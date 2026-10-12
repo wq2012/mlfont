@@ -1,0 +1,29 @@
+{
+  "strategy_name": "range_compact_most1000_500_topics100",
+  "font_family": "NotoSansSC-Regular Sliced",
+  "num_slices": 102,
+  "num_codepoints": 30759,
+  "num_unicode_ranges": 11741,
+  "css_byte_size": 132736,
+  "num_woff2_slices_written": 102,
+  "total_woff2_bytes": 9404228,
+  "strategy_metadata": {
+    "algorithm": "range_compact_ga",
+    "n_topics": 100,
+    "most_sizes": [
+      1000,
+      500
+    ],
+    "range_cost_weight": 0.005,
+    "max_iteration": 1200,
+    "final_range_cost": 10460.0,
+    "final_topic_cost": -1523.051300872063
+  },
+  "preset": "chinese",
+  "wiki_langs": [
+    "zh"
+  ],
+  "n_train_docs": 1600,
+  "n_test_docs": 400,
+  "training_wall_time_sec": 118.62
+}

@@ -1,0 +1,1570 @@
+[
+  {
+    "strategy_name": "single_slice",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 285.81574213105245,
+      "p95": 2648.0,
+      "minimal": 0.0,
+      "maximal": 5616.969696969696,
+      "stddev": 897.6011361689485
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.4671190516275563,
+      "p95": 22.857142857142858,
+      "minimal": 0.0,
+      "maximal": 48.484848484848484,
+      "stddev": 7.747959742502793
+    },
+    "download_per_glyph_ms": {
+      "mean": 283.34862307942484,
+      "p95": 2625.1428571428573,
+      "minimal": 0.0,
+      "maximal": 5568.484848484848,
+      "stddev": 889.8531764264458
+    },
+    "upfront_utilization_pct": 3.014076331446815,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 80.07748093553043,
+      "p95": 560.7466666666668,
+      "minimal": 0.0,
+      "maximal": 917.4468085106383,
+      "stddev": 174.02724236168555
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 11.885756264520838,
+      "p95": 83.22770562770565,
+      "minimal": 0.0,
+      "maximal": 136.17021276595744,
+      "stddev": 25.829888342715183
+    },
+    "download_per_glyph_ms": {
+      "mean": 68.1917246710096,
+      "p95": 477.5189610389612,
+      "minimal": 0.0,
+      "maximal": 781.2765957446809,
+      "stddev": 148.1973909883778
+    },
+    "upfront_utilization_pct": 22.275902900625272,
+    "session_utilization_pct": 20.108134452767036
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 330.1609368049753,
+      "p95": 3016.279411764706,
+      "minimal": 0.0,
+      "maximal": 5693.333333333333,
+      "stddev": 999.9891201279571
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 48.96691748239278,
+      "p95": 447.2058823529412,
+      "minimal": 0.0,
+      "maximal": 844.4444444444445,
+      "stddev": 148.3035980431988
+    },
+    "download_per_glyph_ms": {
+      "mean": 281.19401932258256,
+      "p95": 2569.073529411765,
+      "minimal": 0.0,
+      "maximal": 4848.888888888889,
+      "stddev": 851.6855253604183
+    },
+    "upfront_utilization_pct": 3.073441248926921,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 93.0261879958548,
+      "p95": 640.0,
+      "minimal": 0.0,
+      "maximal": 1848.888888888889,
+      "stddev": 239.61411811229365
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 7.9784067543884705,
+      "p95": 52.6932084309134,
+      "minimal": 0.0,
+      "maximal": 133.33333333333334,
+      "stddev": 19.66608900187142
+    },
+    "download_per_glyph_ms": {
+      "mean": 85.04778124146634,
+      "p95": 617.4647887323944,
+      "minimal": 0.0,
+      "maximal": 1715.5555555555557,
+      "stddev": 222.64806067210705
+    },
+    "upfront_utilization_pct": 26.30099933476033,
+    "session_utilization_pct": 18.432612890768578
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 71.57437221385581,
+      "p95": 350.026565464896,
+      "minimal": 0.0,
+      "maximal": 708.1967213114754,
+      "stddev": 126.85229153291246
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 10.60361069834901,
+      "p95": 51.85578747628089,
+      "minimal": 0.0,
+      "maximal": 104.91803278688525,
+      "stddev": 18.792932078949992
+    },
+    "download_per_glyph_ms": {
+      "mean": 60.97076151550681,
+      "p95": 298.1707779886151,
+      "minimal": 0.0,
+      "maximal": 603.2786885245902,
+      "stddev": 108.05935945396247
+    },
+    "upfront_utilization_pct": 29.8719806763285,
+    "session_utilization_pct": 21.26174373130895
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 63.955192540026246,
+      "p95": 420.77922077922074,
+      "minimal": 0.0,
+      "maximal": 689.3617021276596,
+      "stddev": 142.0969771343086
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 9.474843339263145,
+      "p95": 62.33766233766234,
+      "minimal": 0.0,
+      "maximal": 102.12765957446808,
+      "stddev": 21.05140401989757
+    },
+    "download_per_glyph_ms": {
+      "mean": 54.480349200763094,
+      "p95": 358.4415584415584,
+      "minimal": 0.0,
+      "maximal": 587.2340425531914,
+      "stddev": 121.04557311441101
+    },
+    "upfront_utilization_pct": 23.98067632850242,
+    "session_utilization_pct": 24.297170462387854
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "GIN-2g-poor",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 71.72940167966341,
+      "p95": 367.0444022770403,
+      "minimal": 0.0,
+      "maximal": 743.6065573770493,
+      "stddev": 132.27091525346665
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 10.182060286155362,
+      "p95": 51.85578747628089,
+      "minimal": 0.0,
+      "maximal": 104.91803278688525,
+      "stddev": 18.718197524481297
+    },
+    "download_per_glyph_ms": {
+      "mean": 61.547341393508056,
+      "p95": 315.1886148007594,
+      "minimal": 0.0,
+      "maximal": 638.688524590164,
+      "stddev": 113.55647811116808
+    },
+    "upfront_utilization_pct": 28.012459951001237,
+    "session_utilization_pct": 21.17246174074756
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "GIN-2g",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 58.52006390460564,
+      "p95": 542.1714285714286,
+      "minimal": 0.0,
+      "maximal": 1150.060606060606,
+      "stddev": 183.78160509216625
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 1.8503392887206673,
+      "p95": 17.142857142857142,
+      "minimal": 0.0,
+      "maximal": 36.36363636363637,
+      "stddev": 5.810969806877095
+    },
+    "download_per_glyph_ms": {
+      "mean": 56.669724615884974,
+      "p95": 525.0285714285715,
+      "minimal": 0.0,
+      "maximal": 1113.6969696969697,
+      "stddev": 177.97063528528918
+    },
+    "upfront_utilization_pct": 3.014076331446815,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "GIN-2g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 22.55266213259255,
+      "p95": 157.92457142857148,
+      "minimal": 0.0,
+      "maximal": 258.3829787234042,
+      "stddev": 49.01187476453446
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 8.914317198390629,
+      "p95": 62.42077922077924,
+      "minimal": 0.0,
+      "maximal": 102.12765957446808,
+      "stddev": 19.372416257036388
+    },
+    "download_per_glyph_ms": {
+      "mean": 13.63834493420192,
+      "p95": 95.50379220779223,
+      "minimal": 0.0,
+      "maximal": 156.25531914893617,
+      "stddev": 29.63947819767556
+    },
+    "upfront_utilization_pct": 22.275902900625272,
+    "session_utilization_pct": 20.108134452767036
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "GIN-2g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 92.96399197631109,
+      "p95": 849.219117647059,
+      "minimal": 0.0,
+      "maximal": 1603.1111111111113,
+      "stddev": 281.5648018594364
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 36.72518811179459,
+      "p95": 335.4044117647059,
+      "minimal": 0.0,
+      "maximal": 633.3333333333334,
+      "stddev": 111.22769853239912
+    },
+    "download_per_glyph_ms": {
+      "mean": 56.23880386451651,
+      "p95": 513.814705882353,
+      "minimal": 0.0,
+      "maximal": 969.7777777777778,
+      "stddev": 170.33710507208366
+    },
+    "upfront_utilization_pct": 3.073441248926921,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "GIN-2g",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 22.99336131408462,
+      "p95": 140.49464788732396,
+      "minimal": 0.0,
+      "maximal": 443.1111111111111,
+      "stddev": 57.60935531104287
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 5.983805065791352,
+      "p95": 39.519906323185054,
+      "minimal": 0.0,
+      "maximal": 100.0,
+      "stddev": 14.749566751403565
+    },
+    "download_per_glyph_ms": {
+      "mean": 17.009556248293265,
+      "p95": 123.49295774647888,
+      "minimal": 0.0,
+      "maximal": 343.1111111111111,
+      "stddev": 44.529612134421406
+    },
+    "upfront_utilization_pct": 26.30099933476033,
+    "session_utilization_pct": 18.432612890768578
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "GIN-2g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 20.146860326863116,
+      "p95": 98.52599620493369,
+      "minimal": 0.0,
+      "maximal": 199.344262295082,
+      "stddev": 35.70657095000499
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 7.952708023761758,
+      "p95": 38.89184060721067,
+      "minimal": 0.0,
+      "maximal": 78.68852459016394,
+      "stddev": 14.094699059212495
+    },
+    "download_per_glyph_ms": {
+      "mean": 12.194152303101362,
+      "p95": 59.63415559772302,
+      "minimal": 0.0,
+      "maximal": 120.65573770491804,
+      "stddev": 21.611871890792493
+    },
+    "upfront_utilization_pct": 29.8719806763285,
+    "session_utilization_pct": 21.26174373130895
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "GIN-2g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 18.00220234459998,
+      "p95": 118.44155844155844,
+      "minimal": 0.0,
+      "maximal": 194.04255319148936,
+      "stddev": 39.99766763780538
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 7.10613250444736,
+      "p95": 46.753246753246756,
+      "minimal": 0.0,
+      "maximal": 76.59574468085107,
+      "stddev": 15.788553014923178
+    },
+    "download_per_glyph_ms": {
+      "mean": 10.89606984015262,
+      "p95": 71.68831168831169,
+      "minimal": 0.0,
+      "maximal": 117.44680851063829,
+      "stddev": 24.2091146228822
+    },
+    "upfront_utilization_pct": 23.98067632850242,
+    "session_utilization_pct": 24.297170462387854
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "GIN-2g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 19.946013493318134,
+      "p95": 101.92956356736255,
+      "minimal": 0.0,
+      "maximal": 206.42622950819674,
+      "stddev": 36.747913517577985
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 7.636545214616524,
+      "p95": 38.89184060721067,
+      "minimal": 0.0,
+      "maximal": 78.68852459016394,
+      "stddev": 14.038648143360971
+    },
+    "download_per_glyph_ms": {
+      "mean": 12.30946827870161,
+      "p95": 63.037722960151875,
+      "minimal": 0.0,
+      "maximal": 127.73770491803279,
+      "stddev": 22.711295622233617
+    },
+    "upfront_utilization_pct": 28.012459951001237,
+    "session_utilization_pct": 21.17246174074756
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "GIN-3g",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 14.784210916878134,
+      "p95": 136.9714285714286,
+      "minimal": 0.0,
+      "maximal": 290.54545454545456,
+      "stddev": 46.429648756947984
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.6167797629068891,
+      "p95": 5.714285714285714,
+      "minimal": 0.0,
+      "maximal": 12.121212121212121,
+      "stddev": 1.9369899356256983
+    },
+    "download_per_glyph_ms": {
+      "mean": 14.167431153971243,
+      "p95": 131.25714285714287,
+      "minimal": 0.0,
+      "maximal": 278.42424242424244,
+      "stddev": 44.492658821322294
+    },
+    "upfront_utilization_pct": 3.014076331446815,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "GIN-3g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 6.381025299680689,
+      "p95": 44.68287445887447,
+      "minimal": 0.0,
+      "maximal": 73.1063829787234,
+      "stddev": 13.867335835783164
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.9714390661302095,
+      "p95": 20.80692640692641,
+      "minimal": 0.0,
+      "maximal": 34.04255319148936,
+      "stddev": 6.457472085678796
+    },
+    "download_per_glyph_ms": {
+      "mean": 3.40958623355048,
+      "p95": 23.875948051948058,
+      "minimal": 0.0,
+      "maximal": 39.06382978723404,
+      "stddev": 7.40986954941889
+    },
+    "upfront_utilization_pct": 22.275902900625272,
+    "session_utilization_pct": 20.108134452767036
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "GIN-3g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 26.301430336727325,
+      "p95": 240.25514705882355,
+      "minimal": 0.0,
+      "maximal": 453.55555555555554,
+      "stddev": 79.66017526482094
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 12.241729370598195,
+      "p95": 111.8014705882353,
+      "minimal": 0.0,
+      "maximal": 211.11111111111111,
+      "stddev": 37.0758995107997
+    },
+    "download_per_glyph_ms": {
+      "mean": 14.059700966129128,
+      "p95": 128.45367647058825,
+      "minimal": 0.0,
+      "maximal": 242.44444444444446,
+      "stddev": 42.584276268020915
+    },
+    "upfront_utilization_pct": 3.073441248926921,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "GIN-3g",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 6.246990750670434,
+      "p95": 36.77789915966387,
+      "minimal": 0.0,
+      "maximal": 119.11111111111111,
+      "stddev": 15.533922029066789
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 1.9946016885971176,
+      "p95": 13.17330210772835,
+      "minimal": 0.0,
+      "maximal": 33.333333333333336,
+      "stddev": 4.916522250467855
+    },
+    "download_per_glyph_ms": {
+      "mean": 4.252389062073316,
+      "p95": 30.87323943661972,
+      "minimal": 0.0,
+      "maximal": 85.77777777777777,
+      "stddev": 11.132403033605351
+    },
+    "upfront_utilization_pct": 26.30099933476033,
+    "session_utilization_pct": 18.432612890768578
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "GIN-3g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 5.699440750362593,
+      "p95": 27.87248576850098,
+      "minimal": 0.0,
+      "maximal": 56.39344262295082,
+      "stddev": 10.101200992435622
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.6509026745872526,
+      "p95": 12.963946869070222,
+      "minimal": 0.0,
+      "maximal": 26.229508196721312,
+      "stddev": 4.698233019737498
+    },
+    "download_per_glyph_ms": {
+      "mean": 3.0485380757753404,
+      "p95": 14.908538899430756,
+      "minimal": 0.0,
+      "maximal": 30.16393442622951,
+      "stddev": 5.402967972698123
+    },
+    "upfront_utilization_pct": 29.8719806763285,
+    "session_utilization_pct": 21.26174373130895
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "GIN-3g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 5.092728294853941,
+      "p95": 33.506493506493506,
+      "minimal": 0.0,
+      "maximal": 54.8936170212766,
+      "stddev": 11.315129660694943
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.3687108348157864,
+      "p95": 15.584415584415584,
+      "minimal": 0.0,
+      "maximal": 25.53191489361702,
+      "stddev": 5.262851004974393
+    },
+    "download_per_glyph_ms": {
+      "mean": 2.724017460038155,
+      "p95": 17.92207792207792,
+      "minimal": 0.0,
+      "maximal": 29.361702127659573,
+      "stddev": 6.05227865572055
+    },
+    "upfront_utilization_pct": 23.98067632850242,
+    "session_utilization_pct": 24.297170462387854
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "GIN-3g",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 5.622882141214244,
+      "p95": 28.72337760910819,
+      "minimal": 0.0,
+      "maximal": 58.16393442622951,
+      "stddev": 10.356772976802425
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.5455150715388406,
+      "p95": 12.963946869070222,
+      "minimal": 0.0,
+      "maximal": 26.229508196721312,
+      "stddev": 4.679549381120324
+    },
+    "download_per_glyph_ms": {
+      "mean": 3.0773670696754025,
+      "p95": 15.759430740037969,
+      "minimal": 0.0,
+      "maximal": 31.934426229508198,
+      "stddev": 5.677823905558404
+    },
+    "upfront_utilization_pct": 28.012459951001237,
+    "session_utilization_pct": 21.17246174074756
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "residential-DSL",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 2.9105837011576097,
+      "p95": 26.965714285714284,
+      "minimal": 0.0,
+      "maximal": 57.199999999999996,
+      "stddev": 9.14065550621767
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.07709747036336113,
+      "p95": 0.7142857142857143,
+      "minimal": 0.0,
+      "maximal": 1.5151515151515151,
+      "stddev": 0.2421237419532123
+    },
+    "download_per_glyph_ms": {
+      "mean": 2.8334862307942483,
+      "p95": 26.25142857142857,
+      "minimal": 0.0,
+      "maximal": 55.68484848484848,
+      "stddev": 8.898531764264456
+    },
+    "upfront_utilization_pct": 3.014076331446815,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "residential-DSL",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 1.053347129976372,
+      "p95": 7.376055411255414,
+      "minimal": 0.0,
+      "maximal": 12.068085106382979,
+      "stddev": 2.2891570423113383
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3714298832662762,
+      "p95": 2.6008658008658014,
+      "minimal": 0.0,
+      "maximal": 4.25531914893617,
+      "stddev": 0.8071840107098495
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.6819172467100958,
+      "p95": 4.775189610389612,
+      "minimal": 0.0,
+      "maximal": 7.812765957446809,
+      "stddev": 1.481973909883778
+    },
+    "upfront_utilization_pct": 22.275902900625272,
+    "session_utilization_pct": 20.108134452767036
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "residential-DSL",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 4.3421563645506,
+      "p95": 39.665919117647064,
+      "minimal": 0.0,
+      "maximal": 74.87777777777778,
+      "stddev": 13.15134261461931
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 1.5302161713247744,
+      "p95": 13.975183823529413,
+      "minimal": 0.0,
+      "maximal": 26.38888888888889,
+      "stddev": 4.634487438849963
+    },
+    "download_per_glyph_ms": {
+      "mean": 2.8119401932258254,
+      "p95": 25.69073529411765,
+      "minimal": 0.0,
+      "maximal": 48.48888888888889,
+      "stddev": 8.516855253604183
+    },
+    "upfront_utilization_pct": 3.073441248926921,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "residential-DSL",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 1.099803023489303,
+      "p95": 6.878873239436619,
+      "minimal": 0.0,
+      "maximal": 21.322222222222223,
+      "stddev": 2.7685573876431895
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.2493252110746397,
+      "p95": 1.6466627634660438,
+      "minimal": 0.0,
+      "maximal": 4.166666666666667,
+      "stddev": 0.6145652813084819
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.8504778124146634,
+      "p95": 6.174647887323943,
+      "minimal": 0.0,
+      "maximal": 17.155555555555555,
+      "stddev": 2.2264806067210703
+    },
+    "upfront_utilization_pct": 26.30099933476033,
+    "session_utilization_pct": 18.432612890768578
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "residential-DSL",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 0.9410704494784744,
+      "p95": 4.602201138519929,
+      "minimal": 0.0,
+      "maximal": 9.311475409836065,
+      "stddev": 1.667872722006812
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3313628343234066,
+      "p95": 1.6204933586337777,
+      "minimal": 0.0,
+      "maximal": 3.278688524590164,
+      "stddev": 0.5872791274671872
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.609707615155068,
+      "p95": 2.9817077798861513,
+      "minimal": 0.0,
+      "maximal": 6.032786885245901,
+      "stddev": 1.0805935945396246
+    },
+    "upfront_utilization_pct": 29.8719806763285,
+    "session_utilization_pct": 21.26174373130895
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "residential-DSL",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 0.8408923463596042,
+      "p95": 5.532467532467532,
+      "minimal": 0.0,
+      "maximal": 9.063829787234042,
+      "stddev": 1.868312106765909
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.2960888543519733,
+      "p95": 1.948051948051948,
+      "minimal": 0.0,
+      "maximal": 3.1914893617021276,
+      "stddev": 0.6578563756217991
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.5448034920076309,
+      "p95": 3.5844155844155843,
+      "minimal": 0.0,
+      "maximal": 5.872340425531915,
+      "stddev": 1.2104557311441102
+    },
+    "upfront_utilization_pct": 23.98067632850242,
+    "session_utilization_pct": 24.297170462387854
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "residential-DSL",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 0.9336627978774357,
+      "p95": 4.7723795066413714,
+      "minimal": 0.0,
+      "maximal": 9.665573770491804,
+      "stddev": 1.720418108125641
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3181893839423551,
+      "p95": 1.6204933586337777,
+      "minimal": 0.0,
+      "maximal": 3.278688524590164,
+      "stddev": 0.5849436726400405
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.6154734139350805,
+      "p95": 3.151886148007594,
+      "minimal": 0.0,
+      "maximal": 6.38688524590164,
+      "stddev": 1.135564781111681
+    },
+    "upfront_utilization_pct": 28.012459951001237,
+    "session_utilization_pct": 21.17246174074756
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 0.360446093442786,
+      "p95": 3.3394285714285714,
+      "minimal": 0.0,
+      "maximal": 7.083636363636364,
+      "stddev": 1.131976918379658
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.07709747036336113,
+      "p95": 0.7142857142857143,
+      "minimal": 0.0,
+      "maximal": 1.5151515151515151,
+      "stddev": 0.2421237419532123
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.2833486230794248,
+      "p95": 2.625142857142857,
+      "minimal": 0.0,
+      "maximal": 5.568484848484848,
+      "stddev": 0.8898531764264458
+    },
+    "upfront_utilization_pct": 3.014076331446815,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 0.4396216079372857,
+      "p95": 3.0783847619047626,
+      "minimal": 0.0,
+      "maximal": 5.0365957446808505,
+      "stddev": 0.9553811912559169
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3714298832662762,
+      "p95": 2.6008658008658014,
+      "minimal": 0.0,
+      "maximal": 4.25531914893617,
+      "stddev": 0.8071840107098495
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.06819172467100959,
+      "p95": 0.47751896103896113,
+      "minimal": 0.0,
+      "maximal": 0.7812765957446808,
+      "stddev": 0.1481973909883778
+    },
+    "upfront_utilization_pct": 22.275902900625272,
+    "session_utilization_pct": 20.108134452767036
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 1.811410190647357,
+      "p95": 16.544257352941177,
+      "minimal": 0.0,
+      "maximal": 31.23777777777778,
+      "stddev": 5.4861729455519725
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 1.5302161713247744,
+      "p95": 13.975183823529413,
+      "minimal": 0.0,
+      "maximal": 26.38888888888889,
+      "stddev": 4.634487438849963
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.2811940193225826,
+      "p95": 2.5690735294117646,
+      "minimal": 0.0,
+      "maximal": 4.848888888888889,
+      "stddev": 0.8516855253604182
+    },
+    "upfront_utilization_pct": 3.073441248926921,
+    "session_utilization_pct": 4.630677695544914
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 0.334372992316106,
+      "p95": 1.941744730679159,
+      "minimal": 0.0,
+      "maximal": 5.8822222222222225,
+      "stddev": 0.8125656940018523
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.2493252110746397,
+      "p95": 1.6466627634660438,
+      "minimal": 0.0,
+      "maximal": 4.166666666666667,
+      "stddev": 0.6145652813084819
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.08504778124146634,
+      "p95": 0.6174647887323944,
+      "minimal": 0.0,
+      "maximal": 1.7155555555555555,
+      "stddev": 0.22264806067210705
+    },
+    "upfront_utilization_pct": 26.30099933476033,
+    "session_utilization_pct": 18.432612890768578
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 0.3923335958389133,
+      "p95": 1.9186641366223929,
+      "minimal": 0.0,
+      "maximal": 3.8819672131147542,
+      "stddev": 0.6953384869211497
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3313628343234066,
+      "p95": 1.6204933586337777,
+      "minimal": 0.0,
+      "maximal": 3.278688524590164,
+      "stddev": 0.5872791274671872
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.06097076151550681,
+      "p95": 0.2981707779886151,
+      "minimal": 0.0,
+      "maximal": 0.6032786885245901,
+      "stddev": 0.10805935945396244
+    },
+    "upfront_utilization_pct": 29.8719806763285,
+    "session_utilization_pct": 21.26174373130895
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 0.3505692035527364,
+      "p95": 2.3064935064935064,
+      "minimal": 0.0,
+      "maximal": 3.7787234042553193,
+      "stddev": 0.7789019487362099
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.2960888543519733,
+      "p95": 1.948051948051948,
+      "minimal": 0.0,
+      "maximal": 3.1914893617021276,
+      "stddev": 0.6578563756217991
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.0544803492007631,
+      "p95": 0.35844155844155845,
+      "minimal": 0.0,
+      "maximal": 0.5872340425531916,
+      "stddev": 0.12104557311441101
+    },
+    "upfront_utilization_pct": 23.98067632850242,
+    "session_utilization_pct": 24.297170462387854
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "residential-ADSL2+",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 0.37973672533586317,
+      "p95": 1.935681973434537,
+      "minimal": 0.0,
+      "maximal": 3.917377049180328,
+      "stddev": 0.6984778975264774
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 0.3181893839423551,
+      "p95": 1.6204933586337777,
+      "minimal": 0.0,
+      "maximal": 3.278688524590164,
+      "stddev": 0.5849436726400405
+    },
+    "download_per_glyph_ms": {
+      "mean": 0.06154734139350805,
+      "p95": 0.31518861480075944,
+      "minimal": 0.0,
+      "maximal": 0.6386885245901639,
+      "stddev": 0.11355647811116808
+    },
+    "upfront_utilization_pct": 28.012459951001237,
+    "session_utilization_pct": 21.17246174074756
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 145.92320810572173,
+      "p95": 204.0,
+      "minimal": 87.16363636363637,
+      "maximal": 290.54545454545456,
+      "stddev": 32.320567526202694
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 6.087743350259563,
+      "p95": 8.51063829787234,
+      "minimal": 3.6363636363636362,
+      "maximal": 12.121212121212121,
+      "stddev": 1.3483757833209302
+    },
+    "download_per_glyph_ms": {
+      "mean": 139.83546475546217,
+      "p95": 195.48936170212767,
+      "minimal": 83.52727272727273,
+      "maximal": 278.42424242424244,
+      "stddev": 30.972191742881762
+    },
+    "upfront_utilization_pct": 2.9820055144391238,
+    "session_utilization_pct": 2.9820055144391238
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 40.57219095832959,
+      "p95": 73.1063829787234,
+      "minimal": 13.4375,
+      "maximal": 98.17142857142858,
+      "stddev": 16.664920746596557
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 18.890457476675984,
+      "p95": 34.04255319148936,
+      "minimal": 6.25,
+      "maximal": 45.714285714285715,
+      "stddev": 7.76241723799886
+    },
+    "download_per_glyph_ms": {
+      "mean": 21.681733481653602,
+      "p95": 39.06382978723404,
+      "minimal": 7.1875,
+      "maximal": 52.457142857142856,
+      "stddev": 8.902518085299343
+    },
+    "upfront_utilization_pct": 22.099362793303783,
+    "session_utilization_pct": 22.099362793303783
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 254.8850714534645,
+      "p95": 347.40425531914894,
+      "minimal": 156.25454545454545,
+      "maximal": 466.51428571428573,
+      "stddev": 50.3248939268141
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 118.63084076620262,
+      "p95": 161.70212765957447,
+      "minimal": 72.72727272727273,
+      "maximal": 217.14285714285714,
+      "stddev": 23.421570662493846
+    },
+    "download_per_glyph_ms": {
+      "mean": 136.25423068726187,
+      "p95": 185.70212765957447,
+      "minimal": 83.52727272727273,
+      "maximal": 249.37142857142857,
+      "stddev": 26.903327484146654
+    },
+    "upfront_utilization_pct": 3.038634718248746,
+    "session_utilization_pct": 3.038634718248746
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 37.746109382812804,
+      "p95": 72.68121065375303,
+      "minimal": 12.3125,
+      "maximal": 122.5142857142857,
+      "stddev": 20.313449278219903
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 14.597040233905178,
+      "p95": 23.076923076923077,
+      "minimal": 6.25,
+      "maximal": 34.285714285714285,
+      "stddev": 4.91825849739546
+    },
+    "download_per_glyph_ms": {
+      "mean": 23.149069148907625,
+      "p95": 51.51028248587572,
+      "minimal": 6.0625,
+      "maximal": 88.22857142857143,
+      "stddev": 16.14528298503068
+    },
+    "upfront_utilization_pct": 24.871941809312535,
+    "session_utilization_pct": 24.871941809312535
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 29.033991874520755,
+      "p95": 47.77777777777778,
+      "minimal": 11.025641025641026,
+      "maximal": 62.70833333333333,
+      "stddev": 10.205628553505402
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 13.504182267218958,
+      "p95": 22.22222222222222,
+      "minimal": 5.128205128205129,
+      "maximal": 29.166666666666668,
+      "stddev": 4.746803978374605
+    },
+    "download_per_glyph_ms": {
+      "mean": 15.529809607301802,
+      "p95": 25.555555555555557,
+      "minimal": 5.897435897435898,
+      "maximal": 33.541666666666664,
+      "stddev": 5.458824575130796
+    },
+    "upfront_utilization_pct": 29.39284334023464,
+    "session_utilization_pct": 29.39284334023464
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 34.28384824826532,
+      "p95": 49.8917306052856,
+      "minimal": 13.4375,
+      "maximal": 64.17910447761194,
+      "stddev": 8.7543507871011
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 15.945975929425732,
+      "p95": 23.205456095481676,
+      "minimal": 6.25,
+      "maximal": 29.850746268656717,
+      "stddev": 4.071791063767954
+    },
+    "download_per_glyph_ms": {
+      "mean": 18.337872318839587,
+      "p95": 26.686274509803926,
+      "minimal": 7.1875,
+      "maximal": 34.32835820895522,
+      "stddev": 4.682559723333147
+    },
+    "upfront_utilization_pct": 23.385169082125607,
+    "session_utilization_pct": 23.385169082125607
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "GIN-3g_no_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 29.58526652953394,
+      "p95": 49.23148148148148,
+      "minimal": 11.487179487179487,
+      "maximal": 64.625,
+      "stddev": 10.397516748226025
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 13.33033043388703,
+      "p95": 22.22222222222222,
+      "minimal": 5.128205128205129,
+      "maximal": 29.166666666666668,
+      "stddev": 4.7245128224889426
+    },
+    "download_per_glyph_ms": {
+      "mean": 16.254936095646915,
+      "p95": 27.009259259259263,
+      "minimal": 6.358974358974359,
+      "maximal": 35.458333333333336,
+      "stddev": 5.6737590630208175
+    },
+    "upfront_utilization_pct": 27.906050850168093,
+    "session_utilization_pct": 27.906050850168093
+  },
+  {
+    "strategy_name": "single_slice",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 1,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 123,
+    "total_per_glyph_ms": {
+      "mean": 48.92434998446981,
+      "p95": 171.21428571428572,
+      "minimal": 0.0,
+      "maximal": 290.54545454545456,
+      "stddev": 72.14652737402058
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 2.0410659150800923,
+      "p95": 7.142857142857143,
+      "minimal": 0.0,
+      "maximal": 12.121212121212121,
+      "stddev": 3.0098676418031114
+    },
+    "download_per_glyph_ms": {
+      "mean": 46.883284069389724,
+      "p95": 164.07142857142858,
+      "minimal": 0.0,
+      "maximal": 278.42424242424244,
+      "stddev": 69.13665973221745
+    },
+    "upfront_utilization_pct": 2.9725729212015675,
+    "session_utilization_pct": 3.8276012189812803
+  },
+  {
+    "strategy_name": "equal_bin_20",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 140,
+    "total_per_glyph_ms": {
+      "mean": 16.68425008741564,
+      "p95": 56.526315789473685,
+      "minimal": 0.0,
+      "maximal": 92.86486486486487,
+      "stddev": 20.460750825878428
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 7.769148134569283,
+      "p95": 26.31578947368421,
+      "minimal": 0.0,
+      "maximal": 43.24324324324324,
+      "stddev": 9.52747915339883
+    },
+    "download_per_glyph_ms": {
+      "mean": 8.915101952846358,
+      "p95": 30.210526315789473,
+      "minimal": 0.0,
+      "maximal": 49.62162162162162,
+      "stddev": 10.933280728707459
+    },
+    "upfront_utilization_pct": 21.408272683560032,
+    "session_utilization_pct": 21.656557948421913
+  },
+  {
+    "strategy_name": "random_slice_20",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 2180,
+    "total_per_glyph_ms": {
+      "mean": 87.12595159748133,
+      "p95": 296.43779028852924,
+      "minimal": 0.0,
+      "maximal": 466.51428571428573,
+      "stddev": 124.00120289134428
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 40.55163406685326,
+      "p95": 137.9732582688248,
+      "minimal": 0.0,
+      "maximal": 217.14285714285714,
+      "stddev": 57.7129186124065
+    },
+    "download_per_glyph_ms": {
+      "mean": 46.574317530628086,
+      "p95": 158.46453201970445,
+      "minimal": 0.0,
+      "maximal": 249.37142857142857,
+      "stddev": 66.28828532698007
+    },
+    "upfront_utilization_pct": 3.0244449641519644,
+    "session_utilization_pct": 3.8361687980683055
+  },
+  {
+    "strategy_name": "language_slice",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 12,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 8,
+    "num_ranges": 100,
+    "total_per_glyph_ms": {
+      "mean": 15.603436713029327,
+      "p95": 61.25714285714285,
+      "minimal": 0.0,
+      "maximal": 122.5142857142857,
+      "stddev": 22.12160825936376
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 5.6039938952197375,
+      "p95": 19.765432098765434,
+      "minimal": 0.0,
+      "maximal": 34.285714285714285,
+      "stddev": 7.4384596669563425
+    },
+    "download_per_glyph_ms": {
+      "mean": 9.999442817809589,
+      "p95": 43.52402414486922,
+      "minimal": 0.0,
+      "maximal": 88.22857142857143,
+      "stddev": 15.40774775641386
+    },
+    "upfront_utilization_pct": 23.91095446992316,
+    "session_utilization_pct": 23.94675233492481
+  },
+  {
+    "strategy_name": "online_lda_topics20_greedy",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 516,
+    "total_per_glyph_ms": {
+      "mean": 13.595312821634932,
+      "p95": 38.73472612359553,
+      "minimal": 0.0,
+      "maximal": 56.39344262295082,
+      "stddev": 14.30534340492025
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 6.323401312388341,
+      "p95": 18.016151685393268,
+      "minimal": 0.0,
+      "maximal": 26.229508196721312,
+      "stddev": 6.653648095311745
+    },
+    "download_per_glyph_ms": {
+      "mean": 7.271911509246593,
+      "p95": 20.718574438202257,
+      "minimal": 0.0,
+      "maximal": 30.16393442622951,
+      "stddev": 7.651695309608507
+    },
+    "upfront_utilization_pct": 29.09347826086957,
+    "session_utilization_pct": 25.85079710144928
+  },
+  {
+    "strategy_name": "dnntm_topics20_greedy",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 584,
+    "total_per_glyph_ms": {
+      "mean": 13.847763403255266,
+      "p95": 44.52177858439202,
+      "minimal": 0.0,
+      "maximal": 55.84415584415584,
+      "stddev": 16.454030240282925
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 6.440820187560589,
+      "p95": 20.707803992740477,
+      "minimal": 0.0,
+      "maximal": 25.974025974025974,
+      "stddev": 7.653037321061825
+    },
+    "download_per_glyph_ms": {
+      "mean": 7.406943215694676,
+      "p95": 23.813974591651547,
+      "minimal": 0.0,
+      "maximal": 29.87012987012987,
+      "stddev": 8.8009929192211
+    },
+    "upfront_utilization_pct": 23.10855072463768,
+    "session_utilization_pct": 24.264927536231884
+  },
+  {
+    "strategy_name": "range_compact_topics20",
+    "params_name": "GIN-3g_short_session",
+    "num_slices": 20,
+    "num_codepoints": 2297,
+    "num_samples": 300,
+    "num_missing_codepoints": 0,
+    "num_ranges": 411,
+    "total_per_glyph_ms": {
+      "mean": 13.704434868975726,
+      "p95": 38.7412147858655,
+      "minimal": 0.0,
+      "maximal": 58.16393442622951,
+      "stddev": 14.573254168706026
+    },
+    "rtt_per_glyph_ms": {
+      "mean": 6.1908028249861875,
+      "p95": 17.42061553492917,
+      "minimal": 0.0,
+      "maximal": 26.229508196721312,
+      "stddev": 6.581253797864129
+    },
+    "download_per_glyph_ms": {
+      "mean": 7.513632043989537,
+      "p95": 21.091385767790264,
+      "minimal": 0.0,
+      "maximal": 31.934426229508198,
+      "stddev": 7.99260026184281
+    },
+    "upfront_utilization_pct": 27.72849126765741,
+    "session_utilization_pct": 24.941210887645056
+  }
+]
