@@ -5,3 +5,5 @@ fonttools>=4.38.0
 brotli>=1.0.9
 safetensors>=0.4.0
 torch>=2.0.0
+matplotlib>=3.5.0
+datasets>=2.14.0

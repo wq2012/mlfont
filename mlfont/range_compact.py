@@ -68,7 +68,9 @@ class Gene:
         return (self._range_cost, self._topic_cost)
 
     def check_slice_size_diff(self, max_diff: int = 1) -> bool:
-        topics = np.fromiter((t for _, t in self._dna), dtype=np.int64, count=self.n_codepoints)
+        topics = np.fromiter(
+            (t for _, t in self._dna), dtype=np.int64, count=self.n_codepoints
+        )
         counts = np.bincount(topics, minlength=self.n_topics)
         return int(np.max(counts) - np.min(counts)) <= max_diff
 
@@ -83,7 +85,9 @@ class Gene:
         return self._hash_code
 
     def _compute_cost_topic_model_consistency(self, matrix: np.ndarray) -> float:
-        topics = np.fromiter((t for _, t in self._dna), dtype=np.int64, count=self.n_codepoints)
+        topics = np.fromiter(
+            (t for _, t in self._dna), dtype=np.int64, count=self.n_codepoints
+        )
         cols = np.arange(self.n_codepoints, dtype=np.int64)
         return float(-np.sum(matrix[topics, cols]))
 
@@ -181,7 +185,10 @@ def left_shift_mutation(
         return purely_random_mutation(ancestor, rng=r)
 
     right_index = center_index
-    while right_index < ancestor.n_codepoints and dna[right_index][1] == dna[center_index][1]:
+    while (
+        right_index < ancestor.n_codepoints
+        and dna[right_index][1] == dna[center_index][1]
+    ):
         right_index += 1
 
     i1, i2 = left_index, right_index - 1
@@ -205,7 +212,10 @@ def right_shift_mutation(
         attempt_count += 1
         center_index = r.randrange(ancestor.n_codepoints - 1)
         right_index = center_index
-        while right_index < ancestor.n_codepoints and dna[right_index][1] == dna[center_index][1]:
+        while (
+            right_index < ancestor.n_codepoints
+            and dna[right_index][1] == dna[center_index][1]
+        ):
             right_index += 1
         if right_index != ancestor.n_codepoints:
             break
@@ -395,7 +405,7 @@ class RangeCompactGeneticLearner:
         most_sizes: Sequence[int] = (),
         normalization_method: str = "topic_sum",
     ) -> None:
-        if not codepoint_list:
+        if len(codepoint_list) == 0:
             raise ValueError("codepoint_list cannot be empty")
         if lambda_matrix.ndim != 2:
             raise ValueError("lambda_matrix must be 2D")
@@ -443,6 +453,8 @@ class RangeCompactGeneticLearner:
         # Precompute where consecutive codepoints are NOT adjacent (cp[i] - 1 != cp[i-1])
         self.cp_gap_mask = (self.cp_array[1:] - self.cp_array[:-1]) != 1
         self.col_indices = np.arange(self.n_codepoints, dtype=np.int64)
+        self.matrix_flat = np.ascontiguousarray(self.matrix.T, dtype=np.float64).ravel()
+        self.col_offset = self.col_indices * self.n_topics
 
         self.history_: List[GeneticHistoryEvent] = []
         self.winner_gene_: Optional[Gene] = None
@@ -451,7 +463,7 @@ class RangeCompactGeneticLearner:
         """Vectorized computation of (range_cost, topic_cost, final_cost)."""
         topic_breaks = topics[1:] != topics[:-1]
         range_cost = float(1 + np.count_nonzero(self.cp_gap_mask | topic_breaks))
-        topic_cost = float(-np.sum(self.matrix[topics, self.col_indices]))
+        topic_cost = float(-np.sum(self.matrix_flat[self.col_offset + topics]))
         w_r = self.config.range_cost_weight
         final_cost = w_r * range_cost + (1.0 - w_r) * topic_cost
         return range_cost, topic_cost, final_cost
@@ -464,11 +476,89 @@ class RangeCompactGeneticLearner:
             return False
         return True
 
+    def _repair_max_diff(
+        self,
+        topics: np.ndarray,
+        max_diff: int,
+        rng: random.Random,
+    ) -> np.ndarray:
+        """Deterministically repairs topic counts so no topic vanishes and max-min <= max_diff."""
+        t = topics.copy()
+        n = self.n_codepoints
+        min_achievable = 0 if (n % self.n_topics == 0) else 1
+        target_diff = max(min_achievable, int(max_diff))
+        counts = np.bincount(t, minlength=self.n_topics)
+
+        # 1. Rescue any vanished topics (count == 0)
+        zero_topics = np.flatnonzero(counts == 0)
+        for k_zero in zero_topics:
+            k_max = int(np.argmax(counts))
+            max_idx = np.flatnonzero(t == k_max)
+            gains = self.matrix[k_zero, max_idx] - self.matrix[k_max, max_idx]
+            chosen = int(max_idx[int(np.argmax(gains))])
+            t[chosen] = int(k_zero)
+            counts[k_max] -= 1
+            counts[k_zero] += 1
+
+        # 2. Enforce max(counts) - min(counts) <= target_diff in fast vectorized batches
+        steps = 0
+        max_steps = 4 * self.n_topics + 64
+        while int(np.max(counts) - np.min(counts)) > target_diff and steps < max_steps:
+            steps += 1
+            k_max = int(np.argmax(counts))
+            k_min = int(np.argmin(counts))
+            excess = int(counts[k_max] - counts[k_min]) - target_diff
+            if excess <= 0:
+                break
+            batch_sz = max(1, (excess + 1) // 2)
+
+            # First try expanding k_min at its contiguous run borders
+            if batch_sz == 1:
+                is_min = t == k_min
+                adj_min = np.zeros(n, dtype=bool)
+                adj_min[1:] |= is_min[:-1]
+                adj_min[:-1] |= is_min[1:]
+                border_min = np.flatnonzero(adj_min & ~is_min)
+                valid_min = border_min[counts[t[border_min]] > counts[k_min] + 1]
+                if len(valid_min) > 0:
+                    idx_exp = int(valid_min[int(np.argmax(counts[t[valid_min]]))])
+                    old_t = int(t[idx_exp])
+                    t[idx_exp] = k_min
+                    counts[old_t] -= 1
+                    counts[k_min] += 1
+                    continue
+
+            # Otherwise transfer up to batch_sz codepoints from k_max (preferring run borders)
+            is_max = t == k_max
+            not_max = ~is_max
+            adj_other = np.zeros(n, dtype=bool)
+            adj_other[1:] |= not_max[:-1]
+            adj_other[:-1] |= not_max[1:]
+            border_max = np.flatnonzero(is_max & adj_other)
+            candidates = (
+                border_max
+                if len(border_max) >= batch_sz
+                else np.flatnonzero(is_max)
+            )
+            take = min(batch_sz, max(1, int(counts[k_max]) - 1), len(candidates))
+            losses = self.matrix[k_max, candidates] - self.matrix[k_min, candidates]
+            if take == 1:
+                chosen = candidates[int(np.argmin(losses)) : int(np.argmin(losses)) + 1]
+            else:
+                part_idx = np.argpartition(losses, take - 1)[:take]
+                chosen = candidates[part_idx]
+            t[chosen] = k_min
+            counts[k_max] -= len(chosen)
+            counts[k_min] += len(chosen)
+
+        return t
+
     def _mutate_topics(
         self,
         anc: np.ndarray,
         mut_name: str,
         rng: random.Random,
+        max_diff: Optional[int] = None,
     ) -> np.ndarray:
         t = anc.copy()
         n = self.n_codepoints
@@ -496,7 +586,7 @@ class RangeCompactGeneticLearner:
                 if left != -1:
                     break
             if attempts > MAX_MUTATION_ATTEMPTS:
-                return self._mutate_topics(anc, "PURELY_RANDOM", rng)
+                return self._mutate_topics(anc, "PURELY_RANDOM", rng, max_diff=max_diff)
             right = center
             tc = t[center]
             while right < n and t[right] == tc:
@@ -518,7 +608,7 @@ class RangeCompactGeneticLearner:
                 if right != n:
                     break
             if attempts > MAX_MUTATION_ATTEMPTS:
-                return self._mutate_topics(anc, "PURELY_RANDOM", rng)
+                return self._mutate_topics(anc, "PURELY_RANDOM", rng, max_diff=max_diff)
             left = center
             tc = t[center]
             while left > -1 and t[left] == tc:
@@ -543,24 +633,94 @@ class RangeCompactGeneticLearner:
         if mut_name == "MERGE_SHORT_RANGE":
             breaks = np.flatnonzero(t[1:] != t[:-1]) + 1
             if len(breaks) == 0:
-                return self._mutate_topics(anc, "PURELY_RANDOM", rng)
+                return self._mutate_topics(anc, "PURELY_RANDOM", rng, max_diff=max_diff)
             starts = np.concatenate(([0], breaks))
             ends = np.concatenate((breaks, [n]))
             lengths = ends - starts
             min_len = int(np.min(lengths))
-            min_candidates = np.flatnonzero(lengths == min_len)
-            min_idx = int(min_candidates[rng.randrange(len(min_candidates))])
-            s_idx = int(starts[min_idx])
-            s_len = int(lengths[min_idx])
-            candidates = [x for x in (s_idx - 1, s_idx + s_len) if 0 <= x < n]
-            if not candidates:
-                return self._mutate_topics(anc, "PURELY_RANDOM", rng)
+            short_mask = lengths <= max(min_len, min(4, min_len + 2))
+            short_candidates = np.flatnonzero(short_mask)
+            if len(short_candidates) > 256:
+                step = len(short_candidates) // 256
+                short_candidates = short_candidates[rng.randrange(step) :: step][:256]
+            s_indices = starts[short_candidates]
+            s_topics = t[s_indices]
+            left_idx = np.maximum(0, s_indices - 1)
+            right_idx = np.minimum(n - 1, ends[short_candidates])
+            left_topics = t[left_idx]
+            right_topics = t[right_idx]
+            s_base = s_indices * self.n_topics
+            mat_s = self.matrix_flat[s_base + s_topics]
+            loss_left = np.where(
+                s_indices > 0,
+                mat_s - self.matrix_flat[s_base + left_topics],
+                1e9,
+            )
+            loss_right = np.where(
+                ends[short_candidates] < n,
+                mat_s - self.matrix_flat[s_base + right_topics],
+                1e9,
+            )
+            bridge_bonus = np.where(
+                (s_indices > 0)
+                & (ends[short_candidates] < n)
+                & (left_topics == right_topics),
+                -0.01,
+                0.0,
+            )
+            est_loss = (
+                np.minimum(loss_left, loss_right) * lengths[short_candidates]
+                + bridge_bonus
+            )
+            pool_size = min(len(short_candidates), max(8, len(short_candidates) // 2))
+            top_order = np.argsort(est_loss)[:pool_size]
+            top_runs = [int(short_candidates[i]) for i in top_order]
+            n_merges = min(
+                len(top_runs),
+                rng.randint(1, max(2, min(20, len(top_runs) // 3 + 3))),
+            )
+            chosen_runs = rng.sample(top_runs, n_merges)
             counts = np.bincount(t, minlength=self.n_topics)
-            neigh = min(candidates, key=lambda x: int(counts[t[x]]))
-            t[s_idx:s_idx + s_len] = t[neigh]
-            for _ in range(s_len):
-                t = self._expand_min_topic_border(t, rng)
-                t = self._shrink_max_topic_border(t, rng)
+            cur_min = int(np.min(counts))
+            cur_max = int(np.max(counts))
+            for run_idx in chosen_runs:
+                s_idx = int(starts[run_idx])
+                s_len = int(lengths[run_idx])
+                old_topic = int(t[s_idx])
+                if counts[old_topic] <= s_len + 1:
+                    continue
+                if max_diff is not None and counts[old_topic] - s_len < cur_max - max_diff:
+                    continue
+                candidates = [x for x in (s_idx - 1, s_idx + s_len) if 0 <= x < n]
+                if not candidates:
+                    continue
+                if max_diff is not None:
+                    candidates = [
+                        x
+                        for x in candidates
+                        if counts[t[x]] + s_len <= cur_min + max_diff
+                    ]
+                    if not candidates:
+                        continue
+                neigh = min(
+                    candidates,
+                    key=lambda x: (
+                        float(
+                            np.sum(
+                                self.matrix[old_topic, s_idx : s_idx + s_len]
+                                - self.matrix[t[x], s_idx : s_idx + s_len]
+                            )
+                        ),
+                        int(counts[t[x]]),
+                    ),
+                )
+                new_topic = int(t[neigh])
+                if new_topic != old_topic:
+                    t[s_idx : s_idx + s_len] = new_topic
+                    counts[old_topic] -= s_len
+                    counts[new_topic] += s_len
+                    cur_min = int(np.min(counts))
+                    cur_max = int(np.max(counts))
             return t
 
         raise ValueError(f"Unknown mutation: {mut_name!r}")
@@ -578,6 +738,8 @@ class RangeCompactGeneticLearner:
         if len(border) == 0:
             return t
         idx = int(border[rng.randrange(len(border))])
+        if counts[t[idx]] <= 1:
+            return t
         t[idx] = min_topic
         return t
 
@@ -586,6 +748,8 @@ class RangeCompactGeneticLearner:
         n = self.n_codepoints
         counts = np.bincount(t, minlength=self.n_topics)
         max_topic = int(np.argmax(counts))
+        if counts[max_topic] <= 1:
+            return t
         is_max = t == max_topic
         not_max = ~is_max
         adj_other = np.zeros(n, dtype=bool)
@@ -607,25 +771,39 @@ class RangeCompactGeneticLearner:
         np_rng = np.random.default_rng(self.config.random_seed)
         start_time = time.time()
 
+        decay_fn = create_params_decay(
+            self.config.decay_max_diff, max(1, self.config.max_iteration)
+        )
+        initial_max_diff = int(decay_fn(0))
+        final_min_diff = max(1, int(self.config.decay_max_diff.min_val))
+
         # Initialize survival population
         initial_genes: List[Gene] = []
         if self.config.init_from_matrix:
             diff_mat = balance_topics_diff_constrained(
                 self.matrix,
-                max_diff=int(self.config.decay_max_diff.max_val),
+                max_diff=final_min_diff,
                 normalization_method="none",
             )
-            initial_genes.append(init_gene_from_topic_matrix(self.codepoint_list, diff_mat))
+            initial_genes.append(
+                init_gene_from_topic_matrix(self.codepoint_list, diff_mat)
+            )
         if self.config.init_from_topic_balanced_matrix:
             greedy_mat = balance_topics_greedy(self.matrix, normalization_method="none")
-            initial_genes.append(init_gene_from_topic_matrix(self.codepoint_list, greedy_mat))
+            initial_genes.append(
+                init_gene_from_topic_matrix(self.codepoint_list, greedy_mat)
+            )
         if self.config.init_from_binning or not initial_genes:
-            initial_genes.append(init_gene_by_equal_binning(self.codepoint_list, self.n_topics))
+            initial_genes.append(
+                init_gene_by_equal_binning(self.codepoint_list, self.n_topics)
+            )
 
         # Represent individuals as (topics_array, range_cost, topic_cost, final_cost, hash_id)
         population: List[Tuple[np.ndarray, float, float, float, int]] = []
         for g in initial_genes:
             t_arr = np.array([topic for _, topic in g.get_dna()], dtype=np.int64)
+            if not self._valid_topics(t_arr, max_diff=initial_max_diff):
+                t_arr = self._repair_max_diff(t_arr, initial_max_diff, rng)
             rc, tc, fc = self._topics_cost(t_arr)
             population.append((t_arr, rc, tc, fc, hash(t_arr.tobytes())))
 
@@ -634,10 +812,12 @@ class RangeCompactGeneticLearner:
             [self.config.mutation_probabilities[k] for k in mut_names], dtype=np.float64
         )
         mut_probs /= np.sum(mut_probs)
+        count_changing_muts = {
+            "INCREASE_MIN_TOPIC",
+            "DECREASE_MAX_TOPIC",
+            "MERGE_SHORT_RANGE",
+        }
 
-        decay_fn = create_params_decay(
-            self.config.decay_max_diff, max(1, self.config.max_iteration)
-        )
         old_max_diff = -1
         self.history_ = []
 
@@ -654,8 +834,15 @@ class RangeCompactGeneticLearner:
                 len(mut_names), size=self.config.n_mutations_per_iteration, p=mut_probs
             )
             for m_idx in chosen_muts:
+                m_name = mut_names[int(m_idx)]
                 parent_topics = population[rng.randrange(n_pop)][0]
-                child_topics = self._mutate_topics(parent_topics, mut_names[int(m_idx)], rng)
+                child_topics = self._mutate_topics(
+                    parent_topics, m_name, rng, max_diff=max_diff
+                )
+                if m_name in count_changing_muts and not self._valid_topics(
+                    child_topics, max_diff=max_diff
+                ):
+                    child_topics = self._repair_max_diff(child_topics, max_diff, rng)
                 rc, tc, fc = self._topics_cost(child_topics)
                 alive.append((child_topics, rc, tc, fc, hash(child_topics.tobytes())))
 
@@ -669,22 +856,22 @@ class RangeCompactGeneticLearner:
                     )
                     if self._valid_topics(child_topics, max_diff=max_diff):
                         rc, tc, fc = self._topics_cost(child_topics)
-                        alive.append((child_topics, rc, tc, fc, hash(child_topics.tobytes())))
+                        alive.append(
+                            (child_topics, rc, tc, fc, hash(child_topics.tobytes()))
+                        )
 
-            # Deduplicate, check topic vanish, and check max_diff if changed
+            # Deduplicate and strictly enforce max_diff and no vanished topics
             deduped: List[Tuple[np.ndarray, float, float, float, int]] = []
             seen: set[int] = set()
             for item in alive:
-                if item[4] not in seen and self._valid_topics(item[0], max_diff=None):
+                t_arr = item[0]
+                if max_diff_changed and not self._valid_topics(t_arr, max_diff=max_diff):
+                    t_arr = self._repair_max_diff(t_arr, max_diff, rng)
+                    rc, tc, fc = self._topics_cost(t_arr)
+                    item = (t_arr, rc, tc, fc, hash(t_arr.tobytes()))
+                if item[4] not in seen:
                     seen.add(item[4])
                     deduped.append(item)
-
-            if max_diff_changed:
-                constrained = [
-                    item for item in deduped if self._valid_topics(item[0], max_diff=max_diff)
-                ]
-                if constrained:
-                    deduped = constrained
 
             deduped.sort(key=lambda item: item[3])
             population = deduped[: self.config.n_survivals]
@@ -742,4 +929,64 @@ class RangeCompactGeneticLearner:
                 "final_range_cost": float(population[0][1]),
                 "final_topic_cost": float(population[0][2]),
             },
+        )
+
+    def fit(self) -> SlicingStrategy:
+        """Alias for run()."""
+        return self.run()
+
+
+class RangeCompactGASolver(RangeCompactGeneticLearner):
+    """Solver interface for the Range-Compact Genetic Algorithm."""
+
+    def __init__(
+        self,
+        codepoint_list: Optional[Sequence[int]] = None,
+        lambda_matrix: Optional[np.ndarray] = None,
+        config: Optional[RangeCompactConfig] = None,
+        frequency_array: Optional[np.ndarray] = None,
+        most_sizes: Sequence[int] = (),
+        normalization_method: str = "topic_sum",
+        codepoints: Optional[Sequence[int]] = None,
+        topic_matrix: Optional[np.ndarray] = None,
+    ) -> None:
+        cps = codepoint_list if codepoint_list is not None else codepoints
+        mat = lambda_matrix if lambda_matrix is not None else topic_matrix
+        if cps is None or mat is None:
+            raise ValueError("Both codepoints and topic_matrix/lambda_matrix must be provided.")
+        mat_arr = np.asarray(mat, dtype=np.float64)
+        if mat_arr.ndim == 2 and mat_arr.shape[1] != len(cps) and mat_arr.shape[0] == len(cps):
+            mat_arr = mat_arr.T
+        if config is None:
+            config = RangeCompactConfig()
+        super().__init__(
+            codepoint_list=cps,
+            lambda_matrix=mat_arr,
+            config=config,
+            frequency_array=frequency_array,
+            most_sizes=most_sizes,
+            normalization_method=normalization_method,
+        )
+
+    def optimize(
+        self,
+        strategy_name: Optional[str] = None,
+        font_name: Optional[str] = None,
+        prefix_slices: Optional[Sequence[Sequence[int]]] = None,
+        suffix_slices: Optional[Sequence[Sequence[int]]] = None,
+    ) -> SlicingStrategy:
+        """Runs GA optimization and optionally prepends/appends deterministic slices."""
+        strat = self.run()
+        subsets = list(strat.subsets)
+        if prefix_slices:
+            subsets = [sorted(int(c) for c in s) for s in prefix_slices] + subsets
+        if suffix_slices:
+            subsets = subsets + [sorted(int(c) for c in s) for s in suffix_slices]
+        meta = dict(strat.metadata)
+        if font_name is not None:
+            meta["font_name"] = font_name
+        return SlicingStrategy(
+            subsets=subsets,
+            name=strategy_name or strat.name,
+            metadata=meta,
         )

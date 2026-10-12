@@ -68,6 +68,24 @@ def main() -> None:
         help="Directory of plain-text (.txt) or .jsonl files to ingest.",
     )
     parser.add_argument(
+        "--hf_dataset",
+        type=str,
+        default="",
+        help="Optional Hugging Face dataset ID (e.g., wikimedia/wikipedia).",
+    )
+    parser.add_argument(
+        "--hf_config",
+        type=str,
+        default="",
+        help="Optional Hugging Face dataset config/subset (e.g., 20231101.zh).",
+    )
+    parser.add_argument(
+        "--max_docs",
+        type=int,
+        default=3500,
+        help="Maximum number of documents to load from --hf_dataset.",
+    )
+    parser.add_argument(
         "--generate_synthetic",
         action="store_true",
         help="Generate a synthetic document corpus for fast testing.",
@@ -111,6 +129,21 @@ def main() -> None:
         documents = generate_synthetic_documents(
             codepoints, num_docs=args.num_synthetic, seed=args.seed
         )
+    elif args.hf_dataset:
+        from datasets import load_dataset
+
+        ds = load_dataset(
+            args.hf_dataset,
+            args.hf_config or None,
+            split="train",
+            streaming=True,
+        )
+        for row in ds:
+            txt = str(row.get("text", "")).strip()
+            if len(txt) >= 80:
+                documents.append(txt[:4000])
+                if len(documents) >= args.max_docs:
+                    break
     elif args.text_dir:
         tdir = Path(args.text_dir)
         for p in sorted(tdir.rglob("*")):
@@ -126,7 +159,9 @@ def main() -> None:
                         if txt:
                             documents.append(txt)
     else:
-        raise ValueError("Provide either --text_dir or --generate_synthetic")
+        raise ValueError(
+            "Provide --text_dir, --hf_dataset, or --generate_synthetic"
+        )
 
     rng = random.Random(args.seed)
     rng.shuffle(documents)

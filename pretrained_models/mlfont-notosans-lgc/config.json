@@ -3,18 +3,40 @@
   "font_family": "NotoSans-Regular Sliced",
   "num_slices": 20,
   "num_codepoints": 2297,
-  "num_unicode_ranges": 411,
-  "css_byte_size": 8266,
+  "num_unicode_ranges": 384,
+  "css_byte_size": 7938,
   "num_woff2_slices_written": 20,
-  "total_woff2_bytes": 448100,
+  "total_woff2_bytes": 442984,
+  "woff2_slice_byte_sizes": [
+    21532,
+    19140,
+    20384,
+    20828,
+    23484,
+    31872,
+    16692,
+    22780,
+    23728,
+    29060,
+    28488,
+    27692,
+    22248,
+    20980,
+    17012,
+    17216,
+    14012,
+    23056,
+    19768,
+    23012
+  ],
   "strategy_metadata": {
     "algorithm": "range_compact_ga",
     "n_topics": 20,
     "most_sizes": [],
-    "range_cost_weight": 0.005,
+    "range_cost_weight": 0.012,
     "max_iteration": 1200,
-    "final_range_cost": 411.0,
-    "final_topic_cost": -234.8571243257177
+    "final_range_cost": 384.0,
+    "final_topic_cost": -239.51922863437352
   },
   "preset": "lgc",
   "wiki_langs": [
@@ -27,5 +49,10 @@
   ],
   "n_train_docs": 1500,
   "n_test_docs": 300,
-  "training_wall_time_sec": 36.96
+  "num_remaining_codepoints": 2297,
+  "num_active_codepoints": 491,
+  "num_core_codepoints": 374,
+  "k_eff": 4,
+  "n_topics": 20,
+  "training_wall_time_sec": 16.06
 }

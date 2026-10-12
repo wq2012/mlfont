@@ -384,3 +384,195 @@ def test_baselines_subsetter_and_evaluator(tmp_path: Path) -> None:
     assert loaded_bundle.lambda_matrix is not None
     assert loaded_bundle.lambda_matrix.shape == (4, 26)
     assert loaded_bundle.predict_required_slices("AZ") == [0, 3]
+
+
+def test_sparse_vocabulary_max_diff_and_aliases(tmp_path: Path) -> None:
+    import mlfont
+
+    for sym in (
+        "DNNTMConfig",
+        "DNNTMSolver",
+        "FontSubsetter",
+        "FrequencySolver",
+        "OnlineLDAConfig",
+        "OnlineLDASolver",
+        "RangeCompactGASolver",
+        "extract_font_codepoints",
+        "normalize_topic_matrix",
+        "save_safetensors_model",
+    ):
+        assert hasattr(mlfont, sym), f"Missing public symbol {sym}"
+
+    # 120 codepoints where only 40 are observed in training documents
+    cps = list(range(0x4E00, 0x4E00 + 120))
+    docs = []
+    for i in range(40):
+        cluster = cps[(i % 4) * 10 : ((i % 4) + 1) * 10]
+        docs.append("".join(chr(c) for c in cluster))
+    proc = DocumentCorpusProcessor(docs, random_seed=42)
+
+    olda = OnlineLdaLearner(
+        proc,
+        cps,
+        OnlineLdaConfig(
+            n_topics=6,
+            most_sizes=[12],
+            normalization_method="global_max",
+            batch_size=20,
+            n_batches=5,
+            random_state=42,
+        ),
+    )
+    s_olda = olda.fit()
+    assert s_olda.num_slices == 7  # 1 most_slice + 6 topic slices
+    assert olda.lambda_matrix_ is not None
+    assert olda.lambda_matrix_.shape == (6, 108)
+    # All 6 topic rows carry real mass (> 1e-3) and non-constant learned signal on active cols
+    assert int(np.sum(np.any(olda.lambda_matrix_ > 1e-3, axis=1))) == 6
+    assert int(np.sum(np.ptp(olda.lambda_matrix_[:, :28], axis=1) > 1e-4)) == 6
+    assert int(np.sum(np.max(olda.lambda_matrix_, axis=0) <= 1e-3)) == 0
+
+    dnntm = DnnTmLearner(
+        proc,
+        cps,
+        DnnTmConfig(
+            n_topics=6,
+            most_sizes=[12],
+            normalization_method="global_max",
+            batch_size=16,
+            n_layers=2,
+            layer_size=16,
+            training_steps=20,
+            loss_type="ALL_COMBINED",
+            random_seed=42,
+        ),
+    )
+    s_dnn = dnntm.fit()
+    assert s_dnn.num_slices == 7
+    assert all(loss_val >= 0.0 for loss_val in dnntm.loss_history_)
+
+    freq = proc.count_frequency_array(cps)
+    ga_cfg = RangeCompactConfig(
+        range_cost_weight=0.005,
+        max_iteration=80,
+        n_survivals=15,
+        n_mutations_per_iteration=30,
+        n_crossovers_per_iteration=15,
+        decay_max_diff=DecayConfig(
+            min_val=3.0, max_val=15.0, decay_method="POWER", decay_power=3.0
+        ),
+        random_seed=42,
+    )
+    ga = RangeCompactGeneticLearner(
+        cps,
+        olda.lambda_matrix_,
+        ga_cfg,
+        frequency_array=freq,
+        most_sizes=[12],
+        normalization_method="global_max",
+    )
+    s_ga = ga.run()
+    topic_slice_sizes = [len(s) for s in s_ga.subsets[1:]]
+    assert max(topic_slice_sizes) - min(topic_slice_sizes) <= 3
+
+
+def test_readme_quickstart_api_and_edge_cases(tmp_path: Path) -> None:
+    from mlfont import (
+        DNNTMConfig,
+        DNNTMSolver,
+        FontSubsetter,
+        FrequencySolver,
+        OnlineLDAConfig,
+        OnlineLDASolver,
+        RangeCompactConfig,
+        RangeCompactGASolver,
+        extract_font_codepoints,
+    )
+
+    cps = list(range(0x0041, 0x0041 + 60))
+    font_path = _create_tiny_ttf(tmp_path / "Quickstart.ttf", cps)
+    font_codepoints = extract_font_codepoints(font_path)
+    assert len(font_codepoints) == 60
+
+    train_docs = [
+        set(font_codepoints[:20]),
+        set(font_codepoints[15:35]),
+        set(font_codepoints[30:50]),
+    ] * 10
+
+    freq_solver = FrequencySolver(font_codepoints)
+    freq_solver.fit(train_docs)
+    most_slices, remaining_codepoints = freq_solver.partition_most_frequent(
+        most_counts=[12]
+    )
+    assert len(most_slices) == 1
+    assert len(most_slices[0]) == 12
+    assert len(remaining_codepoints) == 48
+
+    olda_solver = OnlineLDASolver(
+        codepoints=remaining_codepoints,
+        config=OnlineLDAConfig(
+            n_topics=4,
+            batch_size=16,
+            max_iter=5,
+            normalization="global_max",
+            random_state=42,
+        ),
+    )
+    topic_matrix = olda_solver.fit_transform(train_docs)
+    assert topic_matrix.shape == (4, 48)
+
+    dnntm_solver = DNNTMSolver(
+        codepoints=remaining_codepoints,
+        config=DNNTMConfig(
+            n_topics=4,
+            batch_size=16,
+            max_iter=10,
+            normalization="global_max",
+            random_state=42,
+        ),
+    )
+    dnn_matrix = dnntm_solver.fit_transform(train_docs)
+    assert dnn_matrix.shape == (4, 48)
+
+    # Test exact max_diff=0 when 48 % 4 == 0
+    ga_solver = RangeCompactGASolver(
+        codepoints=remaining_codepoints,
+        topic_matrix=topic_matrix,
+        config=RangeCompactConfig(
+            population_size=10,
+            num_iterations=40,
+            decay_power=3.0,
+            range_cost_weight=0.012,
+            decay_max_diff=DecayConfig(min_val=0.0, max_val=4.0),
+            random_state=42,
+        ),
+    )
+    strategy = ga_solver.optimize(
+        strategy_name="range_compact_most12_topics4",
+        font_name="Quickstart",
+        prefix_slices=most_slices,
+    )
+    assert strategy.num_slices == 5
+    assert strategy.total_num_ranges() == strategy.num_ranges
+    ga_sizes = [len(s) for s in strategy.subsets[1:]]
+    assert max(ga_sizes) - min(ga_sizes) == 0
+
+    subsetter = FontSubsetter(font_path)
+    artifacts, css_path = subsetter.slice_font(strategy, tmp_path / "out_woff2")
+    assert len(artifacts) == 5
+    assert css_path.exists()
+
+    # Edge case: V_active < K (only 2 active codepoints, K=6 topics)
+    tiny_docs = [
+        "".join(chr(c) for c in remaining_codepoints[:2]),
+        "".join(chr(c) for c in remaining_codepoints[:2]),
+    ]
+    sparse_solver = OnlineLDASolver(
+        codepoints=remaining_codepoints,
+        config=OnlineLDAConfig(n_topics=6, batch_size=4, max_iter=3, random_state=42),
+    )
+    sparse_strat = sparse_solver.fit(tiny_docs)
+    assert sparse_strat.num_slices == 6
+    assert sparse_strat.all_codepoints() == set(remaining_codepoints)
+

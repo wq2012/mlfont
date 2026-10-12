@@ -26,14 +26,17 @@ setuptools.setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/wq2012/mlfont",
-    packages=setuptools.find_packages(include=["mlfont", "mlfont.*"]),
-    scripts=[
-        "scripts/prepare_data.py",
-        "scripts/train.py",
-        "scripts/evaluate.py",
-        "scripts/export_model.py",
-        "scripts/inference.py",
-    ],
+    packages=setuptools.find_packages(include=["mlfont", "mlfont.*", "scripts", "scripts.*"]),
+    entry_points={
+        "console_scripts": [
+            "mlfont-prepare-data=scripts.prepare_data:main",
+            "mlfont-train=scripts.train:main",
+            "mlfont-evaluate=scripts.evaluate:main",
+            "mlfont-export=scripts.export_model:main",
+            "mlfont-slice=scripts.inference:main",
+            "mlfont-inference=scripts.inference:main",
+        ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

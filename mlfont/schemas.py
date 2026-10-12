@@ -86,6 +86,15 @@ class SlicingStrategy:
                     total_ranges += 1
         return total_ranges
 
+    @property
+    def num_ranges(self) -> int:
+        """Total number of contiguous CSS unicode-range intervals across all slices."""
+        return self.count_unicode_ranges()
+
+    def total_num_ranges(self) -> int:
+        """Returns the total number of contiguous CSS unicode-range intervals."""
+        return self.count_unicode_ranges()
+
     def count_dna_compactness_ranges(self) -> int:
         """Counts range breaks across the sorted global DNA sequence.
 
@@ -232,6 +241,7 @@ class StrategyEvaluationResult:
     download_per_glyph_ms: DistributionStats
     upfront_utilization_pct: float
     session_utilization_pct: float
+    num_unassigned_font_codepoints: int = 0
 
 
 @dataclass
@@ -271,6 +281,20 @@ class RangeCompactConfig:
     )
     history_interval: int = 10
     random_seed: Optional[int] = 42
+    population_size: Optional[int] = None
+    num_iterations: Optional[int] = None
+    decay_power: Optional[float] = None
+    random_state: Optional[int] = None
+
+    def __post_init__(self) -> None:
+        if self.population_size is not None:
+            self.n_survivals = int(self.population_size)
+        if self.num_iterations is not None:
+            self.max_iteration = int(self.num_iterations)
+        if self.decay_power is not None:
+            self.decay_max_diff.decay_power = float(self.decay_power)
+        if self.random_state is not None:
+            self.random_seed = int(self.random_state)
 
 
 @dataclass

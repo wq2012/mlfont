@@ -18,7 +18,7 @@ datasets:
 
 ## Overview
 
-Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans JP (Japanese)** (`NotoSansJP-Regular.otf`, 16,665 Unicode codepoints partitioned into 62 range-compact slices).
+Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans JP (Japanese)** (`NotoSansJP-Regular.otf`, 16,663 Unicode codepoints partitioned into 62 range-compact slices).
 
 * **Paper**: *Learning Better Font Slicing Strategies from Data* (Quan Wang and Yiran Mao)
 * **Open-Source Repository**: https://github.com/wq2012/mlfont
@@ -26,18 +26,21 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 
 ## Training Configuration
 
-* **Target Font**: `NotoSansJP-Regular.otf` (16,665 Unicode codepoints)
-* **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `ja`), 1,600 training articles and 400 testing articles
+* **Target Font**: `NotoSansJP-Regular.otf` (16,663 Unicode codepoints)
+* **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `ja`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA Topic Modeling + Range-Compact Genetic Algorithm (`mlfont` preset: `japanese`)
-* **Total Slices**: 62 slices (9,380 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 4732.7 KB across 62 `.woff2` files (companion CSS: 99.6 KB)
-* **Training Wall-Time**: 73.2 seconds on CPU/GPU
+* **Total Slices**: 62 slices (8,447 total CSS `unicode-range` intervals)
+* **Physical WOFF2 Bundle Size**: 4811.8 KB across 62 `.woff2` files (companion CSS: 93.3 KB)
+* **Training Wall-Time**: 47.4 seconds on CPU/GPU
 
 ## Model Files Included
 
-* `model.safetensors`: Learned topic-codepoint weight matrix (`lambda_matrix`), `codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
-* `strategy.json`: Complete `SlicingStrategy` definition and hyperparameters
-* `config.json`: Model and font bundle summary metadata
+* `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
+* `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
+* `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition
+* `dnntm_strategy.json`: DNNTM (Entropy Difference Loss) + Greedy `SlicingStrategy` definition
+* `test_samples.json`: Exact held-out evaluation codepoint sets (400 test pages)
+* `config.json`: Model and font bundle summary metadata (including per-slice WOFF2 byte sizes)
 * `font_sliced.css`: Production-ready `@font-face` stylesheet with compact `unicode-range` descriptors
 * `woff2/*.woff2`: 62 physical WOFF2 font slices generated via `fontTools.subset`
 * `nam/*.nam`: 62 Google Fonts `.nam` codepoint subset files
@@ -45,16 +48,16 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 
 ## Benchmark Performance (400 Wikipedia Test Pages, Session Length L = 10)
 
-| Strategy | Slices | CSS Ranges | Missing Glyphs | GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) | DSL Mean / P95 (ms) | Session Util (%) |
+| Strategy | Slices | CSS Ranges | Missing (Eval / Font) | GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) | DSL Mean / P95 (ms) | Session Util (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `single_slice` | 1 | 4831 | 0 | 82.38 / 642.61 | 20.63 / 160.89 | 4.12 / 32.11 | 7.05% |
-| `equal_bin_62` | 62 | 4876 | 0 | 86.91 / 646.00 | 23.31 / 173.24 | 4.19 / 31.13 | 7.98% |
-| `random_slice_62` | 62 | 16489 | 0 | 103.47 / 818.24 | 27.75 / 219.43 | 4.99 / 39.42 | 7.05% |
-| `language_slice` | 12 | 5966 | 38 | 46.07 / 354.24 | 11.68 / 89.52 | 2.29 / 17.62 | 12.97% |
-| `most_500_500_equal_bin_60` | 62 | 5982 | 0 | 73.54 / 382.26 | 19.71 / 102.34 | 3.54 / 18.43 | 8.52% |
-| `online_lda_topics60_greedy` | 62 | 9521 | 0 | 32.23 / 188.16 | 8.61 / 50.09 | 1.56 / 9.09 | 19.92% |
-| `dnntm_topics60_greedy` | 62 | 9524 | 0 | 30.14 / 147.36 | 8.05 / 39.33 | 1.46 / 7.12 | 21.68% |
-| **range_compact_most500_500_topics60 (This Model)** | 62 | 9380 | 0 | 32.62 / 190.08 | 8.71 / 50.64 | 1.58 / 9.21 | 19.61% |
+| `single_slice` | 1 | 4830 | 0 / 0 | 94.75 / 701.82 | 23.72 / 175.72 | 4.73 / 35.06 | 7.62% |
+| `equal_bin_62` | 62 | 4876 | 0 / 0 | 95.38 / 698.56 | 25.58 / 187.34 | 4.60 / 33.66 | 8.56% |
+| `random_slice_62` | 62 | 16450 | 0 / 0 | 114.88 / 893.64 | 30.81 / 239.66 | 5.53 / 43.06 | 7.62% |
+| `language_slice` | 10 | 5617 | 43 / 7632 | 45.20 / 305.76 | 11.42 / 77.00 | 2.25 / 15.22 | 15.84% |
+| `most_500_500_equal_bin_60` | 62 | 5975 | 0 / 0 | 76.50 / 387.35 | 20.50 / 103.64 | 3.69 / 18.69 | 8.92% |
+| `online_lda_topics60_greedy` | 62 | 8888 | 0 / 0 | 34.87 / 201.00 | 9.31 / 53.61 | 1.68 / 9.71 | 21.31% |
+| `dnntm_topics60_greedy` | 62 | 8710 | 0 / 0 | 34.80 / 188.72 | 9.30 / 50.47 | 1.68 / 9.12 | 20.88% |
+| **range_compact_most500_500_topics60 (This Model)** | 62 | 8447 | 0 / 0 | 37.13 / 214.37 | 9.91 / 57.09 | 1.79 / 10.37 | 19.79% |
 
 ## Usage
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 from typing import List, Optional, Sequence
 
 import numpy as np
@@ -16,6 +17,7 @@ from mlfont.maths import (
     balance_topics_greedy,
     balance_topics_unbalanced,
 )
+from mlfont.olda import align_and_smooth_topic_matrix
 from mlfont.schemas import SlicingStrategy
 
 
@@ -27,6 +29,7 @@ class DnnTmConfig:
     most_sizes: List[int] = field(default_factory=list)
     least_sizes: List[int] = field(default_factory=list)
     topic_balancing: str = "greedy"
+    max_diff: int = 30
     normalization_method: str = "topic_sum"
     batch_size: int = 256
     n_layers: int = 2
@@ -39,6 +42,17 @@ class DnnTmConfig:
     loss_type: str = "ALL_COMBINED"  # REAL_FAKE_DIFF, REAL_FAKE_AND_REAL_AVERAGE_DIFF, ALL_COMBINED
     activation: str = "ELU"  # RELU, ELU, TANH, SIGMOID
     random_seed: int = 42
+    max_iter: Optional[int] = None
+    normalization: Optional[str] = None
+    random_state: Optional[int] = None
+
+    def __post_init__(self) -> None:
+        if self.max_iter is not None:
+            self.training_steps = int(self.max_iter)
+        if self.normalization is not None:
+            self.normalization_method = str(self.normalization)
+        if self.random_state is not None:
+            self.random_seed = int(self.random_state)
 
 
 def _make_activation(name: str) -> nn.Module:
@@ -89,14 +103,16 @@ class DnnTopicNetwork(nn.Module):
 
 
 class DnnTmLearner:
-    """Trains a Deep Neural Network Topic Model using Entropy Difference Loss."""
+    """Trains a Deep Neural Network Topic Model using non-negative Entropy Difference Loss."""
 
     def __init__(
         self,
-        corpus: DocumentCorpusProcessor,
-        codepoints: Sequence[int],
-        config: DnnTmConfig,
+        corpus: Optional[DocumentCorpusProcessor] = None,
+        codepoints: Sequence[int] = (),
+        config: Optional[DnnTmConfig] = None,
     ) -> None:
+        if config is None:
+            config = DnnTmConfig()
         if config.n_topics <= 0:
             raise ValueError("n_topics must be positive")
         self.corpus = corpus
@@ -109,16 +125,29 @@ class DnnTmLearner:
         self.most_slices_: List[List[int]] = []
         self.least_slices_: List[List[int]] = []
 
-    def fit(self) -> SlicingStrategy:
+    def _ensure_corpus(self, docs: Optional[Sequence[object]] = None) -> DocumentCorpusProcessor:
+        if docs is not None:
+            if isinstance(docs, DocumentCorpusProcessor):
+                self.corpus = docs
+            else:
+                self.corpus = DocumentCorpusProcessor(
+                    docs, random_seed=self.config.random_seed
+                )
+        if self.corpus is None:
+            raise ValueError("A DocumentCorpusProcessor or document list must be provided.")
+        return self.corpus
+
+    def fit(self, docs: Optional[Sequence[object]] = None) -> SlicingStrategy:
         """Trains the DNNTM model and returns the resulting SlicingStrategy."""
+        corpus = self._ensure_corpus(docs)
         torch.manual_seed(self.config.random_seed)
         np.random.seed(self.config.random_seed)
 
-        freq_arr = self.corpus.count_frequency_array(
+        if len(self.codepoints) == 0:
+            raise ValueError("codepoints cannot be empty")
+        freq_arr = corpus.count_frequency_array(
             self.codepoints, deduplicate_within_doc=True
         )
-        if int(np.sum(freq_arr)) == 0:
-            raise ValueError("No documents contain any target codepoints")
 
         if self.config.most_sizes or self.config.least_sizes:
             _, self.most_slices_, remaining_cps, self.least_slices_ = (
@@ -138,6 +167,8 @@ class DnnTmLearner:
         n_rem = len(remaining_cps)
         n_topics = self.config.n_topics
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if device.type == "cpu" and torch.get_num_threads() > 4:
+            torch.set_num_threads(4)
 
         loss_type = self.config.loss_type.upper()
         if loss_type not in (
@@ -147,7 +178,7 @@ class DnnTmLearner:
         ):
             raise ValueError(f"Unsupported loss_type: {self.config.loss_type!r}")
 
-        full_sparse = self.corpus.construct_batch_sparse_matrix(
+        full_sparse = corpus.construct_batch_sparse_matrix(
             remaining_cps, n_samples=0
         )
         col_sums = np.asarray(full_sparse.sum(axis=0)).ravel()
@@ -157,17 +188,13 @@ class DnnTmLearner:
             from scipy import sparse as sp
 
             active_sparse = sp.csr_matrix(np.ones((1, n_rem), dtype=np.uint8))
-            active_freq_scale = np.ones((1, n_rem), dtype=np.float64)
         elif len(active_cols) == n_rem:
             active_sparse = full_sparse
-            active_freq_scale = np.log1p(col_sums.astype(np.float64))[np.newaxis, :]
         else:
             active_sparse = full_sparse[:, active_cols]
             row_mask = np.asarray(active_sparse.sum(axis=1)).ravel() > 0
-            active_sparse = active_sparse[row_mask]
-            active_freq_scale = np.log1p(col_sums[active_cols].astype(np.float64))[
-                np.newaxis, :
-            ]
+            if np.any(row_mask):
+                active_sparse = active_sparse[row_mask]
 
         n_words = len(active_cols)
         model = DnnTopicNetwork(
@@ -193,6 +220,7 @@ class DnnTmLearner:
         n_total_docs = full_docs_tensor.shape[0]
         b_size = max(1, self.config.batch_size)
         density = float(self.config.fake_doc_word_density)
+        log_k = float(math.log(max(2, n_topics)))
 
         self.loss_history_ = []
         for _ in range(self.config.training_steps):
@@ -210,22 +238,30 @@ class DnnTmLearner:
             loss_fake = torch.mean(_shannon_entropy(fake_topics))
 
             if loss_type == "REAL_FAKE_DIFF":
-                loss = loss_real - loss_fake
+                loss = (loss_real - loss_fake) + log_k
             else:
                 avg_real_topic = torch.mean(real_topics, dim=0, keepdim=True)
                 loss_real_avg = torch.mean(_shannon_entropy(avg_real_topic))
                 if loss_type == "REAL_FAKE_AND_REAL_AVERAGE_DIFF":
-                    loss = loss_real - loss_fake - loss_real_avg
+                    loss = (loss_real - loss_fake + log_k) + (
+                        loss_real - loss_real_avg + log_k
+                    )
                 else:
-                    if n_words <= 128:
+                    if n_words <= 256:
                         eye_batch = torch.eye(n_words, device=device)
                     else:
-                        idx = torch.randperm(n_words, device=device)[:128]
+                        idx = torch.randperm(n_words, device=device)[:256]
                         eye_batch = torch.zeros((len(idx), n_words), device=device)
                         eye_batch[torch.arange(len(idx), device=device), idx] = 1.0
                     word_topics = model(eye_batch)
                     loss_word = torch.mean(_shannon_entropy(word_topics))
-                    loss = loss_real - loss_fake - loss_real_avg + loss_word
+                    avg_word_topic = torch.mean(word_topics, dim=0, keepdim=True)
+                    loss_word_avg = torch.mean(_shannon_entropy(avg_word_topic))
+                    loss = (
+                        (loss_real - loss_fake + log_k)
+                        + (loss_real - loss_real_avg + log_k)
+                        + (loss_word - loss_word_avg + log_k)
+                    )
 
             loss.backward()
             optimizer.step()
@@ -248,19 +284,13 @@ class DnnTmLearner:
                 word_probs_chunks.append(probs_chunk)
 
         active_probs = np.vstack(word_probs_chunks)  # (n_words, n_topics)
-        if n_words == n_rem:
-            self.word_topic_probs_ = active_probs
-            self.lambda_matrix_ = active_probs.T * active_freq_scale
-        else:
-            full_probs = np.full((n_rem, n_topics), 1.0 / n_topics, dtype=np.float64)
-            full_probs[active_cols, :] = active_probs
-            self.word_topic_probs_ = full_probs
-            row_decay = 1e-4 * (
-                1.0 - 1e-3 * (np.arange(n_topics, dtype=np.float64)[:, np.newaxis] / max(1, n_topics))
-            )
-            full_lambda = np.broadcast_to(row_decay, (n_topics, n_rem)).copy()
-            full_lambda[:, active_cols] = (1e-2 + active_probs.T) * active_freq_scale
-            self.lambda_matrix_ = full_lambda
+        self.lambda_matrix_ = align_and_smooth_topic_matrix(
+            active_probs.T, active_cols, col_sums, n_rem, n_topics
+        )
+        col_norm = self.lambda_matrix_ / np.maximum(
+            1e-12, np.sum(self.lambda_matrix_, axis=0, keepdims=True)
+        )
+        self.word_topic_probs_ = col_norm.T
 
         if self.config.topic_balancing == "greedy":
             balanced = balance_topics_greedy(
@@ -270,7 +300,7 @@ class DnnTmLearner:
         elif self.config.topic_balancing == "diff_constrained":
             balanced = balance_topics_diff_constrained(
                 self.lambda_matrix_,
-                max_diff=30,
+                max_diff=self.config.max_diff,
                 normalization_method=self.config.normalization_method,
             )
         elif self.config.topic_balancing == "unbalanced":
@@ -279,7 +309,9 @@ class DnnTmLearner:
                 normalization_method=self.config.normalization_method,
             )
         else:
-            raise ValueError(f"Unsupported topic_balancing: {self.config.topic_balancing!r}")
+            raise ValueError(
+                f"Unsupported topic_balancing: {self.config.topic_balancing!r}"
+            )
 
         assignments = np.argmax(balanced, axis=0)
         topic_slices: List[List[int]] = [[] for _ in range(self.config.n_topics)]
@@ -295,8 +327,31 @@ class DnnTmLearner:
             metadata={
                 "algorithm": "dnntm",
                 "n_topics": self.config.n_topics,
+                "most_sizes": list(self.config.most_sizes),
+                "least_sizes": list(self.config.least_sizes),
                 "loss_type": self.config.loss_type,
                 "training_steps": self.config.training_steps,
                 "final_loss": self.loss_history_[-1] if self.loss_history_ else None,
             },
         )
+
+    def fit_transform(self, docs: Optional[Sequence[object]] = None) -> np.ndarray:
+        """Fits DNNTM on docs and returns the learned (K, V_rem) topic matrix."""
+        self.fit(docs)
+        assert self.lambda_matrix_ is not None
+        return self.lambda_matrix_
+
+
+DNNTMConfig = DnnTmConfig
+
+
+class DNNTMSolver(DnnTmLearner):
+    """Solver interface for Deep Neural Network Topic Model (DNNTM) font slicing."""
+
+    def __init__(
+        self,
+        corpus: Optional[DocumentCorpusProcessor] = None,
+        codepoints: Sequence[int] = (),
+        config: Optional[DnnTmConfig] = None,
+    ) -> None:
+        super().__init__(corpus=corpus, codepoints=codepoints, config=config)

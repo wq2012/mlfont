@@ -7,13 +7,35 @@ import argparse
 from datetime import datetime
 import json
 from pathlib import Path
+import struct
 from typing import Dict, List
 
 import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-from safetensors.numpy import load_file
+
+try:
+    from safetensors.numpy import load_file
+except ImportError:
+    _DTYPE_MAP = {"F32": np.float32, "F64": np.float64, "I32": np.int32, "I64": np.int64}
+
+    def load_file(path: str) -> Dict[str, np.ndarray]:
+        raw = Path(path).read_bytes()
+        header_len = struct.unpack("<Q", raw[:8])[0]
+        header = json.loads(raw[8 : 8 + header_len].decode("utf-8"))
+        data_start = 8 + header_len
+        out: Dict[str, np.ndarray] = {}
+        for k, meta in header.items():
+            if k == "__metadata__":
+                continue
+            start, end = meta["data_offsets"]
+            arr = np.frombuffer(
+                raw[data_start + start : data_start + end],
+                dtype=_DTYPE_MAP[meta["dtype"]],
+            )
+            out[k] = arr.reshape(meta["shape"]).copy()
+        return out
 
 matplotlib.use("Agg")
 
@@ -64,13 +86,13 @@ def plot_fig1_pareto_and_zipf(
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.5, 4.4))
 
     font_labels = [
-        ("mlfont-notosanssc", "Noto Sans SC (30,759 cps)", "#c0392b"),
-        ("mlfont-notosanstc", "Noto Sans TC (20,637 cps)", "#8e44ad"),
-        ("mlfont-notosansjp", "Noto Sans JP (16,665 cps)", "#2980b9"),
-        ("mlfont-notosanskr", "Noto Sans KR (12,254 cps)", "#16a085"),
-        ("mlfont-notosans-lgc", "Noto Sans LGC (2,297 cps)", "#d35400"),
+        ("notosanssc", "mlfont-notosanssc", "Noto Sans SC", "#c0392b"),
+        ("notosanstc", "mlfont-notosanstc", "Noto Sans TC", "#8e44ad"),
+        ("notosansjp", "mlfont-notosansjp", "Noto Sans JP", "#2980b9"),
+        ("notosanskr", "mlfont-notosanskr", "Noto Sans KR", "#16a085"),
+        ("notosans_lgc", "mlfont-notosans-lgc", "Noto Sans LGC", "#d35400"),
     ]
-    for hf_name, label, color in font_labels:
+    for fkey, hf_name, base_label, color in font_labels:
         st_path = pretrained_dir / hf_name / "model.safetensors"
         if not st_path.exists():
             continue
@@ -78,6 +100,10 @@ def plot_fig1_pareto_and_zipf(
         freqs = np.sort(tensors["frequency_array"])[::-1]
         pos = freqs[freqs > 0]
         ranks = np.arange(1, len(pos) + 1)
+        n_cps = summary["fonts"].get(fkey, {}).get(
+            "num_codepoints", len(tensors["frequency_array"])
+        )
+        label = f"{base_label} ({n_cps:,} cps, {len(pos):,} active)"
         ax1.plot(ranks, pos / max(1.0, float(pos[0])), label=label, color=color, lw=1.8)
 
     ax1.set_xscale("log")
@@ -91,12 +117,12 @@ def plot_fig1_pareto_and_zipf(
         color="#2c3e50",
     )
     ax1.set_title("(a) Zipfian Codepoint Document-Frequency Decay")
-    ax1.set_xlabel("Codepoint Rank (log scale)")
+    ax1.set_xlabel("Active Codepoint Rank (log scale)")
     ax1.set_ylabel("Normalized Document Frequency (log scale)")
     ax1.grid(True, which="both", ls=":", alpha=0.45)
-    ax1.legend(loc="lower left", frameon=True)
+    ax1.legend(loc="lower left", frameon=True, fontsize=7.8)
 
-    # Panel (b): Pareto trade-off on Noto Sans SC & LGC (GIN-3g latency vs CSS unicode-range count)
+    # Panel (b): Pareto trade-off on Noto Sans SC (GIN-3g latency vs CSS unicode-range count)
     sc_results = summary["fonts"]["notosanssc"]["results"]
     gin3g_sc = [r for r in sc_results if r["params_name"] == "GIN-3g"]
 
@@ -106,6 +132,7 @@ def plot_fig1_pareto_and_zipf(
         "random": ("v", COLORS["random"], "Random Slice"),
         "language": ("D", COLORS["language"], "Language Slice (.nam)"),
         "most_": ("P", COLORS["most_eq"], "Most + Equal-Bin"),
+        "google_fonts_ea": ("p", "#16a085", "Google Fonts EA (2017)"),
         "online_lda": ("o", COLORS["olda"], "Online LDA (Greedy)"),
         "dnntm": ("X", COLORS["dnntm"], "DNNTM (Greedy)"),
         "range_compact": ("*", COLORS["ga"], "MLFont Range-Compact GA"),
@@ -136,7 +163,7 @@ def plot_fig1_pareto_and_zipf(
     ax2.set_xlabel("Total CSS unicode-range Intervals (log scale, lower is more compact)")
     ax2.set_ylabel("Mean Per-Glyph Latency on GIN-3g (ms, lower is faster)")
     ax2.grid(True, which="both", ls=":", alpha=0.45)
-    ax2.legend(loc="upper right", frameon=True)
+    ax2.legend(loc="upper right", frameon=True, fontsize=8.0)
 
     fig.tight_layout()
     _save_both(fig, "fig1_architecture", png_dir, pdf_dir)
@@ -169,7 +196,7 @@ def plot_fig2_ga_convergence(
         axes[0].plot(iters, r_cost / max(1e-9, r_cost[0]), label=label, color=color, lw=1.8)
         axes[1].plot(iters, t_cost, label=label, color=color, lw=1.8)
 
-    axes[0].set_title("(a) Population Range Cost Convergence")
+    axes[0].set_title("(a) Population Range Cost Trajectory")
     axes[0].set_xlabel("GA Generation (Iteration)")
     axes[0].set_ylabel("Relative Range Cost C_range(t) / C_range(0)")
     axes[0].grid(True, ls=":", alpha=0.5)
@@ -179,7 +206,7 @@ def plot_fig2_ga_convergence(
     axes[1].set_xlabel("GA Generation (Iteration)")
     axes[1].set_ylabel("Topic Discrepancy Cost C_topic(t) (Lower is Better)")
     axes[1].grid(True, ls=":", alpha=0.5)
-    axes[1].legend(loc="upper right", frameon=True)
+    axes[1].legend(loc="upper right", ncol=2, frameon=True, fontsize=8.0)
 
     sc_hist_file = experiments_dir / "notosanssc" / "ga_history.json"
     if sc_hist_file.exists():
@@ -191,7 +218,7 @@ def plot_fig2_ga_convergence(
             max_diffs,
             color="#2c3e50",
             lw=2.2,
-            label="Curriculum max_diff(t) (p=2.0)",
+            label="Curriculum max_diff(t) (p=3.0)",
         )
         axes[2].fill_between(iters, max_diffs, color="#3498db", alpha=0.18)
     axes[2].set_title("(c) Power-Law Slice-Size Constraint Decay")
@@ -223,7 +250,7 @@ def plot_fig3_benchmark_latency(
         ("single_slice", "Single Slice", COLORS["single"]),
         ("equal_bin", "Equal-Bin", COLORS["equal_bin"]),
         ("language_slice", "Language (.nam)", COLORS["language"]),
-        ("most_and_equal", "Most + Equal-Bin", COLORS["most_eq"]),
+        ("most_", "Most + Equal-Bin", COLORS["most_eq"]),
         ("online_lda", "Online LDA", COLORS["olda"]),
         ("dnntm", "DNNTM", COLORS["dnntm"]),
         ("range_compact", "MLFont (GA)", COLORS["ga"]),
@@ -242,7 +269,7 @@ def plot_fig3_benchmark_latency(
                 if r["params_name"] == "GIN-3g" and r["strategy_name"].startswith(prefix):
                     match = r
                     break
-            if match is None and prefix == "most_and_equal":
+            if match is None and prefix == "most_":
                 # LGC has no most_sizes tier by default; fall back to equal_bin
                 for r in res_list:
                     if r["params_name"] == "GIN-3g" and r["strategy_name"].startswith("equal_bin"):
@@ -259,15 +286,17 @@ def plot_fig3_benchmark_latency(
     ax1.set_xticklabels([lbl for _, lbl in font_order])
     ax1.set_ylabel("Mean Per-Glyph Loading Latency on GIN-3g (ms)")
     ax1.set_title("(a) Mean Per-Glyph Latency Across 5 Noto Fonts (Lower is Better)")
+    ax1.set_ylim(0, 78)
     ax1.grid(True, axis="y", ls=":", alpha=0.5)
-    ax1.legend(ncol=2, frameon=True, fontsize=8)
+    ax1.legend(loc="upper right", ncol=2, frameon=True, fontsize=8)
 
     ax2.set_xticks(x)
     ax2.set_xticklabels([lbl for _, lbl in font_order])
     ax2.set_ylabel("Session Glyph Utilization (%, L = 10 Pages)")
     ax2.set_title("(b) Session Downloaded Glyph Utilization (Higher is Better)")
+    ax2.set_ylim(0, 38.0)
     ax2.grid(True, axis="y", ls=":", alpha=0.5)
-    ax2.legend(ncol=2, frameon=True, fontsize=8)
+    ax2.legend(loc="upper right", ncol=2, frameon=True, fontsize=8)
 
     fig.tight_layout()
     _save_both(fig, "fig3_benchmark_latency", png_dir, pdf_dir)
@@ -307,7 +336,7 @@ def plot_fig4_production_traffic(
         color="#3498db",
         alpha=0.35,
         lw=0.9,
-        label="Daily CSS Requests (Millions)",
+        label="Daily Primary URL CSS Requests (Millions)",
     )
     ax.plot(
         rolling_dates,

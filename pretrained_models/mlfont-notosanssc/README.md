@@ -27,17 +27,20 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 ## Training Configuration
 
 * **Target Font**: `NotoSansSC-Regular.otf` (30,759 Unicode codepoints)
-* **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `zh`), 1,600 training articles and 400 testing articles
+* **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `zh`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA Topic Modeling + Range-Compact Genetic Algorithm (`mlfont` preset: `chinese`)
-* **Total Slices**: 102 slices (11,741 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 9183.8 KB across 102 `.woff2` files (companion CSS: 129.6 KB)
-* **Training Wall-Time**: 118.6 seconds on CPU/GPU
+* **Total Slices**: 102 slices (9,220 total CSS `unicode-range` intervals)
+* **Physical WOFF2 Bundle Size**: 9145.2 KB across 102 `.woff2` files (companion CSS: 109.8 KB)
+* **Training Wall-Time**: 74.4 seconds on CPU/GPU
 
 ## Model Files Included
 
-* `model.safetensors`: Learned topic-codepoint weight matrix (`lambda_matrix`), `codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
-* `strategy.json`: Complete `SlicingStrategy` definition and hyperparameters
-* `config.json`: Model and font bundle summary metadata
+* `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
+* `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
+* `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition
+* `dnntm_strategy.json`: DNNTM (Entropy Difference Loss) + Greedy `SlicingStrategy` definition
+* `test_samples.json`: Exact held-out evaluation codepoint sets (400 test pages)
+* `config.json`: Model and font bundle summary metadata (including per-slice WOFF2 byte sizes)
 * `font_sliced.css`: Production-ready `@font-face` stylesheet with compact `unicode-range` descriptors
 * `woff2/*.woff2`: 102 physical WOFF2 font slices generated via `fontTools.subset`
 * `nam/*.nam`: 102 Google Fonts `.nam` codepoint subset files
@@ -45,16 +48,17 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 
 ## Benchmark Performance (400 Wikipedia Test Pages, Session Length L = 10)
 
-| Strategy | Slices | CSS Ranges | Missing Glyphs | GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) | DSL Mean / P95 (ms) | Session Util (%) |
+| Strategy | Slices | CSS Ranges | Missing (Eval / Font) | GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) | DSL Mean / P95 (ms) | Session Util (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `single_slice` | 1 | 418 | 0 | 190.95 / 1046.58 | 47.78 / 261.86 | 9.54 / 52.31 | 5.00% |
-| `equal_bin_102` | 102 | 519 | 0 | 140.76 / 851.22 | 37.53 / 226.94 | 6.80 / 41.15 | 6.90% |
-| `random_slice_102` | 102 | 30457 | 0 | 202.63 / 1325.94 | 54.02 / 353.49 | 9.80 / 64.10 | 5.00% |
-| `language_slice` | 12 | 7087 | 121 | 68.74 / 377.15 | 17.36 / 95.16 | 3.42 / 18.77 | 13.95% |
-| `most_1000_500_equal_bin_100` | 102 | 2978 | 0 | 111.15 / 493.00 | 29.58 / 131.64 | 5.38 / 23.81 | 7.17% |
-| `online_lda_topics100_greedy` | 102 | 11848 | 0 | 57.88 / 305.81 | 15.36 / 81.13 | 2.81 / 14.82 | 14.99% |
-| `dnntm_topics100_greedy` | 102 | 11928 | 0 | 48.51 / 210.03 | 12.86 / 55.64 | 2.35 / 10.19 | 17.46% |
-| **range_compact_most1000_500_topics100 (This Model)** | 102 | 11741 | 0 | 58.10 / 307.01 | 15.41 / 81.43 | 2.82 / 14.88 | 14.93% |
+| `single_slice` | 1 | 418 | 0 / 0 | 253.67 / 1629.56 | 63.47 / 407.72 | 12.68 / 81.45 | 5.55% |
+| `equal_bin_102` | 102 | 519 | 0 / 0 | 169.75 / 1165.36 | 45.26 / 310.69 | 8.21 / 56.33 | 7.63% |
+| `random_slice_102` | 102 | 30457 | 0 / 0 | 242.74 / 1930.38 | 64.71 / 514.64 | 11.73 / 93.32 | 5.55% |
+| `language_slice` | 10 | 6646 | 126 / 19659 | 86.54 / 554.31 | 21.82 / 139.59 | 4.31 / 27.61 | 16.05% |
+| `most_1000_500_equal_bin_100` | 102 | 2965 | 0 / 0 | 110.52 / 502.64 | 29.38 / 131.07 | 5.35 / 24.59 | 7.82% |
+| `google_fonts_ea_2017` | 102 | 6063 | 0 / 0 | 115.96 / 609.01 | 30.29 / 160.05 | 5.67 / 29.67 | 7.74% |
+| `online_lda_topics100_greedy` | 102 | 10177 | 0 / 0 | 60.16 / 314.64 | 15.93 / 83.23 | 2.92 / 15.27 | 16.90% |
+| `dnntm_topics100_greedy` | 102 | 9640 | 0 / 0 | 59.30 / 311.97 | 15.71 / 82.49 | 2.88 / 15.14 | 16.57% |
+| **range_compact_most1000_500_topics100 (This Model)** | 102 | 9220 | 0 / 0 | 66.51 / 343.80 | 17.61 / 90.79 | 3.23 / 16.71 | 14.77% |
 
 ## Usage
 

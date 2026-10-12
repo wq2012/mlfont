@@ -88,10 +88,12 @@ class FontLoadingEvaluator:
             for cp in unique_subset:
                 slice_mapping[cp] = idx
 
-        if slice_byte_sizes is not None and len(slice_byte_sizes) != len(strategy.subsets):
-            raise ValueError(
-                "slice_byte_sizes length must match strategy.num_slices"
-            )
+        if slice_byte_sizes is not None and len(slice_byte_sizes) != len(
+            strategy.subsets
+        ):
+            raise ValueError("slice_byte_sizes length must match strategy.num_slices")
+
+        unassigned_font_cps = len(self.codepoint_set - set(slice_mapping.keys()))
 
         rtt_list: List[float] = []
         download_time_list: List[float] = []
@@ -106,29 +108,36 @@ class FontLoadingEvaluator:
         session_len = max(1, int(params.session_length))
 
         for i, sample in enumerate(self.samples):
-            session_sample_codepoints.update(sample)
             new_indices_of_slices: Set[int] = set()
+            covered_in_sample: Set[int] = set()
 
             for cp in sample:
                 slice_idx = slice_mapping.get(cp)
                 if slice_idx is None:
                     missing_codepoints.add(cp)
-                elif slice_idx not in cache_indices_of_slices:
-                    new_indices_of_slices.add(slice_idx)
-                    cache_indices_of_slices.add(slice_idx)
-                    session_downloaded_glyph_count += slice_glyph_counts[slice_idx]
+                else:
+                    covered_in_sample.add(cp)
+                    if slice_idx not in cache_indices_of_slices:
+                        new_indices_of_slices.add(slice_idx)
+                        cache_indices_of_slices.add(slice_idx)
+                        session_downloaded_glyph_count += slice_glyph_counts[slice_idx]
 
-            sample_size = len(sample)
-            rtt_ms = (len(new_indices_of_slices) * params.rtt_ms) / sample_size
+            session_sample_codepoints.update(covered_in_sample)
+            denom = max(1, len(covered_in_sample))
+            rtt_ms = (len(new_indices_of_slices) * params.rtt_ms) / denom
             rtt_list.append(rtt_ms)
 
             if slice_byte_sizes is not None:
-                total_bytes = sum(float(slice_byte_sizes[idx]) for idx in new_indices_of_slices)
+                total_bytes = sum(
+                    float(slice_byte_sizes[idx]) for idx in new_indices_of_slices
+                )
             else:
-                total_glyphs = sum(slice_glyph_counts[idx] for idx in new_indices_of_slices)
+                total_glyphs = sum(
+                    slice_glyph_counts[idx] for idx in new_indices_of_slices
+                )
                 total_bytes = total_glyphs * params.average_glyph_size_bytes
 
-            download_ms = (total_bytes / params.bandwidth_bytes_per_ms) / sample_size
+            download_ms = (total_bytes / params.bandwidth_bytes_per_ms) / denom
             download_time_list.append(download_ms)
 
             if i % session_len == 0:
@@ -175,19 +184,32 @@ class FontLoadingEvaluator:
             download_per_glyph_ms=compute_distribution_stats(download_time_list),
             upfront_utilization_pct=upfront_util,
             session_utilization_pct=session_util,
+            num_unassigned_font_codepoints=unassigned_font_cps,
         )
 
     def evaluate_all(
         self,
         strategies: Sequence[SlicingStrategy],
         params_list: Optional[Sequence[EvaluationParams]] = None,
+        slice_byte_sizes_map: Optional[Dict[str, Sequence[int]]] = None,
     ) -> List[StrategyEvaluationResult]:
         """Evaluates multiple strategies across multiple network/session profiles."""
-        profiles = params_list if params_list is not None else STANDARD_EVALUATION_PARAMS
+        profiles = (
+            params_list if params_list is not None else STANDARD_EVALUATION_PARAMS
+        )
         results: List[StrategyEvaluationResult] = []
         for params in profiles:
             for strat in strategies:
-                results.append(self.evaluate_strategy(strat, params))
+                byte_sizes = (
+                    slice_byte_sizes_map.get(strat.name)
+                    if slice_byte_sizes_map is not None
+                    else None
+                )
+                results.append(
+                    self.evaluate_strategy(
+                        strat, params, slice_byte_sizes=byte_sizes
+                    )
+                )
         return results
 
 

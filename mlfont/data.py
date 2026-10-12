@@ -81,10 +81,25 @@ def fill_codepoint_gaps(codepoint_set: Set[int], fill_gap: int) -> Set[int]:
     return result
 
 
+def _iter_doc_codepoints(
+    doc: str | Iterable[int | str],
+    deduplicate: bool = True,
+) -> List[int]:
+    if isinstance(doc, str):
+        chars = set(doc) if deduplicate else doc
+        return [ord(ch) for ch in chars]
+    items = set(doc) if deduplicate else doc
+    return [ord(ch) if isinstance(ch, str) else int(ch) for ch in items]
+
+
 class DocumentCorpusProcessor:
     """Processes a collection of text documents for MLFont training & evaluation."""
 
-    def __init__(self, documents: Sequence[str], random_seed: int = 42) -> None:
+    def __init__(
+        self,
+        documents: Sequence[str | Iterable[int | str]],
+        random_seed: int = 42,
+    ) -> None:
         if not documents:
             raise ValueError("documents must be non-empty")
         self._documents = list(documents)
@@ -97,7 +112,7 @@ class DocumentCorpusProcessor:
     def generate_codepoint_sets(self, valid_codepoints: Set[int]) -> Iterator[Set[int]]:
         """Yields the set of valid target codepoints appearing in each document."""
         for doc in self._documents:
-            cp_set = {ord(ch) for ch in doc} & valid_codepoints
+            cp_set = set(_iter_doc_codepoints(doc, deduplicate=True)) & valid_codepoints
             if cp_set:
                 yield cp_set
 
@@ -109,9 +124,7 @@ class DocumentCorpusProcessor:
         """Counts how frequently each codepoint occurs across the corpus."""
         counts: Dict[int, int] = {int(cp): 0 for cp in valid_codepoints}
         for doc in self._documents:
-            chars = set(doc) if deduplicate_within_doc else doc
-            for ch in chars:
-                cp = ord(ch)
+            for cp in _iter_doc_codepoints(doc, deduplicate=deduplicate_within_doc):
                 if cp in counts:
                     counts[cp] += 1
         return counts
@@ -150,7 +163,11 @@ class DocumentCorpusProcessor:
         if n_samples == 0:
             row_idx = 0
             for doc in self._documents:
-                doc_cols = [cp_to_col[ord(ch)] for ch in set(doc) if ord(ch) in cp_to_col]
+                doc_cols = [
+                    cp_to_col[cp]
+                    for cp in _iter_doc_codepoints(doc, deduplicate=True)
+                    if cp in cp_to_col
+                ]
                 if doc_cols:
                     rows.extend([row_idx] * len(doc_cols))
                     cols.extend(doc_cols)
@@ -163,7 +180,11 @@ class DocumentCorpusProcessor:
             while row_idx < n_samples and attempts < max_attempts:
                 attempts += 1
                 doc = self._rng.choice(self._documents)
-                doc_cols = [cp_to_col[ord(ch)] for ch in set(doc) if ord(ch) in cp_to_col]
+                doc_cols = [
+                    cp_to_col[cp]
+                    for cp in _iter_doc_codepoints(doc, deduplicate=True)
+                    if cp in cp_to_col
+                ]
                 if doc_cols:
                     rows.extend([row_idx] * len(doc_cols))
                     cols.extend(doc_cols)

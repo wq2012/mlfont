@@ -8,13 +8,14 @@ import glob
 import json
 import os
 from pathlib import Path
+import sys
 import time
 from typing import Dict, List, Sequence, Tuple
 
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from datasets import load_dataset  # noqa: E402
 import numpy as np  # noqa: E402
 
 from mlfont import (
@@ -40,7 +41,7 @@ from mlfont import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = Path(os.environ.get("MLFONT_ASSETS_DIR", "/tmp/mlfont_noto_assets"))
-NAM_DIR = ASSETS_DIR / "nam"
+NAM_DIR = Path(os.environ.get("MLFONT_NAM_DIR", str(REPO_ROOT / "resources" / "nam")))
 FONTS_DIR = ASSETS_DIR / "fonts"
 
 FONT_SPECS = [
@@ -109,11 +110,50 @@ def fetch_wikipedia_corpus(
     valid_cps: set[int],
     script_filter: str = "",
 ) -> Tuple[List[str], List[str]]:
-    """Streams real Wikipedia articles across one or more language editions."""
+    """Streams real Wikipedia articles across languages with uniform random train/test splitting."""
+    import random
+
+    cache_dir = Path("/tmp/mlfont_wiki_cache")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_key = f"{'_'.join(langs)}_{n_train}_{n_test}_{len(valid_cps)}_{script_filter}.json"
+    cache_path = cache_dir / cache_key
     total_needed = n_train + n_test
     per_lang_train = max(1, n_train // len(langs))
     per_lang_test = max(1, n_test // len(langs))
 
+    if cache_path.exists():
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
+        if cached.get("uniform_split_seed") == 42:
+            return list(cached["train"]), list(cached["test"])
+        raw_train = list(cached["train"])
+        raw_test = list(cached["test"])
+        rng = random.Random(42)
+        train_docs_u: List[str] = []
+        test_docs_u: List[str] = []
+        for idx, _ in enumerate(langs):
+            t_start_i = idx * per_lang_train
+            t_end_i = len(raw_train) if idx == len(langs) - 1 else (idx + 1) * per_lang_train
+            s_start_i = idx * per_lang_test
+            s_end_i = len(raw_test) if idx == len(langs) - 1 else (idx + 1) * per_lang_test
+            lang_pool = raw_train[t_start_i:t_end_i] + raw_test[s_start_i:s_end_i]
+            rng.shuffle(lang_pool)
+            split_pt = t_end_i - t_start_i
+            train_docs_u.extend(lang_pool[:split_pt])
+            test_docs_u.extend(lang_pool[split_pt:])
+        rng.shuffle(train_docs_u)
+        rng.shuffle(test_docs_u)
+        res_train, res_test = train_docs_u[:n_train], test_docs_u[:n_test]
+        cache_path.write_text(
+            json.dumps(
+                {"train": res_train, "test": res_test, "uniform_split_seed": 42}
+            ),
+            encoding="utf-8",
+        )
+        return res_train, res_test
+
+    from datasets import load_dataset
+
+    rng = random.Random(42)
     train_docs: List[str] = []
     test_docs: List[str] = []
 
@@ -148,11 +188,21 @@ def fetch_wikipedia_corpus(
                 lang_docs.append(snippet)
                 if len(lang_docs) >= need:
                     break
+        rng.shuffle(lang_docs)
         split_pt = min(len(lang_docs), per_lang_train)
         train_docs.extend(lang_docs[:split_pt])
         test_docs.extend(lang_docs[split_pt:])
 
-    return train_docs[:n_train], test_docs[:n_test]
+    rng.shuffle(train_docs)
+    rng.shuffle(test_docs)
+    res_train, res_test = train_docs[:n_train], test_docs[:n_test]
+    cache_path.write_text(
+        json.dumps(
+            {"train": res_train, "test": res_test, "uniform_split_seed": 42}
+        ),
+        encoding="utf-8",
+    )
+    return res_train, res_test
 
 
 def write_hf_model_card(
@@ -177,8 +227,13 @@ def write_hf_model_card(
     for r in all_strat_results:
         by_strat.setdefault(r.strategy_name, {})[r.params_name] = r
 
+    header_row = (
+        "| Strategy | Slices | CSS Ranges | Missing (Eval / Font) "
+        "| GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) "
+        "| DSL Mean / P95 (ms) | Session Util (%) |"
+    )
     table_lines = [
-        "| Strategy | Slices | CSS Ranges | Missing Glyphs | GIN-2g Mean / P95 (ms) | GIN-3g Mean / P95 (ms) | DSL Mean / P95 (ms) | Session Util (%) |",
+        header_row,
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
     ]
     for s_name, prof_map in by_strat.items():
@@ -189,63 +244,115 @@ def write_hf_model_card(
             continue
         is_main = s_name == strategy.name
         label = f"**{s_name} (This Model)**" if is_main else f"`{s_name}`"
+        miss_str = f"{r3g.num_missing_codepoints} / {r3g.num_unassigned_font_codepoints}"
         table_lines.append(
-            f"| {label} | {r3g.num_slices} | {r3g.num_ranges} | {r3g.num_missing_codepoints} | "
+            f"| {label} | {r3g.num_slices} | {r3g.num_ranges} | {miss_str} | "
             f"{r2g.total_per_glyph_ms.mean:.2f} / {r2g.total_per_glyph_ms.p95:.2f} | "
             f"{r3g.total_per_glyph_ms.mean:.2f} / {r3g.total_per_glyph_ms.p95:.2f} | "
             f"{rdsl.total_per_glyph_ms.mean:.2f} / {rdsl.total_per_glyph_ms.p95:.2f} | "
             f"{r3g.session_utilization_pct:.2f}% |"
         )
     metrics_table = "\n".join(table_lines)
+    font_file = str(spec["font_file"])
+    preset_name = str(spec["preset"])
+    n_cps_str = f"{strategy.num_codepoints:,}"
+    n_ranges_str = f"{strategy.count_unicode_ranges():,}"
+    woff2_kb = f"{total_woff2_bytes / 1024.0:.1f}"
+    css_kb = f"{css_bytes / 1024.0:.1f}"
 
-    card = f"""---
-license: apache-2.0
-library_name: mlfont
-tags:
-- fonts
-- web-fonts
-- topic-modeling
-- genetic-algorithm
-- unicode-range
-- woff2
-datasets:
-- wikimedia/wikipedia
----
-
-# {hf_name}: Range-Compact MLFont Slicing for {title}
-
-**This is not an officially supported Google product.**
-
-## Overview
-
-Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **{title}** (`{spec["font_file"]}`, {strategy.num_codepoints:,} Unicode codepoints partitioned into {strategy.num_slices} range-compact slices).
-
-* **Paper**: *Learning Better Font Slicing Strategies from Data* (Quan Wang and Yiran Mao)
-* **Open-Source Repository**: https://github.com/wq2012/mlfont
-* **PyPI Package**: https://pypi.org/project/mlfont/
-
-## Training Configuration
-
-* **Target Font**: `{spec["font_file"]}` ({strategy.num_codepoints:,} Unicode codepoints)
-* **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `{langs_str}`), {n_train:,} training articles and {n_test:,} testing articles
-* **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA Topic Modeling + Range-Compact Genetic Algorithm (`mlfont` preset: `{spec["preset"]}`)
-* **Total Slices**: {strategy.num_slices} slices ({strategy.count_unicode_ranges():,} total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: {total_woff2_bytes / 1024.0:.1f} KB across {strategy.num_slices} `.woff2` files (companion CSS: {css_bytes / 1024.0:.1f} KB)
-* **Training Wall-Time**: {wall_time_sec:.1f} seconds on CPU/GPU
-
-## Model Files Included
-
-* `model.safetensors`: Learned topic-codepoint weight matrix (`lambda_matrix`), `codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
-* `strategy.json`: Complete `SlicingStrategy` definition and hyperparameters
-* `config.json`: Model and font bundle summary metadata
-* `font_sliced.css`: Production-ready `@font-face` stylesheet with compact `unicode-range` descriptors
-* `woff2/*.woff2`: {strategy.num_slices} physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: {strategy.num_slices} Google Fonts `.nam` codepoint subset files
-* `evaluation_metrics.json`: Full benchmark metrics across all 7 network/session profiles
-
-## Benchmark Performance ({n_test:,} Wikipedia Test Pages, Session Length L = 10)
-
-{metrics_table}
+    card_lines = [
+        "---",
+        "license: apache-2.0",
+        "library_name: mlfont",
+        "tags:",
+        "- fonts",
+        "- web-fonts",
+        "- topic-modeling",
+        "- genetic-algorithm",
+        "- unicode-range",
+        "- woff2",
+        "datasets:",
+        "- wikimedia/wikipedia",
+        "---",
+        "",
+        f"# {hf_name}: Range-Compact MLFont Slicing for {title}",
+        "",
+        "**This is not an officially supported Google product.**",
+        "",
+        "## Overview",
+        "",
+        (
+            "Pretrained **MLFont** machine-learning-guided font slicing model "
+            f"and WOFF2 slice bundle for **{title}** (`{font_file}`, "
+            f"{n_cps_str} Unicode codepoints partitioned into "
+            f"{strategy.num_slices} range-compact slices)."
+        ),
+        "",
+        (
+            "* **Paper**: *Learning Better Font Slicing Strategies from Data* "
+            "(Quan Wang and Yiran Mao)"
+        ),
+        "* **Open-Source Repository**: https://github.com/wq2012/mlfont",
+        "* **PyPI Package**: https://pypi.org/project/mlfont/",
+        "",
+        "## Training Configuration",
+        "",
+        f"* **Target Font**: `{font_file}` ({n_cps_str} Unicode codepoints)",
+        (
+            "* **Training & Evaluation Corpus**: `wikimedia/wikipedia` "
+            f"(`20231101`, languages: `{langs_str}`), {n_train:,} training "
+            f"articles and {n_test:,} uniformly sampled testing articles"
+        ),
+        (
+            "* **Slicing Architecture**: Tiered Document-Frequency Slicing "
+            "+ Online Variational LDA Topic Modeling + Range-Compact Genetic "
+            f"Algorithm (`mlfont` preset: `{preset_name}`)"
+        ),
+        (
+            f"* **Total Slices**: {strategy.num_slices} slices "
+            f"({n_ranges_str} total CSS `unicode-range` intervals)"
+        ),
+        (
+            f"* **Physical WOFF2 Bundle Size**: {woff2_kb} KB across "
+            f"{strategy.num_slices} `.woff2` files (companion CSS: {css_kb} KB)"
+        ),
+        f"* **Training Wall-Time**: {wall_time_sec:.1f} seconds on CPU/GPU",
+        "",
+        "## Model Files Included",
+        "",
+        (
+            "* `model.safetensors`: Learned topic-codepoint weight matrices "
+            "(`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, "
+            "`remaining_codepoints`, `frequency_array`, and `dna_assignment` "
+            "in SafeTensors format"
+        ),
+        "* `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters",
+        "* `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition",
+        (
+            "* `dnntm_strategy.json`: DNNTM (Entropy Difference Loss) "
+            "+ Greedy `SlicingStrategy` definition"
+        ),
+        f"* `test_samples.json`: Exact held-out evaluation codepoint sets ({n_test:,} test pages)",
+        (
+            "* `config.json`: Model and font bundle summary metadata "
+            "(including per-slice WOFF2 byte sizes)"
+        ),
+        (
+            "* `font_sliced.css`: Production-ready `@font-face` stylesheet "
+            "with compact `unicode-range` descriptors"
+        ),
+        (
+            f"* `woff2/*.woff2`: {strategy.num_slices} physical WOFF2 font "
+            "slices generated via `fontTools.subset`"
+        ),
+        f"* `nam/*.nam`: {strategy.num_slices} Google Fonts `.nam` codepoint subset files",
+        "* `evaluation_metrics.json`: Full benchmark metrics across all 7 network/session profiles",
+        "",
+        f"## Benchmark Performance ({n_test:,} Wikipedia Test Pages, Session Length L = 10)",
+        "",
+        metrics_table,
+    ]
+    card = "\n".join(card_lines) + f"""
 
 ## Usage
 
@@ -283,9 +390,33 @@ print("CSS unicode-range count:", bundle.strategy.count_unicode_ranges())
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=ASSETS_DIR,
+        help="Assets/data directory containing fonts/ and optional nam/.",
+    )
+    parser.add_argument(
+        "--experiments-dir",
+        type=Path,
+        default=REPO_ROOT / "experiments",
+        help="Output directory for experiment evaluation JSON files.",
+    )
+    parser.add_argument(
+        "--pretrained-dir",
+        type=Path,
+        default=REPO_ROOT / "pretrained_models",
+        help="Output directory for Hugging Face pretrained model bundles.",
+    )
+    args = parser.parse_args()
+
     nam_paths = sorted(glob.glob(str(NAM_DIR / "*.nam")))
-    experiments_dir = REPO_ROOT / "experiments"
-    pretrained_root = REPO_ROOT / "pretrained_models"
+    experiments_dir = args.experiments_dir
+    pretrained_root = args.pretrained_dir
+    fonts_dir = args.data_dir / "fonts" if (args.data_dir / "fonts").exists() else FONTS_DIR
     experiments_dir.mkdir(parents=True, exist_ok=True)
     pretrained_root.mkdir(parents=True, exist_ok=True)
 
@@ -294,7 +425,7 @@ def main() -> None:
     for spec in FONT_SPECS:
         key = str(spec["key"])
         hf_name = str(spec["hf_name"])
-        font_path = FONTS_DIR / str(spec["font_file"])
+        font_path = fonts_dir / str(spec["font_file"])
         preset = get_preset_config(str(spec["preset"]))
         t_start = time.time()
 
@@ -341,6 +472,23 @@ def main() -> None:
             )
             strategies.append(s_most_eq)
 
+        # Include archival 2017 Google Fonts production slicing strategies where available
+        if key == "notosanssc":
+            ea_path = REPO_ROOT / "resources" / "google_fonts_ea_2017_notosanssc.json"
+            if ea_path.exists():
+                s_ea = SlicingStrategy.load_json(ea_path)
+                strategies.append(s_ea)
+        elif key == "notosanskr":
+            kr_path = REPO_ROOT / "resources" / "google_fonts_2017_notosanskr.json"
+            if kr_path.exists():
+                s_kr_raw = SlicingStrategy.load_json(kr_path)
+                s_kr = SlicingStrategy(
+                    subsets=[sorted(set(sub) & cp_set) for sub in s_kr_raw.subsets],
+                    name="google_fonts_2017_kr",
+                    metadata=s_kr_raw.metadata,
+                )
+                strategies.append(s_kr)
+
         # 2. Online LDA
         print("  Training Online LDA...")
         olda_learner = OnlineLdaLearner(train_proc, codepoints, preset.olda_config)
@@ -385,6 +533,13 @@ def main() -> None:
             json.dumps([asdict(e) for e in ga_learner.history_], indent=2),
             encoding="utf-8",
         )
+        (exp_out / "test_samples.json").write_text(
+            json.dumps([sorted(list(s)) for s in test_samples]),
+            encoding="utf-8",
+        )
+        s_olda.save_json(exp_out / "olda_strategy.json")
+        s_dnntm.save_json(exp_out / "dnntm_strategy.json")
+        s_ga.save_json(exp_out / "ga_strategy.json")
 
         # 6. Export Hugging Face Pretrained Bundle with physical WOFF2 font slices!
         print(f"  Exporting Hugging Face bundle & slicing {font_path.name} into WOFF2...")
@@ -393,7 +548,11 @@ def main() -> None:
             output_dir=bundle_dir,
             strategy=s_ga,
             lambda_matrix=olda_learner.lambda_matrix_,
-            codepoints=olda_learner.remaining_codepoints_ or codepoints,
+            codepoints=codepoints,
+            remaining_codepoints=olda_learner.remaining_codepoints_ or codepoints,
+            dnntm_lambda_matrix=dnntm_learner.lambda_matrix_,
+            olda_strategy=s_olda,
+            dnntm_strategy=s_dnntm,
             frequency_array=freq_arr,
             font_path=font_path,
             font_family=f"{font_path.stem} Sliced",
@@ -405,10 +564,34 @@ def main() -> None:
                 "wiki_langs": spec["wiki_langs"],
                 "n_train_docs": len(train_docs),
                 "n_test_docs": len(test_docs),
+                "num_remaining_codepoints": len(olda_learner.remaining_codepoints_ or codepoints),
+                "num_active_codepoints": olda_learner.num_active_codepoints_,
+                "num_core_codepoints": olda_learner.num_core_codepoints_,
+                "k_eff": olda_learner.k_eff_,
+                "n_topics": preset.olda_config.n_topics,
                 "training_wall_time_sec": round(wall_time, 2),
             },
         )
+        (bundle_dir / "test_samples.json").write_text(
+            json.dumps([sorted(list(s)) for s in test_samples]),
+            encoding="utf-8",
+        )
         cfg_json = json.loads((bundle_dir / "config.json").read_text(encoding="utf-8"))
+        woff2_slice_bytes = cfg_json.get("woff2_slice_byte_sizes", [])
+        woff2_eval_dict = {}
+        if woff2_slice_bytes and len(woff2_slice_bytes) == s_ga.num_slices:
+            for p_idx in (1, 2, 3):  # GIN-2g, GIN-3g, residential-DSL
+                ep = STANDARD_EVALUATION_PARAMS[p_idx]
+                res_w2 = evaluator.evaluate_strategy(
+                    s_ga, ep, slice_byte_sizes=woff2_slice_bytes
+                )
+                woff2_eval_dict[ep.name] = {
+                    "mean_ms": res_w2.total_per_glyph_ms.mean,
+                    "p95_ms": res_w2.total_per_glyph_ms.p95,
+                    "session_util_pct": res_w2.session_utilization_pct,
+                    "avg_bytes_per_glyph": float(sum(woff2_slice_bytes)) / max(1, len(codepoints)),
+                }
+
         write_hf_model_card(
             bundle_dir=bundle_dir,
             spec=spec,
@@ -426,17 +609,25 @@ def main() -> None:
                 print(
                     f"    {r.strategy_name:38s} | slices={r.num_slices:3d} | "
                     f"ranges={r.num_ranges:5d} | GIN-3g={r.total_per_glyph_ms.mean:6.2f} ms "
-                    f"(P95={r.total_per_glyph_ms.p95:6.2f} ms) | util={r.session_utilization_pct:5.2f}%"
+                    f"(P95={r.total_per_glyph_ms.p95:6.2f} ms) | "
+                    f"util={r.session_utilization_pct:5.2f}%"
                 )
 
         summary_report["fonts"][key] = {
             "title": spec["title"],
             "hf_name": hf_name,
             "num_codepoints": len(codepoints),
+            "num_remaining_codepoints": len(olda_learner.remaining_codepoints_ or codepoints),
+            "num_active_codepoints": olda_learner.num_active_codepoints_,
+            "num_core_codepoints": olda_learner.num_core_codepoints_,
+            "k_eff": olda_learner.k_eff_,
+            "n_topics": preset.olda_config.n_topics,
             "num_train_docs": len(train_docs),
             "num_test_samples": len(test_samples),
             "total_woff2_bytes": cfg_json["total_woff2_bytes"],
             "css_byte_size": cfg_json["css_byte_size"],
+            "woff2_slice_byte_sizes": woff2_slice_bytes,
+            "woff2_byte_eval": woff2_eval_dict,
             "results": [asdict(r) for r in all_results],
         }
 
@@ -474,7 +665,8 @@ def main() -> None:
                     OnlineLdaConfig(
                         n_topics=k_val,
                         batch_size=1000,
-                        n_batches=15,
+                        n_batches=20,
+                        normalization_method="global_max",
                         random_state=42,
                     ),
                 )
@@ -485,14 +677,87 @@ def main() -> None:
                 k_ablation.append(
                     {
                         "n_topics": k_val,
+                        "k_eff": k_learner.k_eff_,
                         "num_ranges": r3g.num_ranges,
                         "gin_2g_mean_ms": r2g.total_per_glyph_ms.mean,
+                        "gin_2g_p95_ms": r2g.total_per_glyph_ms.p95,
                         "gin_3g_mean_ms": r3g.total_per_glyph_ms.mean,
+                        "gin_3g_p95_ms": r3g.total_per_glyph_ms.p95,
                         "dsl_mean_ms": rdsl.total_per_glyph_ms.mean,
+                        "dsl_p95_ms": rdsl.total_per_glyph_ms.p95,
                         "session_util_pct": r3g.session_utilization_pct,
                     }
                 )
             summary_report["ablations"]["slice_count_lgc"] = k_ablation
+
+        # 8. Multi-seed stability check (3 seeds: 42, 43, 44) on LGC and SC
+        if key in ("notosans_lgc", "notosanssc"):
+            print(f"  Running 3-seed stability check on {key}...")
+            seed_records = {"olda": [], "dnntm": [], "ga": []}
+            for seed in (42, 43, 44):
+                if seed == 42:
+                    st_ol, st_dn, st_ga = s_olda, s_dnntm, s_ga
+                else:
+                    p_seed = get_preset_config(str(spec["preset"]))
+                    p_seed.olda_config.random_state = seed
+                    p_seed.dnntm_config.random_seed = seed
+                    p_seed.range_compact_config.random_seed = seed
+                    proc_s = DocumentCorpusProcessor(train_docs, random_seed=seed)
+
+                    ol_s = OnlineLdaLearner(proc_s, codepoints, p_seed.olda_config)
+                    st_ol = ol_s.fit()
+
+                    dn_s = DnnTmLearner(proc_s, codepoints, p_seed.dnntm_config)
+                    st_dn = dn_s.fit()
+
+                    assert ol_s.lambda_matrix_ is not None
+                    ga_s = RangeCompactGeneticLearner(
+                        codepoint_list=codepoints,
+                        lambda_matrix=ol_s.lambda_matrix_,
+                        config=p_seed.range_compact_config,
+                        frequency_array=freq_arr,
+                        most_sizes=p_seed.olda_config.most_sizes,
+                        normalization_method=p_seed.olda_config.normalization_method,
+                    )
+                    st_ga = ga_s.run()
+
+                r_ol = evaluator.evaluate_strategy(st_ol, STANDARD_EVALUATION_PARAMS[2])
+                seed_records["olda"].append(
+                    {
+                        "seed": seed,
+                        "gin_3g_mean_ms": r_ol.total_per_glyph_ms.mean,
+                        "num_ranges": r_ol.num_ranges,
+                    }
+                )
+                r_dn = evaluator.evaluate_strategy(st_dn, STANDARD_EVALUATION_PARAMS[2])
+                seed_records["dnntm"].append(
+                    {
+                        "seed": seed,
+                        "gin_3g_mean_ms": r_dn.total_per_glyph_ms.mean,
+                        "num_ranges": r_dn.num_ranges,
+                    }
+                )
+                r_ga = evaluator.evaluate_strategy(st_ga, STANDARD_EVALUATION_PARAMS[2])
+                seed_records["ga"].append(
+                    {
+                        "seed": seed,
+                        "gin_3g_mean_ms": r_ga.total_per_glyph_ms.mean,
+                        "num_ranges": r_ga.num_ranges,
+                    }
+                )
+
+            ci_summary = {}
+            for m_key, recs in seed_records.items():
+                means = [x["gin_3g_mean_ms"] for x in recs]
+                rngs = [x["num_ranges"] for x in recs]
+                ci_summary[m_key] = {
+                    "gin_3g_mean_ms_avg": float(np.mean(means)),
+                    "gin_3g_mean_ms_std": float(np.std(means)),
+                    "num_ranges_avg": float(np.mean(rngs)),
+                    "num_ranges_std": float(np.std(rngs)),
+                    "runs": recs,
+                }
+            summary_report["ablations"].setdefault("multi_seed_ci", {})[key] = ci_summary
 
     (experiments_dir / "summary_report.json").write_text(
         json.dumps(summary_report, indent=2), encoding="utf-8"
