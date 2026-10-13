@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import numpy as np  # noqa: E402
 
-from mlfont import (
+from mlfont import (  # noqa: E402
     DocumentCorpusProcessor,
     FontLoadingEvaluator,
     OnlineLdaConfig,
@@ -51,6 +51,10 @@ FONT_SPECS = [
         "title": "Noto Sans (Pan-European LGC)",
         "preset": "lgc",
         "font_file": "NotoSans-Regular.ttf",
+        "font_url": (
+            "https://raw.githubusercontent.com/notofonts/noto-fonts/main/"
+            "hinted/ttf/NotoSans/NotoSans-Regular.ttf"
+        ),
         "wiki_langs": ["en", "de", "fr", "pl", "ru", "el"],
         "n_train": 1500,
         "n_test": 300,
@@ -61,6 +65,10 @@ FONT_SPECS = [
         "title": "Noto Sans KR (Korean)",
         "preset": "korean",
         "font_file": "NotoSansKR-Regular.otf",
+        "font_url": (
+            "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+            "Sans/OTF/Korean/NotoSansCJKkr-Regular.otf"
+        ),
         "wiki_langs": ["ko"],
         "n_train": 1600,
         "n_test": 400,
@@ -71,6 +79,10 @@ FONT_SPECS = [
         "title": "Noto Sans JP (Japanese)",
         "preset": "japanese",
         "font_file": "NotoSansJP-Regular.otf",
+        "font_url": (
+            "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+            "Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf"
+        ),
         "wiki_langs": ["ja"],
         "n_train": 1600,
         "n_test": 400,
@@ -81,6 +93,10 @@ FONT_SPECS = [
         "title": "Noto Sans TC (Traditional Chinese)",
         "preset": "traditional_chinese",
         "font_file": "NotoSansTC-Regular.otf",
+        "font_url": (
+            "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+            "Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf"
+        ),
         "wiki_langs": ["zh"],
         "script_filter": "traditional",
         "n_train": 1600,
@@ -92,6 +108,10 @@ FONT_SPECS = [
         "title": "Noto Sans SC (Simplified Chinese)",
         "preset": "chinese",
         "font_file": "NotoSansSC-Regular.otf",
+        "font_url": (
+            "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+            "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"
+        ),
         "wiki_langs": ["zh"],
         "script_filter": "simplified",
         "n_train": 1600,
@@ -258,7 +278,13 @@ def write_hf_model_card(
     n_cps_str = f"{strategy.num_codepoints:,}"
     n_ranges_str = f"{strategy.count_unicode_ranges():,}"
     woff2_kb = f"{total_woff2_bytes / 1024.0:.1f}"
+    woff2_mb = f"{total_woff2_bytes / (1024.0 * 1024.0):.2f}"
     css_kb = f"{css_bytes / 1024.0:.1f}"
+    size_str = (
+        f"{woff2_kb} KB ({total_woff2_bytes:,} bytes)"
+        if total_woff2_bytes < 1024 * 1024
+        else f"{woff2_mb} MB / {woff2_kb} KB ({total_woff2_bytes:,} bytes)"
+    )
 
     card_lines = [
         "---",
@@ -289,7 +315,8 @@ def write_hf_model_card(
         ),
         "",
         (
-            "* **Paper**: *Learning Better Font Slicing Strategies from Data* "
+            "* **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and "
+            "Optimal Unicode-Range Slicing for Low-Latency Web Typography* "
             "(Quan Wang and Yiran Mao)"
         ),
         "* **Open-Source Repository**: https://github.com/wq2012/mlfont",
@@ -305,15 +332,15 @@ def write_hf_model_card(
         ),
         (
             "* **Slicing Architecture**: Tiered Document-Frequency Slicing "
-            "+ Online Variational LDA Topic Modeling + Range-Compact Genetic "
-            f"Algorithm (`mlfont` preset: `{preset_name}`)"
+            "+ Online Variational LDA & Deep Neural Network Topic Model (DNNTM) "
+            f"+ Range-Compact Genetic Algorithm (`mlfont` preset: `{preset_name}`)"
         ),
         (
             f"* **Total Slices**: {strategy.num_slices} slices "
             f"({n_ranges_str} total CSS `unicode-range` intervals)"
         ),
         (
-            f"* **Physical WOFF2 Bundle Size**: {woff2_kb} KB across "
+            f"* **Physical WOFF2 Bundle Size**: {size_str} across "
             f"{strategy.num_slices} `.woff2` files (companion CSS: {css_kb} KB)"
         ),
         f"* **Training Wall-Time**: {wall_time_sec:.1f} seconds on CPU/GPU",
@@ -362,16 +389,15 @@ Install `mlfont`:
 pip install mlfont huggingface_hub
 ```
 
-Load the pretrained bundle and analyze or slice a font in Python:
+Load the pretrained bundle (Range-Compact GA, Online LDA, and DNNTM) in Python:
 
 ```python
-from huggingface_hub import snapshot_download
 import mlfont
 
-model_dir = snapshot_download(repo_id="wq2012/{hf_name}")
-bundle = mlfont.load_pretrained(model_dir)
-print("Loaded strategy:", bundle.strategy.name, "slices:", bundle.strategy.num_slices)
-print("CSS unicode-range count:", bundle.strategy.count_unicode_ranges())
+bundle = mlfont.load_pretrained("wq2012/{hf_name}")
+print("GA:", bundle.strategy.name, "ranges:", bundle.strategy.count_unicode_ranges())
+print("LDA:", bundle.olda_strategy.name, "ranges:", bundle.olda_strategy.count_unicode_ranges())
+print("DNNTM:", bundle.dnntm_strategy.name, "ranges:", bundle.dnntm_strategy.count_unicode_ranges())
 ```
 
 ## Citation
@@ -426,6 +452,12 @@ def main() -> None:
         key = str(spec["key"])
         hf_name = str(spec["hf_name"])
         font_path = fonts_dir / str(spec["font_file"])
+        if not font_path.exists() and spec.get("font_url"):
+            import urllib.request
+
+            font_path.parent.mkdir(parents=True, exist_ok=True)
+            print(f"  Downloading {font_path.name} from {spec['font_url']} ...")
+            urllib.request.urlretrieve(str(spec["font_url"]), str(font_path))
         preset = get_preset_config(str(spec["preset"]))
         t_start = time.time()
 

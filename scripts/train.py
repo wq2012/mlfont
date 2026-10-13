@@ -14,6 +14,7 @@ import numpy as np
 from mlfont.configs import get_preset_config
 from mlfont.data import DocumentCorpusProcessor, parse_codepoints_file
 from mlfont.dnntm import DnnTmConfig, DnnTmLearner
+from mlfont.export import save_safetensors_model
 from mlfont.frequency import generate_most_and_equal_bin_strategy
 from mlfont.olda import OnlineLdaConfig, OnlineLdaLearner
 from mlfont.range_compact import RangeCompactGeneticLearner
@@ -71,24 +72,24 @@ def main() -> None:
         "--most_sizes",
         type=str,
         default="",
-        help="Comma-separated high-frequency slice sizes (e.g. '2000,1000').",
+        help="Comma-separated high-frequency slice sizes (e.g. '1000,500').",
     )
     parser.add_argument(
         "--normalization_method",
         type=str,
-        default="topic_sum",
+        default="global_max",
         choices=["topic_sum", "row_sum", "global_max", "spectral_norm", "none"],
     )
     parser.add_argument(
         "--range_cost_weight",
         type=float,
-        default=0.005,
-        help="Weight alpha on CSS unicode-range compactness cost in Range-Compact GA.",
+        default=0.012,
+        help="Weight w_r on CSS unicode-range compactness cost in Range-Compact GA.",
     )
     parser.add_argument(
         "--max_iteration",
         type=int,
-        default=1000,
+        default=1200,
         help="Maximum GA iterations for range_compact.",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
@@ -159,6 +160,13 @@ def main() -> None:
     assert lambda_matrix is not None
     np.save(out_dir / "lambda_matrix.npy", lambda_matrix)
     np.save(out_dir / "remaining_codepoints.npy", np.asarray(rem_cps, dtype=np.int32))
+    save_safetensors_model(
+        out_dir / "model.safetensors",
+        lambda_matrix=lambda_matrix,
+        codepoints=codepoints,
+        frequency_array=freq_arr,
+        remaining_codepoints=rem_cps,
+    )
     topic_strategy.save_json(out_dir / "topic_strategy.json")
 
     if args.algorithm in ("online_lda", "dnntm"):

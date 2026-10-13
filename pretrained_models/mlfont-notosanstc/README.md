@@ -20,7 +20,7 @@ datasets:
 
 Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans TC (Traditional Chinese)** (`NotoSansTC-Regular.otf`, 20,637 Unicode codepoints partitioned into 82 range-compact slices).
 
-* **Paper**: *Learning Better Font Slicing Strategies from Data* (Quan Wang and Yiran Mao)
+* **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography* (Quan Wang and Yiran Mao)
 * **Open-Source Repository**: https://github.com/wq2012/mlfont
 * **PyPI Package**: https://pypi.org/project/mlfont/
 
@@ -28,9 +28,9 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 
 * **Target Font**: `NotoSansTC-Regular.otf` (20,637 Unicode codepoints)
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `zh`), 1,600 training articles and 400 uniformly sampled testing articles
-* **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA Topic Modeling + Range-Compact Genetic Algorithm (`mlfont` preset: `traditional_chinese`)
+* **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `traditional_chinese`)
 * **Total Slices**: 82 slices (11,150 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 6129.8 KB across 82 `.woff2` files (companion CSS: 121.7 KB)
+* **Physical WOFF2 Bundle Size**: 5.99 MB / 6129.8 KB (6,276,868 bytes) across 82 `.woff2` files (companion CSS: 121.7 KB)
 * **Training Wall-Time**: 62.0 seconds on CPU/GPU
 
 ## Model Files Included
@@ -67,16 +67,15 @@ Install `mlfont`:
 pip install mlfont huggingface_hub
 ```
 
-Load the pretrained bundle and analyze or slice a font in Python:
+Load the pretrained bundle (Range-Compact GA, Online LDA, and DNNTM) in Python:
 
 ```python
-from huggingface_hub import snapshot_download
 import mlfont
 
-model_dir = snapshot_download(repo_id="wq2012/mlfont-notosanstc")
-bundle = mlfont.load_pretrained(model_dir)
-print("Loaded strategy:", bundle.strategy.name, "slices:", bundle.strategy.num_slices)
-print("CSS unicode-range count:", bundle.strategy.count_unicode_ranges())
+bundle = mlfont.load_pretrained("wq2012/mlfont-notosanstc")
+print("GA:", bundle.strategy.name, "ranges:", bundle.strategy.count_unicode_ranges())
+print("LDA:", bundle.olda_strategy.name, "ranges:", bundle.olda_strategy.count_unicode_ranges())
+print("DNNTM:", bundle.dnntm_strategy.name, "ranges:", bundle.dnntm_strategy.count_unicode_ranges())
 ```
 
 ## Citation

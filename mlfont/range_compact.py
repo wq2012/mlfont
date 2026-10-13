@@ -543,7 +543,8 @@ class RangeCompactGeneticLearner:
             take = min(batch_sz, max(1, int(counts[k_max]) - 1), len(candidates))
             losses = self.matrix[k_max, candidates] - self.matrix[k_min, candidates]
             if take == 1:
-                chosen = candidates[int(np.argmin(losses)) : int(np.argmin(losses)) + 1]
+                min_i = int(np.argmin(losses))
+                chosen = candidates[min_i:min_i + 1]
             else:
                 part_idx = np.argpartition(losses, take - 1)[:take]
                 chosen = candidates[part_idx]
@@ -642,7 +643,8 @@ class RangeCompactGeneticLearner:
             short_candidates = np.flatnonzero(short_mask)
             if len(short_candidates) > 256:
                 step = len(short_candidates) // 256
-                short_candidates = short_candidates[rng.randrange(step) :: step][:256]
+                start_off = rng.randrange(step)
+                short_candidates = short_candidates[start_off::step][:256]
             s_indices = starts[short_candidates]
             s_topics = t[s_indices]
             left_idx = np.maximum(0, s_indices - 1)
@@ -702,13 +704,14 @@ class RangeCompactGeneticLearner:
                     ]
                     if not candidates:
                         continue
+                end_idx = s_idx + s_len
                 neigh = min(
                     candidates,
                     key=lambda x: (
                         float(
                             np.sum(
-                                self.matrix[old_topic, s_idx : s_idx + s_len]
-                                - self.matrix[t[x], s_idx : s_idx + s_len]
+                                self.matrix[old_topic, s_idx:end_idx]
+                                - self.matrix[t[x], s_idx:end_idx]
                             )
                         ),
                         int(counts[t[x]]),
@@ -716,7 +719,7 @@ class RangeCompactGeneticLearner:
                 )
                 new_topic = int(t[neigh])
                 if new_topic != old_topic:
-                    t[s_idx : s_idx + s_len] = new_topic
+                    t[s_idx:end_idx] = new_topic
                     counts[old_topic] -= s_len
                     counts[new_topic] += s_len
                     cur_min = int(np.min(counts))

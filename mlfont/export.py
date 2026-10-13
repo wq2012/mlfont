@@ -231,8 +231,12 @@ def export_pretrained_bundle(
 
 
 def load_pretrained(model_dir: str | Path) -> PretrainedMLFontBundle:
-    """Loads a pretrained MLFont bundle from a local directory or downloaded HF repo."""
+    """Loads a pretrained MLFont bundle from a local directory or Hugging Face repo ID."""
     root = Path(model_dir)
+    if not root.exists() and "/" in str(model_dir):
+        from huggingface_hub import snapshot_download
+
+        root = Path(snapshot_download(repo_id=str(model_dir)))
     strategy = SlicingStrategy.load_json(root / "strategy.json")
     olda_strategy: Optional[SlicingStrategy] = None
     if (root / "olda_strategy.json").exists():

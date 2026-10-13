@@ -407,7 +407,9 @@ def test_sparse_vocabulary_max_diff_and_aliases(tmp_path: Path) -> None:
     cps = list(range(0x4E00, 0x4E00 + 120))
     docs = []
     for i in range(40):
-        cluster = cps[(i % 4) * 10 : ((i % 4) + 1) * 10]
+        start_c = (i % 4) * 10
+        end_c = ((i % 4) + 1) * 10
+        cluster = cps[start_c:end_c]
         docs.append("".join(chr(c) for c in cluster))
     proc = DocumentCorpusProcessor(docs, random_seed=42)
 
@@ -576,3 +578,108 @@ def test_readme_quickstart_api_and_edge_cases(tmp_path: Path) -> None:
     assert sparse_strat.num_slices == 6
     assert sparse_strat.all_codepoints() == set(remaining_codepoints)
 
+
+def test_cli_scripts_end_to_end(tmp_path: Path, monkeypatch) -> None:
+    import sys
+    from scripts import evaluate, export_model, inference, prepare_data, train
+
+    font_path = _create_tiny_ttf(tmp_path / "CliFont.ttf", list(range(0x0041, 0x0041 + 40)))
+    data_dir = tmp_path / "data"
+    train_dir = tmp_path / "trained"
+    export_dir = tmp_path / "exported"
+    eval_json = tmp_path / "eval_results.json"
+    slice_dir = tmp_path / "sliced"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-prepare-data",
+            "--font_path",
+            str(font_path),
+            "--generate_synthetic",
+            "--num_synthetic",
+            "40",
+            "--output_dir",
+            str(data_dir),
+        ],
+    )
+    prepare_data.main()
+    assert (data_dir / "codepoints.nam").exists()
+    assert (data_dir / "train.jsonl").exists()
+    assert (data_dir / "test.jsonl").exists()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-train",
+            "--data_dir",
+            str(data_dir),
+            "--output_dir",
+            str(train_dir),
+            "--n_topics",
+            "4",
+            "--most_sizes",
+            "8",
+            "--max_iteration",
+            "15",
+        ],
+    )
+    train.main()
+    assert (train_dir / "strategy.json").exists()
+    assert (train_dir / "model.safetensors").exists()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-evaluate",
+            "--codepoints_file",
+            str(data_dir / "codepoints.nam"),
+            "--test_jsonl",
+            str(data_dir / "test.jsonl"),
+            "--strategy_files",
+            str(train_dir / "strategy.json"),
+            "--output_json",
+            str(eval_json),
+        ],
+    )
+    evaluate.main()
+    assert eval_json.exists()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-export",
+            "--checkpoint_dir",
+            str(train_dir),
+            "--export_dir",
+            str(export_dir),
+            "--font_path",
+            str(font_path),
+        ],
+    )
+    export_model.main()
+    assert (export_dir / "model.safetensors").exists()
+    assert (export_dir / "strategy.json").exists()
+    assert (export_dir / "font_sliced.css").exists()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-slice",
+            "--model_dir",
+            str(export_dir),
+            "--font_path",
+            str(font_path),
+            "--output_dir",
+            str(slice_dir),
+            "--text",
+            "ABCDEF",
+        ],
+    )
+    inference.main()
+    assert (slice_dir / "clifont_sliced.css").exists()

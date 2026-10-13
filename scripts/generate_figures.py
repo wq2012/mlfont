@@ -23,15 +23,18 @@ except ImportError:
     def load_file(path: str) -> Dict[str, np.ndarray]:
         raw = Path(path).read_bytes()
         header_len = struct.unpack("<Q", raw[:8])[0]
-        header = json.loads(raw[8 : 8 + header_len].decode("utf-8"))
+        end_hdr = 8 + header_len
+        header = json.loads(raw[8:end_hdr].decode("utf-8"))
         data_start = 8 + header_len
         out: Dict[str, np.ndarray] = {}
         for k, meta in header.items():
             if k == "__metadata__":
                 continue
             start, end = meta["data_offsets"]
+            b_start = data_start + start
+            b_end = data_start + end
             arr = np.frombuffer(
-                raw[data_start + start : data_start + end],
+                raw[b_start:b_end],
                 dtype=_DTYPE_MAP[meta["dtype"]],
             )
             out[k] = arr.reshape(meta["shape"]).copy()
@@ -327,7 +330,8 @@ def plot_fig4_production_traffic(
 
     window = 30
     rolling = np.convolve(counts, np.ones(window) / window, mode="valid")
-    rolling_dates = dates[window - 1 :]
+    w_off = window - 1
+    rolling_dates = dates[w_off:]
 
     fig, ax = plt.subplots(figsize=(8.8, 4.0))
     ax.plot(
@@ -355,7 +359,7 @@ def plot_fig4_production_traffic(
     ax.grid(True, ls=":", alpha=0.5)
     ax.annotate(
         "Launch: June 1, 2017\n(63 requests/day)",
-        xy=( mdates.date2num(dates[0]), counts[0]),
+        xy=(mdates.date2num(dates[0]), counts[0]),
         xytext=(mdates.date2num(dates[120]), 0.35),
         arrowprops={"arrowstyle": "->", "color": "#2c3e50", "lw": 1.1},
         fontsize=8.5,

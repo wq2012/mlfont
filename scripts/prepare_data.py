@@ -15,6 +15,48 @@ from mlfont.data import (
     save_codepoints_file,
 )
 
+NOTO_FONT_URLS = {
+    "lgc": (
+        "NotoSans-Regular.ttf",
+        "https://raw.githubusercontent.com/notofonts/noto-fonts/main/"
+        "hinted/ttf/NotoSans/NotoSans-Regular.ttf",
+    ),
+    "kr": (
+        "NotoSansKR-Regular.otf",
+        "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+        "Sans/OTF/Korean/NotoSansCJKkr-Regular.otf",
+    ),
+    "jp": (
+        "NotoSansJP-Regular.otf",
+        "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+        "Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf",
+    ),
+    "tc": (
+        "NotoSansTC-Regular.otf",
+        "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+        "Sans/OTF/TraditionalChinese/NotoSansCJKtc-Regular.otf",
+    ),
+    "sc": (
+        "NotoSansSC-Regular.otf",
+        "https://raw.githubusercontent.com/notofonts/noto-cjk/main/"
+        "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+    ),
+}
+
+
+def download_noto_font(font_key: str, dest_dir: Path) -> Path:
+    """Downloads an official Google Noto font file if not already cached in dest_dir."""
+    import urllib.request
+
+    if font_key not in NOTO_FONT_URLS:
+        raise ValueError(f"Unknown Noto font key: {font_key!r}")
+    filename, url = NOTO_FONT_URLS[font_key]
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = dest_dir / filename
+    if not dest_path.exists():
+        urllib.request.urlretrieve(url, str(dest_path))
+    return dest_path
+
 
 def generate_synthetic_documents(
     codepoints: List[int],
@@ -54,6 +96,13 @@ def main() -> None:
         type=str,
         default="",
         help="Path to a .ttf/.otf font file to extract supported Unicode codepoints.",
+    )
+    parser.add_argument(
+        "--download_noto_font",
+        type=str,
+        default="",
+        choices=["", "lgc", "kr", "jp", "tc", "sc"],
+        help="Optional Noto font key (lgc, kr, jp, tc, sc) to download automatically.",
     )
     parser.add_argument(
         "--codepoints_file",
@@ -114,7 +163,10 @@ def main() -> None:
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.font_path:
+    if args.download_noto_font and not args.font_path:
+        dl_font = download_noto_font(args.download_noto_font, out_dir / "fonts")
+        codepoints = extract_codepoints_from_font(dl_font)
+    elif args.font_path:
         codepoints = extract_codepoints_from_font(args.font_path)
     elif args.codepoints_file:
         codepoints = sorted(parse_codepoints_file(args.codepoints_file))

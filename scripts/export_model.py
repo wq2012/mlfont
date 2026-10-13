@@ -58,11 +58,17 @@ def main() -> None:
         if (ckpt / "frequency_array.npy").exists()
         else None
     )
+    rem_cps = (
+        np.load(ckpt / "remaining_codepoints.npy").tolist()
+        if (ckpt / "remaining_codepoints.npy").exists()
+        else None
+    )
 
     out_dir = export_pretrained_bundle(
         output_dir=args.export_dir,
         strategy=strategy,
         lambda_matrix=lambda_mat,
+        remaining_codepoints=rem_cps,
         frequency_array=freq_arr,
         font_path=args.font_path if args.font_path else None,
         font_family=args.font_family if args.font_family else None,

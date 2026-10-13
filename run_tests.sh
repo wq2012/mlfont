@@ -13,7 +13,9 @@ pushd "${PROJECT_PATH}"
 
 rm -f .coverage
 
-if [[ -x "/tmp/mlfont_venv/bin/python3" ]]; then
+if python3 -c "import pytest" >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+elif [[ -x "/tmp/mlfont_venv/bin/python3" ]]; then
     PYTHON_BIN="/tmp/mlfont_venv/bin/python3"
 else
     PYTHON_BIN="python3"

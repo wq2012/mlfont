@@ -127,7 +127,7 @@ class FrequencySolver:
         else:
             self.codepoints_ = sorted(set(int(c) for c in (codepoints or ())))
             self.most_sizes = [int(m) for m in most_sizes if int(m) > 0]
-        self.least_sizes = [int(l) for l in least_sizes if int(l) > 0]
+        self.least_sizes = [int(ls) for ls in least_sizes if int(ls) > 0]
         self.frequency_array_: Optional[np.ndarray] = None
 
     def fit(
@@ -170,7 +170,7 @@ class FrequencySolver:
             else self.most_sizes
         )
         l_sizes = (
-            [int(l) for l in least_counts if int(l) > 0]
+            [int(ls) for ls in least_counts if int(ls) > 0]
             if least_counts is not None
             else self.least_sizes
         )
