@@ -808,7 +808,7 @@
       var waves = numSlices > 0 ? Math.ceil(numSlices / net.maxPar) : 0;
       var fontMs = numSlices > 0 ? (waves * net.rttMs + fontBytes / net.bwBytesPerMs) : 0;
       var totalMs = Math.round(cssMs + fontMs);
-      var firstPaintMs = numSlices === 0 ? Math.round(cssMs) :
+      var firstPaintMs = (numSlices === 0 || hfBytes <= 0) ? Math.round(cssMs) :
           Math.round(cssMs + net.rttMs + hfBytes / net.bwBytesPerMs);
       if (firstPaintMs > totalMs) firstPaintMs = totalMs;
       return {
@@ -834,27 +834,34 @@
                          document.getElementById('mlfont-body').textContent).replace(/\s+/g, '');
       var uniqueChars = new Set(Array.from(currentText)).size;
       var baseChars = new Set(Array.from((page.title + page.body).replace(/\s+/g, ''))).size;
-      var scale = baseChars > 0 ? Math.max(0.25, uniqueChars / baseChars) : 1.0;
+      var scale = uniqueChars === 0 ? 0.0 :
+          (baseChars > 0 ? Math.max(0.25, uniqueChars / baseChars) : 1.0);
 
       var mlSlicesList = page.mlSlices.slice();
-      var mlSlicesCount = isWarm ? Math.max(1, Math.round(mlSlicesList.length * 0.18)) :
-          Math.min(meta.totalSlices, Math.max(1, Math.round(mlSlicesList.length * scale)));
-      var mlFontBytes = isWarm ? Math.round(mlSlicesCount * meta.avgTopicSliceBytes) :
-          Math.round((page.mlBytes - meta.mlCssGzipBytes) * scale);
+      var mlSlicesCount = uniqueChars === 0 ? 0 :
+          (isWarm ? Math.max(1, Math.round(mlSlicesList.length * 0.18)) :
+           Math.min(meta.totalSlices, Math.max(1, Math.round(mlSlicesList.length * scale))));
+      var mlFontBytes = uniqueChars === 0 ? 0 :
+          (isWarm ? Math.round(mlSlicesCount * meta.avgTopicSliceBytes) :
+           Math.round((page.mlBytes - meta.mlCssGzipBytes) * scale));
 
-      var eqSlicesCount = isWarm ? Math.max(1, Math.round(page.eqSlicesCount * 0.08)) :
-          Math.min(meta.totalSlices, Math.max(1, Math.round(page.eqSlicesCount * scale)));
-      var eqFontBytes = isWarm ? Math.round(eqSlicesCount * meta.avgTopicSliceBytes) :
-          Math.round((page.eqBytes - meta.eqCssGzipBytes) * scale);
+      var eqSlicesCount = uniqueChars === 0 ? 0 :
+          (isWarm ? Math.max(1, Math.round(page.eqSlicesCount * 0.08)) :
+           Math.min(meta.totalSlices, Math.max(1, Math.round(page.eqSlicesCount * scale))));
+      var eqFontBytes = uniqueChars === 0 ? 0 :
+          (isWarm ? Math.round(eqSlicesCount * meta.avgTopicSliceBytes) :
+           Math.round((page.eqBytes - meta.eqCssGzipBytes) * scale));
 
-      var fullSlicesCount = isWarm ? 0 : 1;
-      var fullFontBytes = isWarm ? 0 : meta.fullWoff2Bytes;
+      var fullSlicesCount = (isWarm || uniqueChars === 0) ? 0 : 1;
+      var fullFontBytes = (isWarm || uniqueChars === 0) ? 0 : meta.fullWoff2Bytes;
 
+      var mlHfBytes = isWarm ? 0 : meta.hfSliceBytes;
+      var eqHfBytes = Math.min(eqFontBytes, meta.avgTopicSliceBytes * Math.min(eqSlicesCount, 6));
       var mlTiming = computeStrategyTiming(
-        net, meta.mlCssGzipBytes, mlFontBytes, mlSlicesCount, meta.hfSliceBytes, isWarm
+        net, meta.mlCssGzipBytes, mlFontBytes, mlSlicesCount, mlHfBytes, isWarm
       );
       var eqTiming = computeStrategyTiming(
-        net, meta.eqCssGzipBytes, eqFontBytes, eqSlicesCount, meta.avgTopicSliceBytes * 6, isWarm
+        net, meta.eqCssGzipBytes, eqFontBytes, eqSlicesCount, eqHfBytes, isWarm
       );
       var fullTiming = computeStrategyTiming(
         net, meta.singleCssGzipBytes, fullFontBytes, fullSlicesCount, fullFontBytes, isWarm
@@ -885,14 +892,20 @@
         'Total Load: <strong>' + fullTiming.totalMs + ' ms</strong>';
 
       // Render slice pills
-      var shownSlices = isWarm ? mlSlicesList.slice(-mlSlicesCount) : mlSlicesList.slice(0, mlSlicesCount);
+      var expandedSlices = mlSlicesList.slice();
+      for (var cand = 2; expandedSlices.length < mlSlicesCount && cand < meta.totalSlices; cand++) {
+        if (expandedSlices.indexOf(cand) === -1) expandedSlices.push(cand);
+      }
+      var shownSlices = isWarm ? expandedSlices.slice(-mlSlicesCount) : expandedSlices.slice(0, mlSlicesCount);
       document.getElementById('mlfont-slice-pills').innerHTML = shownSlices.map(function(sIdx) {
         var isHf = sIdx <= 1;
         return '<span class="slice-pill' + (isHf ? ' hf' : '') + '">slice_' +
                String(sIdx).padStart(3, '0') + (isHf ? ' (HF)' : '') + '</span>';
       }).join('');
       document.getElementById('fullfont-slice-pills').innerHTML =
-        '<span class="slice-pill">full_font.woff2 (' + (meta.fullWoff2Bytes / 1024).toFixed(0) + ' KB)</span>';
+        fullSlicesCount > 0 ?
+        '<span class="slice-pill">full_font.woff2 (' + (meta.fullWoff2Bytes / 1024).toFixed(0) + ' KB)</span>' :
+        '<span class="slice-pill">full_font.woff2 (Cached — 0 KB)</span>';
 
       // Populate comparison table
       var rows = [

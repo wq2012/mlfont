@@ -880,6 +880,41 @@ def test_website_simulator_html_extraction_and_profiles(tmp_path):
     filtered_cps = extract_webpage_codepoints("Hello\nWorld", valid_codepoints={ord("H")})
     assert filtered_cps == {ord("H")}
 
+    # Edge cases in HTML extraction:
+    # 1) Comment-only or doctype-only HTML should extract to empty string (not raw comment)
+    assert extract_visible_text_from_html("<!-- hidden comment -->") == ""
+    assert extract_webpage_codepoints("<!-- hidden comment -->") == set()
+    assert extract_visible_text_from_html("<!DOCTYPE html><!-- only doctype -->") == ""
+
+    # 2) Valid HTML5 without <head> but with <title> should ignore <title>
+    no_head_html = (
+        "<!DOCTYPE html><html><title>HiddenTabTitle</title>"
+        "<body><p>VisibleBody</p></body></html>"
+    )
+    assert extract_visible_text_from_html(no_head_html) == "VisibleBody"
+    assert ord("H") not in extract_webpage_codepoints(no_head_html)
+
+    # 3) Malformed HTML with unclosed <head> and no <body> should still extract visible body tags
+    unclosed_head = "<head><meta charset='utf-8'><title>Tab</title><p>RecoveredText</p>"
+    assert extract_visible_text_from_html(unclosed_head) == "RecoveredText"
+
+    # 4) Multi-element HTML without spaces should not inject synthetic U+0020 into codepoints
+    emoji_multi = "<p>🚀</p><p>🔥</p>"
+    assert 0x20 not in extract_webpage_codepoints(emoji_multi)
+    cjk_multi = "<p>天地</p><p>玄黄</p>"
+    assert 0x20 not in extract_webpage_codepoints(cjk_multi)
+
+    # 5) Long inline HTML/text string (>255 UTF-8 bytes) must not raise OSError(ENAMETOOLONG)
+    long_inline_html = "<article>" + ("机器学习网页字体分片优化测试内容" * 40) + "</article>"
+    assert len(long_inline_html.encode("utf-8")) > 1000
+    long_sample = load_webpage_sample(long_inline_html, page_id="long_inline")
+    assert long_sample.url == "inline://html"
+    assert ord("机") in long_sample.codepoints
+
+    # 6) Passing a nonexistent Path object must raise FileNotFoundError
+    with pytest.raises(FileNotFoundError):
+        load_webpage_sample(tmp_path / "does_not_exist_12345.html")
+
     # Load from .html and .txt files
     html_file = tmp_path / "sample_page.html"
     html_file.write_text(html, encoding="utf-8")
@@ -908,6 +943,7 @@ def test_website_font_simulator_and_cli(tmp_path):
     import pytest
     from mlfont import SlicingStrategy
     from mlfont.simulator import (
+        BrowserNetworkProfile,
         WebPageSample,
         WebsiteFontSimulator,
         get_real_website_benchmark_pages,
@@ -940,6 +976,15 @@ def test_website_font_simulator_and_cli(tmp_path):
     assert sim._get_high_freq_slice_indices("equal_bin_3", eq_strat) == set()
     assert sim._get_high_freq_slice_indices("mlfont_3slice", sliced_strat) == {0, 1}
 
+    # Verify high_freq_slice_count=0 is respected
+    sim_no_hf = WebsiteFontSimulator(
+        font_key="notosanssc",
+        codepoints=all_cps,
+        strategies=[sliced_strat],
+        high_freq_slice_count=0,
+    )
+    assert sim_no_hf._get_high_freq_slice_indices("mlfont_3slice", sliced_strat) == set()
+
     with pytest.raises(ValueError, match="Unknown strategy"):
         sim.simulate_page_load(
             WebPageSample("p0", "P0", "u", "Cat", "notosanssc", "<p>Hi</p>"),
@@ -962,6 +1007,28 @@ def test_website_font_simulator_and_cli(tmp_path):
     assert res_ml_all3.high_freq_token_coverage_pct > 0.0
     assert res_eq_all3.high_freq_token_coverage_pct == 0.0
     assert res_ml_all3.first_text_paint_ms < res_eq_all3.first_text_paint_ms
+
+    # Custom profile with max_parallel_requests=1: 2 HF slices require 2 RTT waves
+    serial_prof = BrowserNetworkProfile(
+        "Serial-1", rtt_ms=100.0, bandwidth_bytes_per_ms=1000.0, max_parallel_requests=1
+    )
+    res_serial = sim.simulate_page_load(page_all3, "mlfont_3slice", serial_prof)
+    # 2 HF slices (10KB + 40KB = 50KB -> 50ms) + 2 RTTs (200ms) + CSS (~100ms) > 350ms
+    assert res_serial.first_text_paint_ms >= 350.0
+
+    # Warm load where HF slices {0, 1} are already cached and only tail slice {2} is downloaded:
+    # First text paint should be immediate (0.0 ms when css_cached=True)
+    res_warm_tail = sim.simulate_page_load(
+        page_all3,
+        "mlfont_3slice",
+        "GIN-3g",
+        cached_slices={0, 1},
+        css_cached=True,
+        session_page_index=1,
+    )
+    assert res_warm_tail.downloaded_slice_indices == [2]
+    assert res_warm_tail.first_text_paint_ms == 0.0
+    assert res_warm_tail.total_font_load_ms > 0.0
 
     # Page using only s0 and s1 (not s2)
     page1 = WebPageSample(
@@ -998,6 +1065,12 @@ def test_website_font_simulator_and_cli(tmp_path):
     assert session_results[1].font_bytes_downloaded == 0
     assert session_results[1].total_font_load_ms == 0.0
 
+    # Single-page compare_strategies: warm_total_load_ms should reflect warm revisit (0.0 ms)
+    single_page_rep = sim.compare_strategies(pages=[page1], profiles=["GIN-3g"])
+    for s in single_page_rep.summaries:
+        assert s.warm_total_load_ms.mean == 0.0
+        assert s.warm_slices_downloaded_mean == 0.0
+
     # Empty page codepoints edge case
     empty_page = WebPageSample(
         page_id="empty",
@@ -1010,6 +1083,7 @@ def test_website_font_simulator_and_cli(tmp_path):
     res_empty = sim.simulate_page_load(empty_page, "mlfont_3slice", "GIN-3g")
     assert res_empty.num_slices_downloaded == 0
     assert res_empty.font_bytes_downloaded == 0
+    assert res_empty.high_freq_token_coverage_pct == 0.0
 
     # Compare strategies & save JSON report
     report = sim.compare_strategies(
@@ -1044,9 +1118,64 @@ def test_website_font_simulator_and_cli(tmp_path):
     ])
     assert cli_json.exists()
 
+    # Test CLI with --text "" (empty inline string)
+    empty_cli_json = tmp_path / "empty_cli_sim.json"
+    simulate_cli_main([
+        "--font_key", "notosans_lgc",
+        "--profiles", "Cable-5Mbps",
+        "--text", "",
+        "--output_json", str(empty_cli_json),
+    ])
+    empty_rep = json.loads(empty_cli_json.read_text(encoding="utf-8"))
+    assert empty_rep["fonts"]["notosans_lgc"]["summaries"][0]["num_pages_evaluated"] == 1
+
+
+def test_mlfont_js_api_and_aliases() -> None:
+    """Verify web/mlfont.js and pretrained_models/*/mlfont.js expose documented API."""
+    from scripts.run_noto_experiments import FONT_SPECS, REPO_ROOT
+
+    web_js_path = REPO_ROOT / "web" / "mlfont.js"
+    web_js = web_js_path.read_text(encoding="utf-8")
+    for alias in (
+        "'notosanssc'",
+        "'sc'",
+        "'zh-cn'",
+        "'zh-hans'",
+        "'notosanstc'",
+        "'tc'",
+        "'zh-tw'",
+        "'zh-hant'",
+        "'notosansjp'",
+        "'jp'",
+        "'ja'",
+        "'notosanskr'",
+        "'kr'",
+        "'ko'",
+        "'notosans-lgc'",
+        "'notosans_lgc'",
+        "'notosans'",
+        "'lgc'",
+    ):
+        assert alias in web_js, f"Missing documented alias {alias} in web/mlfont.js"
+
+    for prop in (
+        "totalSlicesFetched",
+        "cachedSlicesCount",
+        "totalTransferBytes",
+        "maxSliceDurationMs",
+    ):
+        assert prop in web_js, f"Missing documented metrics.summary.{prop} in web/mlfont.js"
+
+    for spec in FONT_SPECS:
+        hf_js = (REPO_ROOT / "pretrained_models" / str(spec["hf_name"]) / "mlfont.js").read_text(
+            encoding="utf-8"
+        )
+        assert hf_js == web_js
+
 
 def test_hf_model_card_website_simulation_section(tmp_path: Path) -> None:
     """Verify write_hf_model_card and all 5 pretrained model cards include subsection 5."""
+    from mlfont import SlicingStrategy
     from scripts.run_noto_experiments import (
         FONT_SPECS,
         REPO_ROOT,

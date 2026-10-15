@@ -174,20 +174,47 @@ def get_network_profile(name: str | BrowserNetworkProfile) -> BrowserNetworkProf
 class _VisibleTextExtractor(HTMLParser):
     """HTMLParser that strips non-visible container tags (<script>, <style>, <head>, etc.)."""
 
-    _IGNORED_CONTAINERS = {"script", "style", "noscript", "template", "svg", "head"}
+    _IGNORED_CONTAINERS = {
+        "script",
+        "style",
+        "noscript",
+        "template",
+        "svg",
+        "head",
+        "title",
+    }
+    _HEAD_METADATA_TAGS = {
+        "head",
+        "base",
+        "basefont",
+        "bgsound",
+        "link",
+        "meta",
+        "noscript",
+        "noframes",
+        "script",
+        "style",
+        "template",
+        "title",
+    }
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self._ignore_stack: List[str] = []
         self._chunks: List[str] = []
         self.saw_html_tag = False
+        self.has_inline_whitespace = False
 
     def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
         self.saw_html_tag = True
         t = tag.lower()
-        if t == "body":
-            self._ignore_stack = [x for x in self._ignore_stack if x != "head"]
-        elif t in self._IGNORED_CONTAINERS:
+        if "head" in self._ignore_stack and t not in self._HEAD_METADATA_TAGS:
+            self._ignore_stack = [
+                x for x in self._ignore_stack if x not in ("head", "title")
+            ]
+        elif "title" in self._ignore_stack and t != "title":
+            self._ignore_stack = [x for x in self._ignore_stack if x != "title"]
+        if t in self._IGNORED_CONTAINERS:
             self._ignore_stack.append(t)
 
     def handle_endtag(self, tag: str) -> None:
@@ -199,25 +226,47 @@ class _VisibleTextExtractor(HTMLParser):
                     del self._ignore_stack[idx]
                     break
 
+    def handle_comment(self, data: str) -> None:
+        self.saw_html_tag = True
+
+    def handle_decl(self, decl: str) -> None:
+        self.saw_html_tag = True
+
+    def handle_pi(self, data: str) -> None:
+        self.saw_html_tag = True
+
     def handle_data(self, data: str) -> None:
-        if not self._ignore_stack and data.strip():
-            self._chunks.append(data.strip())
+        if not self._ignore_stack:
+            stripped = data.strip()
+            if stripped:
+                if " " in data or any(ch.isspace() for ch in stripped):
+                    self.has_inline_whitespace = True
+                self._chunks.append(stripped)
 
     def get_text(self) -> str:
         return " ".join(self._chunks)
 
 
-def extract_visible_text_from_html(html_or_text: str) -> str:
-    """Extracts visible rendered text from an HTML document or plain text string."""
+def _parse_html_or_text(html_or_text: str) -> Tuple[str, bool, bool]:
+    """Returns (visible_text, was_html, has_inline_whitespace)."""
     if not html_or_text:
-        return ""
+        return "", False, False
     if "<" in html_or_text and ">" in html_or_text:
         parser = _VisibleTextExtractor()
         parser.feed(html_or_text)
         parser.close()
         if parser.saw_html_tag:
-            return html.unescape(parser.get_text())
-    return html.unescape(html_or_text)
+            text = html.unescape(parser.get_text())
+            return text, True, parser.has_inline_whitespace
+    text = html.unescape(html_or_text)
+    has_ws = any(ch.isspace() for ch in text)
+    return text, False, has_ws
+
+
+def extract_visible_text_from_html(html_or_text: str) -> str:
+    """Extracts visible rendered text from an HTML document or plain text string."""
+    text, _, _ = _parse_html_or_text(html_or_text)
+    return text
 
 
 def extract_webpage_codepoints(
@@ -225,9 +274,11 @@ def extract_webpage_codepoints(
     valid_codepoints: Optional[Set[int]] = None,
 ) -> Set[int]:
     """Extracts unique visible Unicode codepoints from an HTML page or text string."""
-    text = extract_visible_text_from_html(html_or_text)
+    text, was_html, has_inline_ws = _parse_html_or_text(html_or_text)
     normalized = " ".join(text.split())
     cps = {ord(ch) for ch in normalized}
+    if was_html and not has_inline_ws:
+        cps.discard(0x20)
     if valid_codepoints is not None:
         cps &= valid_codepoints
     return cps
@@ -249,12 +300,20 @@ class WebPageSample:
     codepoint_frequencies: Dict[int, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        was_html = False
+        has_inline_ws = True
         if not self.visible_text and self.html_content:
-            self.visible_text = extract_visible_text_from_html(self.html_content)
+            self.visible_text, was_html, has_inline_ws = _parse_html_or_text(
+                self.html_content
+            )
+        else:
+            has_inline_ws = any(ch.isspace() for ch in self.visible_text)
         normalized = " ".join(self.visible_text.split())
         non_ws = [ord(ch) for ch in normalized if not ch.isspace()]
         if not self.codepoints and normalized:
             self.codepoints = {ord(ch) for ch in normalized}
+            if was_html and not has_inline_ws:
+                self.codepoints.discard(0x20)
         if self.char_count == 0 and non_ws:
             self.char_count = len(non_ws)
         if not self.codepoint_frequencies and non_ws:
@@ -691,7 +750,21 @@ def load_webpage_sample(
     timeout_sec: float = 10.0,
 ) -> WebPageSample:
     """Loads a WebPageSample from a live URL, local file path, or raw HTML/text string."""
-    src_str = str(source).strip()
+    if isinstance(source, Path):
+        if not source.exists() or not source.is_file():
+            raise FileNotFoundError(f"HTML file not found: {source}")
+        html_text = source.read_text(encoding="utf-8", errors="replace")
+        return WebPageSample(
+            page_id=page_id or source.stem,
+            title=title or source.name,
+            url=f"file://{source.resolve()}",
+            category=category,
+            font_key=font_key,
+            html_content=html_text,
+        )
+
+    raw_str = str(source)
+    src_str = raw_str.strip()
     if src_str.startswith(("http://", "https://")):
         req = urllib.request.Request(
             src_str,
@@ -709,17 +782,28 @@ def load_webpage_sample(
             html_content=html_text,
         )
 
-    path_obj = Path(source)
-    if path_obj.exists() and path_obj.is_file():
-        html_text = path_obj.read_text(encoding="utf-8", errors="replace")
-        return WebPageSample(
-            page_id=page_id or path_obj.stem,
-            title=title or path_obj.name,
-            url=f"file://{path_obj.resolve()}",
-            category=category,
-            font_key=font_key,
-            html_content=html_text,
-        )
+    if (
+        src_str
+        and "\n" not in src_str
+        and "\r" not in src_str
+        and "\x00" not in src_str
+        and not src_str.startswith("<")
+        and len(src_str.encode("utf-8", errors="ignore")) <= 4096
+    ):
+        try:
+            path_obj = Path(src_str)
+            if path_obj.exists() and path_obj.is_file():
+                html_text = path_obj.read_text(encoding="utf-8", errors="replace")
+                return WebPageSample(
+                    page_id=page_id or path_obj.stem,
+                    title=title or path_obj.name,
+                    url=f"file://{path_obj.resolve()}",
+                    category=category,
+                    font_key=font_key,
+                    html_content=html_text,
+                )
+        except OSError:
+            pass
 
     return WebPageSample(
         page_id=page_id,
@@ -727,7 +811,7 @@ def load_webpage_sample(
         url="inline://html",
         category=category,
         font_key=font_key,
-        html_content=src_str,
+        html_content=raw_str if not src_str else src_str,
     )
 
 
@@ -1043,7 +1127,7 @@ class WebsiteFontSimulator:
             return set()
         if strategy_name == "google_fonts_ea_2017":
             return {i for i in (86, 100, 101) if i < strat.num_slices}
-        return set(range(min(max(1, self.high_freq_slice_count), strat.num_slices)))
+        return set(range(min(max(0, self.high_freq_slice_count), strat.num_slices)))
 
     def simulate_page_load(
         self,
@@ -1089,7 +1173,7 @@ class WebsiteFontSimulator:
         hf_indices = self._get_high_freq_slice_indices(strategy_name, strat)
         if strat.num_slices == 1:
             hf_token_cov = 100.0 if total_in_font_tokens > 0 else 0.0
-        elif not hf_indices:
+        elif not hf_indices or total_in_font_tokens == 0:
             hf_token_cov = 0.0
         else:
             hf_tokens = sum(
@@ -1097,11 +1181,7 @@ class WebsiteFontSimulator:
                 for cp, cnt in page.codepoint_frequencies.items()
                 if cp in covered_cps and cp_map.get(cp, -1) in hf_indices
             )
-            hf_token_cov = (
-                100.0 * float(hf_tokens) / float(total_in_font_tokens)
-                if total_in_font_tokens > 0
-                else 100.0
-            )
+            hf_token_cov = 100.0 * float(hf_tokens) / float(total_in_font_tokens)
 
         # 1. CSS transfer and parse latency
         css_raw = self.css_raw_bytes[strategy_name]
@@ -1132,27 +1212,29 @@ class WebsiteFontSimulator:
             font_rtt_ms = 0.0
             font_dl_ms = 0.0
 
-        # 3. First text paint (when high-frequency head slices complete in Wave 1)
+        # 3. First text paint (when high-frequency head slices complete)
+        req_hf = [idx for idx in req_sorted if idx in hf_indices]
         hf_dl = [idx for idx in dl_sorted if idx in hf_indices]
-        if not dl_sorted:
+        if not dl_sorted or (req_hf and not hf_dl):
             first_paint_ms = css_rtt_ms + css_dl_ms + css_parse_ms
         elif hf_dl:
+            hf_waves = math.ceil(len(hf_dl) / float(max_par))
             hf_bytes = sum(slice_sizes[idx] for idx in hf_dl)
             first_paint_ms = (
                 css_rtt_ms
                 + css_dl_ms
                 + css_parse_ms
-                + float(profile.rtt_ms)
+                + float(hf_waves) * float(profile.rtt_ms)
                 + float(hf_bytes) / float(profile.bandwidth_bytes_per_ms)
             )
         else:
-            first_Wave_bytes = sum(slice_sizes[idx] for idx in dl_sorted[:max_par])
+            first_wave_bytes = sum(slice_sizes[idx] for idx in dl_sorted[:max_par])
             first_paint_ms = (
                 css_rtt_ms
                 + css_dl_ms
                 + css_parse_ms
                 + float(profile.rtt_ms)
-                + float(first_Wave_bytes) / float(profile.bandwidth_bytes_per_ms)
+                + float(first_wave_bytes) / float(profile.bandwidth_bytes_per_ms)
             )
 
         total_load_ms = css_rtt_ms + css_dl_ms + css_parse_ms + font_rtt_ms + font_dl_ms
@@ -1258,11 +1340,24 @@ class WebsiteFontSimulator:
                     strategy_name=sname,
                     profile=profile,
                 )
-                warm_results = session_results[1:] if len(session_results) > 1 else session_results
+                if len(session_results) > 1:
+                    warm_results = session_results[1:]
+                elif len(session_results) == 1:
+                    warm_results = [
+                        self.simulate_page_load(
+                            page=pages[0],
+                            strategy_name=sname,
+                            profile=profile,
+                            cached_slices=set(session_results[0].required_slice_indices),
+                            css_cached=True,
+                            session_page_index=1,
+                        )
+                    ]
+                else:
+                    warm_results = []
 
                 all_page_results.extend(cold_results)
-                if len(session_results) > 1:
-                    all_page_results.extend(session_results[1:])
+                all_page_results.extend(warm_results)
 
                 summary = StrategyWebsiteSummary(
                     font_key=self.font_key,
@@ -1507,6 +1602,14 @@ def run_headless_chrome_benchmark(
 
                 css_local = re.sub(r"url\(([^)]+\.woff2)\)", _repl_url, css_raw)
 
+            body_match = re.search(
+                r"<body[^>]*>(.*?)</body>",
+                page_obj.html_content,
+                re.IGNORECASE | re.DOTALL,
+            )
+            inner_body_html = (
+                body_match.group(1) if body_match else html.escape(page_obj.visible_text)
+            )
             html_doc = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -1520,7 +1623,7 @@ def run_headless_chrome_benchmark(
   </style>
 </head>
 <body>
-  <div id="content">{page_obj.html_content}</div>
+  <div id="content">{inner_body_html}</div>
   <pre id="mlfont-chrome-report">pending</pre>
   <script>
     const t0 = performance.now();

@@ -49,6 +49,20 @@
       slices: 102,
       codepoints: 30759
     },
+    'zh-cn': {
+      repo: 'mlfont-notosanssc',
+      family: 'Noto Sans SC Sliced',
+      legacyFamily: 'NotoSansSC-Regular Sliced',
+      slices: 102,
+      codepoints: 30759
+    },
+    'zh-hans': {
+      repo: 'mlfont-notosanssc',
+      family: 'Noto Sans SC Sliced',
+      legacyFamily: 'NotoSansSC-Regular Sliced',
+      slices: 102,
+      codepoints: 30759
+    },
     'notosanstc': {
       repo: 'mlfont-notosanstc',
       family: 'Noto Sans TC Sliced',
@@ -57,6 +71,20 @@
       codepoints: 20637
     },
     'tc': {
+      repo: 'mlfont-notosanstc',
+      family: 'Noto Sans TC Sliced',
+      legacyFamily: 'NotoSansTC-Regular Sliced',
+      slices: 82,
+      codepoints: 20637
+    },
+    'zh-tw': {
+      repo: 'mlfont-notosanstc',
+      family: 'Noto Sans TC Sliced',
+      legacyFamily: 'NotoSansTC-Regular Sliced',
+      slices: 82,
+      codepoints: 20637
+    },
+    'zh-hant': {
       repo: 'mlfont-notosanstc',
       family: 'Noto Sans TC Sliced',
       legacyFamily: 'NotoSansTC-Regular Sliced',
@@ -77,6 +105,13 @@
       slices: 62,
       codepoints: 16663
     },
+    'ja': {
+      repo: 'mlfont-notosansjp',
+      family: 'Noto Sans JP Sliced',
+      legacyFamily: 'NotoSansJP-Regular Sliced',
+      slices: 62,
+      codepoints: 16663
+    },
     'notosanskr': {
       repo: 'mlfont-notosanskr',
       family: 'Noto Sans KR Sliced',
@@ -91,7 +126,28 @@
       slices: 52,
       codepoints: 22853
     },
+    'ko': {
+      repo: 'mlfont-notosanskr',
+      family: 'Noto Sans KR Sliced',
+      legacyFamily: 'NotoSansKR-Regular Sliced',
+      slices: 52,
+      codepoints: 22853
+    },
     'notosans-lgc': {
+      repo: 'mlfont-notosans-lgc',
+      family: 'Noto Sans Sliced',
+      legacyFamily: 'NotoSans-Regular Sliced',
+      slices: 20,
+      codepoints: 2297
+    },
+    'notosans_lgc': {
+      repo: 'mlfont-notosans-lgc',
+      family: 'Noto Sans Sliced',
+      legacyFamily: 'NotoSans-Regular Sliced',
+      slices: 20,
+      codepoints: 2297
+    },
+    'notosans': {
       repo: 'mlfont-notosans-lgc',
       family: 'Noto Sans Sliced',
       legacyFamily: 'NotoSans-Regular Sliced',
@@ -381,6 +437,8 @@
     var stylesheets = [];
     var pageLoad = {};
     var totalSliceBytes = 0;
+    var cachedSlicesCount = 0;
+    var maxSliceDurationMs = 0;
     var maxSliceResponseEnd = 0;
     var minSliceStartTime = Infinity;
 
@@ -401,6 +459,12 @@
         };
         slices.push(sliceInfo);
         totalSliceBytes += sliceInfo.transferBytes;
+        if (sliceInfo.cached) {
+          cachedSlicesCount++;
+        }
+        if (sliceInfo.durationMs > maxSliceDurationMs) {
+          maxSliceDurationMs = sliceInfo.durationMs;
+        }
         if (sliceInfo.responseEndMs > maxSliceResponseEnd) {
           maxSliceResponseEnd = sliceInfo.responseEndMs;
         }
@@ -426,12 +490,21 @@
       return a.sliceIndex - b.sliceIndex;
     });
 
+    var wallClockMs = slices.length > 0 ?
+        Math.max(0, maxSliceResponseEnd - minSliceStartTime) : 0;
+
     return {
       uuid: requestUUID,
       numSlicesDownloaded: slices.length,
       totalSliceTransferBytes: totalSliceBytes,
-      wallClockFontDownloadMs: slices.length > 0 ?
-          Math.max(0, maxSliceResponseEnd - minSliceStartTime) : 0,
+      wallClockFontDownloadMs: wallClockMs,
+      summary: {
+        totalSlicesFetched: slices.length,
+        cachedSlicesCount: cachedSlicesCount,
+        totalTransferBytes: totalSliceBytes,
+        maxSliceDurationMs: maxSliceDurationMs,
+        wallClockFontDownloadMs: wallClockMs
+      },
       slices: slices,
       stylesheets: stylesheets,
       pageLoad: pageLoad

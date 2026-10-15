@@ -193,6 +193,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             for p in args.network_profile.split(",")
             if p.strip()
         ]
+        if not profiles:
+            raise ValueError("At least one valid network profile must be specified.")
 
     if args.model_dir is not None:
         bundle_dirs = [args.model_dir]
@@ -221,13 +223,13 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     for bdir in bundle_dirs:
         sim = WebsiteFontSimulator.from_pretrained(bdir, include_baselines=True)
-        if args.url:
+        if args.url is not None:
             pages = [
                 load_webpage_sample(
                     args.url, page_id="custom_url", title=args.url, font_key=sim.font_key
                 )
             ]
-        elif args.html_file:
+        elif args.html_file is not None:
             pages = [
                 load_webpage_sample(
                     args.html_file,
@@ -236,7 +238,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                     font_key=sim.font_key,
                 )
             ]
-        elif args.text:
+        elif args.text is not None:
             pages = [
                 load_webpage_sample(
                     args.text, page_id="inline_text", title="Inline Text", font_key=sim.font_key
@@ -254,7 +256,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         )
         display_profiles = (
             ["GIN-3g", "Cable-5Mbps", "Mobile-4G-LTE"]
-            if len(profiles) > 3
+            if args.network_profile.lower() == "all"
             else [p.name for p in profiles]
         )
         for pname in display_profiles:
@@ -262,14 +264,19 @@ def main(argv: Sequence[str] | None = None) -> None:
         print(_format_per_page_table(report, display_profiles[0], ga_name))
 
         if args.headless_chrome:
+            chrome_prof = (
+                profiles[0]
+                if len(profiles) == 1
+                else get_network_profile("Cable-5Mbps")
+            )
             print(
                 f"\n[Headless Chrome] Running real browser benchmark for {sim.font_key} "
-                f"on Cable-5Mbps..."
+                f"on {chrome_prof.name}..."
             )
             c_res = run_headless_chrome_benchmark(
                 bundle_dir=bdir,
                 pages=pages[:3],
-                profile=get_network_profile("Cable-5Mbps"),
+                profile=chrome_prof,
             )
             chrome_results.extend(c_res)
             print(
