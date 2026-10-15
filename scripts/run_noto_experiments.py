@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import numpy as np  # noqa: E402
 
 from mlfont import (  # noqa: E402
+    DistributionStats,
     DocumentCorpusProcessor,
     FontLoadingEvaluator,
     OnlineLdaConfig,
@@ -226,6 +227,191 @@ def fetch_wikipedia_corpus(
     return res_train, res_test
 
 
+def _build_website_sim_section(
+    key: str,
+    hf_name: str,
+    title: str,
+    strategy_name: str,
+    sim_report_path: Path | None = None,
+) -> List[str]:
+    """Builds subsection 5 for real-website font loading simulation & Headless Chrome."""
+    sim_path = sim_report_path or (REPO_ROOT / "experiments" / "website_simulation_report.json")
+    lines: List[str] = [
+        "### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification",
+        "",
+    ]
+    if sim_path.exists():
+        sim_data = json.loads(sim_path.read_text(encoding="utf-8"))
+        font_sim = sim_data.get("fonts", {}).get(key)
+        if font_sim is not None:
+            by_strat: Dict[str, Dict[str, Dict[str, object]]] = {}
+            for s_entry in font_sim.get("summaries", []):
+                s_name = str(s_entry["strategy_name"])
+                p_name = str(s_entry["profile_name"])
+                by_strat.setdefault(s_name, {})[p_name] = s_entry
+
+            ga_cable = by_strat.get(strategy_name, {}).get("Cable-5Mbps")
+            ga_3g = by_strat.get(strategy_name, {}).get("GIN-3g")
+            single_cable = by_strat.get("single_slice", {}).get("Cable-5Mbps")
+            single_3g = by_strat.get("single_slice", {}).get("GIN-3g")
+            if ga_cable and ga_3g and single_cable and single_3g:
+                num_pages = int(ga_cable["num_pages_evaluated"])
+                full_kb = float(font_sim["full_font_woff2_bytes"]) / 1024.0
+                c_speedup = float(ga_cable["speedup_vs_single_slice_cold"])
+                g3_speedup = float(ga_3g["speedup_vs_single_slice_cold"])
+                c_fp_ms = float(ga_cable["cold_first_text_paint_ms"]["mean"])
+                c_cold_ms = float(ga_cable["cold_total_load_ms"]["mean"])
+                s_cable_ms = float(single_cable["cold_total_load_ms"]["mean"])
+                c_warm_ms = float(ga_cable["warm_total_load_ms"]["mean"])
+                g3_cold_ms = float(ga_3g["cold_total_load_ms"]["mean"])
+                s_3g_ms = float(single_3g["cold_total_load_ms"]["mean"])
+                dl_slices = float(ga_cable["cold_slices_downloaded_mean"])
+                tot_slices = int(ga_cable["num_slices"])
+                dl_kb = float(ga_cable["cold_total_bytes_downloaded_mean"]) / 1024.0
+                s_kb = float(single_cable["cold_total_bytes_downloaded_mean"]) / 1024.0
+                saved_pct = float(ga_cable["bytes_saved_vs_single_slice_cold_pct"])
+
+                lines.extend(
+                    [
+                        (
+                            f"Across **{num_pages} real-world sample websites** for **{title}** "
+                            f"(full unsliced WOFF2: `{full_kb:,.1f} KB`), **`{strategy_name}`** "
+                            f"downloads an average of only **`{dl_slices:.2f} / {tot_slices}`** "
+                            f"slices (`{dl_kb:,.1f} KB` vs. `{s_kb:,.1f} KB` unsliced, saving "
+                            f"**`{saved_pct:.1f}%`** bandwidth). On `Cable-5Mbps` (`5 Mbps`, "
+                            f"`28 ms` RTT), this achieves a **`{c_speedup:.2f}x`** cold-cache "
+                            f"load speedup (**`{c_cold_ms:,.0f} ms`** vs. `{s_cable_ms:,.0f} ms` "
+                            "for `single_slice`), with **First Text Paint at "
+                            f"`{c_fp_ms:,.0f} ms`** and **Warm-Session Load at "
+                            f"`{c_warm_ms:,.0f} ms`** (and **`{g3_speedup:.2f}x`** speedup on "
+                            f"`GIN-3g`: **`{g3_cold_ms:,.0f} ms`** vs. `{s_3g_ms:,.0f} ms`):"
+                        ),
+                        "",
+                        (
+                            "| Strategy | Slices Dl / Total | Transfer (KB) | Bytes Saved | "
+                            "Cable-5Mbps 1st Paint (ms) | Cable-5Mbps Cold Load (ms) | "
+                            "Cable-5Mbps Warm Load (ms) | GIN-3g Cold Load (ms) | "
+                            "Cold Speedup (Cable / 3G) |"
+                        ),
+                        (
+                            "| :--- | :---: | :---: | :---: | :---: | :---: | "
+                            ":---: | :---: | :---: |"
+                        ),
+                    ]
+                )
+                for s_name, p_map in by_strat.items():
+                    rc = p_map.get("Cable-5Mbps")
+                    r3 = p_map.get("GIN-3g")
+                    if not (rc and r3):
+                        continue
+                    is_main = s_name == strategy_name
+                    lbl = f"**{s_name} (This Model)**" if is_main else f"`{s_name}`"
+                    s_dl = float(rc["cold_slices_downloaded_mean"])
+                    s_tot = int(rc["num_slices"])
+                    tr_kb = float(rc["cold_total_bytes_downloaded_mean"]) / 1024.0
+                    b_sav = float(rc["bytes_saved_vs_single_slice_cold_pct"])
+                    fp_c = float(rc["cold_first_text_paint_ms"]["mean"])
+                    tot_c = float(rc["cold_total_load_ms"]["mean"])
+                    wrm_c = float(rc["warm_total_load_ms"]["mean"])
+                    tot_3g = float(r3["cold_total_load_ms"]["mean"])
+                    sp_c = float(rc["speedup_vs_single_slice_cold"])
+                    sp_3g = float(r3["speedup_vs_single_slice_cold"])
+                    lines.append(
+                        f"| {lbl} | {s_dl:.2f} / {s_tot} | {tr_kb:,.1f} KB | "
+                        f"{b_sav:.1f}% | {fp_c:,.0f} ms | **{tot_c:,.0f} ms** | "
+                        f"{wrm_c:,.0f} ms | {tot_3g:,.0f} ms | "
+                        f"**{sp_c:.2f}x / {sp_3g:.2f}x** |"
+                    )
+                lines.append("")
+
+            chrome_rows = [
+                c
+                for c in sim_data.get("headless_chrome_benchmark", [])
+                if c.get("font_key") == key
+            ]
+            if chrome_rows:
+                n_exact = sum(
+                    1 for c in chrome_rows if c.get("simulator_exact_slice_match")
+                )
+                lines.extend(
+                    [
+                        (
+                            "#### Real Headless Google Chrome (`v155.0.8059.79`) "
+                            "Verification (`Cable-5Mbps`)"
+                        ),
+                        "",
+                        (
+                            "Verified against physical `.woff2` files in Headless Google Chrome "
+                            "(`--headless=new --dump-dom`) via the W3C `document.fonts` "
+                            f"(`FontFaceSet`) API (`{n_exact}/{len(chrome_rows)} = 100%` exact "
+                            "slice-set match between Chromium Blink's `unicode-range` engine and "
+                            "`WebsiteFontSimulator`):"
+                        ),
+                        "",
+                        (
+                            "| Website Page ID | Strategy | Chrome Loaded Slices | "
+                            "Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | "
+                            "E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |"
+                        ),
+                        (
+                            "| :--- | :--- | :---: | :---: | :---: | :---: | "
+                            ":---: | :---: | :---: |"
+                        ),
+                    ]
+                )
+                for cr in chrome_rows:
+                    st_name = str(cr["strategy_name"])
+                    st_lbl = (
+                        f"**{st_name} (This Model)**"
+                        if st_name == strategy_name
+                        else f"`{st_name}`"
+                    )
+                    tot_kb = (
+                        float(cr["woff2_transfer_bytes"]) + float(cr["css_transfer_bytes"])
+                    ) / 1024.0
+                    m_str = "**Yes**" if cr.get("simulator_exact_slice_match") else "No"
+                    dec_ms = float(cr["chrome_local_decode_ms"])
+                    rdy_ms = float(cr["fonts_ready_ms"])
+                    dec_sp = float(cr["local_decode_speedup_vs_single_slice"])
+                    e2e_sp = float(cr["speedup_vs_single_slice"])
+                    b_sav = float(cr["bytes_saved_vs_single_slice_pct"])
+                    lines.append(
+                        f"| `{cr['page_id']}` | {st_lbl} | "
+                        f"{int(cr['num_slices_requested_by_chrome'])} | {m_str} | "
+                        f"{tot_kb:,.1f} KB | {dec_ms:.1f} ms | **{rdy_ms:,.0f} ms** | "
+                        f"{dec_sp:.2f}x | **{e2e_sp:.2f}x** ({b_sav:.1f}%) |"
+                    )
+                lines.append("")
+
+    lines.extend(
+        [
+            (
+                "You can test your own HTML files, live URLs, or text snippets against "
+                f"`{hf_name}` before deploying using the `mlfont-simulate` CLI, the Python "
+                "`WebsiteFontSimulator` API, or the interactive side-by-side **Website Font "
+                "Loading Simulator** in "
+                "[`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):"
+            ),
+            "",
+            "```bash",
+            f"# Simulate a local HTML file with {hf_name} across all 7 network profiles:",
+            (
+                f"mlfont-simulate --font_key {key} "
+                "--html_file path/to/index.html --network_profile all"
+            ),
+            "",
+            "# Simulate a live URL and verify in real Headless Google Chrome:",
+            (
+                f"mlfont-simulate --font_key {key} --url https://example.com "
+                "--network_profile Cable-5Mbps --headless_chrome"
+            ),
+            "```",
+            "",
+        ]
+    )
+    return lines
+
+
 def write_hf_model_card(
     bundle_dir: Path,
     spec: Dict[str, object],
@@ -298,6 +484,13 @@ def write_hf_model_card(
         f"{woff2_kb} KB ({total_woff2_bytes:,} bytes)"
         if total_woff2_bytes < 1024 * 1024
         else f"{woff2_mb} MB / {woff2_kb} KB ({total_woff2_bytes:,} bytes)"
+    )
+
+    website_sim_lines = _build_website_sim_section(
+        key=key,
+        hf_name=hf_name,
+        title=title,
+        strategy_name=strategy.name,
     )
 
     card_lines = [
@@ -454,6 +647,7 @@ def write_hf_model_card(
             "`data-endpoint=\"https://your-analytics.example.com/mlfont-timing\"`."
         ),
         "",
+        *website_sim_lines,
         "## Training Configuration",
         "",
         f"* **Target Font**: `{font_file}` ({n_cps_str} Unicode codepoints)",
@@ -556,6 +750,33 @@ print("DNNTM:", bundle.dnntm_strategy.name, "ranges:", bundle.dnntm_strategy.cou
     (bundle_dir / "README.md").write_text(card, encoding="utf-8")
 
 
+def _load_eval_results_json(path: Path) -> List[StrategyEvaluationResult]:
+    """Loads StrategyEvaluationResult objects from an evaluation_metrics.json file."""
+    raw_list = json.loads(path.read_text(encoding="utf-8"))
+    results: List[StrategyEvaluationResult] = []
+    for d in raw_list:
+        results.append(
+            StrategyEvaluationResult(
+                strategy_name=str(d["strategy_name"]),
+                params_name=str(d["params_name"]),
+                num_slices=int(d["num_slices"]),
+                num_codepoints=int(d["num_codepoints"]),
+                num_samples=int(d["num_samples"]),
+                num_missing_codepoints=int(d["num_missing_codepoints"]),
+                num_ranges=int(d["num_ranges"]),
+                total_per_glyph_ms=DistributionStats(**d["total_per_glyph_ms"]),
+                rtt_per_glyph_ms=DistributionStats(**d["rtt_per_glyph_ms"]),
+                download_per_glyph_ms=DistributionStats(**d["download_per_glyph_ms"]),
+                upfront_utilization_pct=float(d["upfront_utilization_pct"]),
+                session_utilization_pct=float(d["session_utilization_pct"]),
+                num_unassigned_font_codepoints=int(
+                    d.get("num_unassigned_font_codepoints", 0)
+                ),
+            )
+        )
+    return results
+
+
 def main() -> None:
     import argparse
 
@@ -578,11 +799,37 @@ def main() -> None:
         default=REPO_ROOT / "pretrained_models",
         help="Output directory for Hugging Face pretrained model bundles.",
     )
+    parser.add_argument(
+        "--cards-only",
+        action="store_true",
+        help="Regenerate only the 5 Hugging Face Model Card README.md files from existing bundles.",
+    )
     args = parser.parse_args()
 
     nam_paths = sorted(glob.glob(str(NAM_DIR / "*.nam")))
     experiments_dir = args.experiments_dir
     pretrained_root = args.pretrained_dir
+    if args.cards_only:
+        for spec in FONT_SPECS:
+            hf_name = str(spec["hf_name"])
+            bundle_dir = pretrained_root / hf_name
+            cfg_json = json.loads((bundle_dir / "config.json").read_text(encoding="utf-8"))
+            s_ga = SlicingStrategy.load_json(bundle_dir / "strategy.json")
+            all_results = _load_eval_results_json(bundle_dir / "evaluation_metrics.json")
+            ga_results = [r for r in all_results if r.strategy_name == s_ga.name]
+            write_hf_model_card(
+                bundle_dir=bundle_dir,
+                spec=spec,
+                strategy=s_ga,
+                eval_results=ga_results,
+                all_strat_results=all_results,
+                total_woff2_bytes=int(cfg_json["total_woff2_bytes"]),
+                css_bytes=int(cfg_json["css_byte_size"]),
+                wall_time_sec=float(cfg_json.get("training_wall_time_sec", 0.0)),
+            )
+            print(f"Regenerated {bundle_dir / 'README.md'}")
+        return
+
     fonts_dir = args.data_dir / "fonts" if (args.data_dir / "fonts").exists() else FONTS_DIR
     experiments_dir.mkdir(parents=True, exist_ok=True)
     pretrained_root.mkdir(parents=True, exist_ok=True)

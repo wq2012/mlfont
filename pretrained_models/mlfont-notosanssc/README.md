@@ -89,6 +89,50 @@ To include the library, add the following code to the bottom of your `<head>` se
 
 You can inspect downloaded slice metrics in your browser DevTools console via `MLFont.printReport()` or `MLFont.getMetrics()`, or forward anonymized telemetry beacons to your own analytics endpoint via `data-endpoint="https://your-analytics.example.com/mlfont-timing"`.
 
+### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification
+
+Across **8 real-world sample websites** for **Noto Sans SC (Simplified Chinese)** (full unsliced WOFF2: `5,987.0 KB`), **`range_compact_most1000_500_topics100`** downloads an average of only **`16.88 / 102`** slices (`1,673.7 KB` vs. `5,988.7 KB` unsliced, saving **`72.0%`** bandwidth). On `Cable-5Mbps` (`5 Mbps`, `28 ms` RTT), this achieves a **`3.43x`** cold-cache load speedup (**`2,880 ms`** vs. `9,869 ms` for `single_slice`), with **First Text Paint at `748 ms`** and **Warm-Session Load at `494 ms`** (and **`3.43x`** speedup on `GIN-3g`: **`36,044 ms`** vs. `123,450 ms`):
+
+| Strategy | Slices Dl / Total | Transfer (KB) | Bytes Saved | Cable-5Mbps 1st Paint (ms) | Cable-5Mbps Cold Load (ms) | Cable-5Mbps Warm Load (ms) | GIN-3g Cold Load (ms) | Cold Speedup (Cable / 3G) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `single_slice` | 1.00 / 1 | 5,988.7 KB | 0.0% | 9,869 ms | **9,869 ms** | 0 ms | 123,450 ms | **1.00x / 1.00x** |
+| `equal_bin_102` | 55.12 / 102 | 4,924.0 KB | 17.8% | 946 ms | **8,371 ms** | 295 ms | 105,099 ms | **1.18x / 1.17x** |
+| `most_1000_500_equal_bin_100` | 21.75 / 102 | 2,111.4 KB | 64.7% | 721 ms | **3,606 ms** | 1,066 ms | 45,201 ms | **2.74x / 2.73x** |
+| `language_slice` | 3.00 / 10 | 2,936.9 KB | 51.0% | 4,880 ms | **4,880 ms** | 0 ms | 60,961 ms | **2.02x / 2.03x** |
+| `google_fonts_ea_2017` | 4.62 / 102 | 1,175.5 KB | 80.4% | 1,664 ms | **2,004 ms** | 305 ms | 24,990 ms | **4.92x / 4.94x** |
+| `online_lda_topics100_greedy` | 15.12 / 102 | 1,562.4 KB | 73.9% | 772 ms | **2,695 ms** | 406 ms | 33,622 ms | **3.66x / 3.67x** |
+| `dnntm_topics100_greedy` | 13.75 / 102 | 1,440.9 KB | 75.9% | 769 ms | **2,481 ms** | 343 ms | 30,931 ms | **3.98x / 3.99x** |
+| **range_compact_most1000_500_topics100 (This Model)** | 16.88 / 102 | 1,673.7 KB | 72.0% | 748 ms | **2,880 ms** | 494 ms | 36,044 ms | **3.43x / 3.43x** |
+
+#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+
+Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`12/12 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+
+| Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `dev_china_portal` | `single_slice` | 1 | **Yes** | 5,988.7 KB | 265.8 ms | **10,134 ms** | 1.00x | **1.00x** (0.0%) |
+| `dev_china_portal` | `equal_bin_102` | 56 | **Yes** | 5,002.1 KB | 118.5 ms | **8,622 ms** | 2.24x | **1.18x** (16.5%) |
+| `dev_china_portal` | `google_fonts_ea_2017` | 3 | **Yes** | 972.2 KB | 41.0 ms | **1,690 ms** | 6.48x | **6.00x** (83.8%) |
+| `dev_china_portal` | **range_compact_most1000_500_topics100 (This Model)** | 11 | **Yes** | 1,151.0 KB | 72.9 ms | **2,043 ms** | 3.65x | **4.96x** (80.8%) |
+| `sina_sports_nba` | `single_slice` | 1 | **Yes** | 5,988.7 KB | 223.3 ms | **10,091 ms** | 1.00x | **1.00x** (0.0%) |
+| `sina_sports_nba` | `equal_bin_102` | 52 | **Yes** | 4,644.7 KB | 108.8 ms | **7,999 ms** | 2.05x | **1.26x** (22.4%) |
+| `sina_sports_nba` | `google_fonts_ea_2017` | 3 | **Yes** | 972.2 KB | 40.2 ms | **1,689 ms** | 5.55x | **5.97x** (83.8%) |
+| `sina_sports_nba` | **range_compact_most1000_500_topics100 (This Model)** | 16 | **Yes** | 1,580.3 KB | 59.6 ms | **2,761 ms** | 3.75x | **3.66x** (73.6%) |
+| `tech_ai_maluuba` | `single_slice` | 1 | **Yes** | 5,988.7 KB | 223.0 ms | **10,091 ms** | 1.00x | **1.00x** (0.0%) |
+| `tech_ai_maluuba` | `equal_bin_102` | 56 | **Yes** | 5,002.1 KB | 143.6 ms | **8,647 ms** | 1.55x | **1.17x** (16.5%) |
+| `tech_ai_maluuba` | `google_fonts_ea_2017` | 5 | **Yes** | 1,229.1 KB | 45.2 ms | **2,115 ms** | 4.93x | **4.77x** (79.5%) |
+| `tech_ai_maluuba` | **range_compact_most1000_500_topics100 (This Model)** | 15 | **Yes** | 1,524.9 KB | 59.9 ms | **2,670 ms** | 3.72x | **3.78x** (74.5%) |
+
+You can test your own HTML files, live URLs, or text snippets against `mlfont-notosanssc` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
+
+```bash
+# Simulate a local HTML file with mlfont-notosanssc across all 7 network profiles:
+mlfont-simulate --font_key notosanssc --html_file path/to/index.html --network_profile all
+
+# Simulate a live URL and verify in real Headless Google Chrome:
+mlfont-simulate --font_key notosanssc --url https://example.com --network_profile Cable-5Mbps --headless_chrome
+```
+
 ## Training Configuration
 
 * **Target Font**: `NotoSansSC-Regular.otf` (30,759 Unicode codepoints)

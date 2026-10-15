@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MLFont Sliced Webfonts — Live Frontend Demo &amp; Latency Inspector</title>
+  <title>MLFont Sliced Webfonts — Live Frontend Demo &amp; Website Loading Simulator</title>
 
   <!--
-    Option 1 (Drop-in JS Loader + HTML5 Performance API Telemetry):
+    Drop-in JS Loader + HTML5 Performance API Telemetry:
     Automatically injects the sliced @font-face rules for Noto Sans SC Sliced
     and records per-slice download latency via the HTML5 Performance API.
   -->
@@ -19,7 +19,13 @@
       --text: #0f172a;
       --muted: #475569;
       --accent: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-slate: #64748b;
       --border: #e2e8f0;
+    }
+    * {
+      box-sizing: border-box;
     }
     body {
       margin: 0;
@@ -30,10 +36,10 @@
                    'Noto Sans TC Sliced', 'Noto Sans JP Sliced',
                    'Noto Sans KR Sliced', 'Noto Sans Sliced',
                    Roboto, 'Noto Sans', sans-serif;
-      line-height: 1.7;
+      line-height: 1.65;
     }
     .container {
-      max-width: 920px;
+      max-width: 1120px;
       margin: 0 auto;
     }
     .card {
@@ -44,7 +50,7 @@
       margin-bottom: 1.5rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    h1, h2 {
+    h1, h2, h3 {
       margin-top: 0;
     }
     .controls {
@@ -52,6 +58,29 @@
       gap: 0.75rem;
       flex-wrap: wrap;
       margin-bottom: 1rem;
+      align-items: center;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 190px;
+      flex: 1;
+    }
+    .control-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    select, input[type="text"] {
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.92rem;
+      background: #fff;
+      color: var(--text);
     }
     button {
       background: var(--accent);
@@ -59,24 +88,144 @@
       border: none;
       border-radius: 6px;
       padding: 0.55rem 1rem;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      font-weight: 500;
       cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    button:hover {
+      opacity: 0.92;
     }
     button.secondary {
       background: #334155;
     }
-    pre {
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 1rem;
+    button.success {
+      background: var(--accent-green);
+    }
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 820px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .sim-pane {
+      border: 1px solid var(--border);
       border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.85rem;
+      padding: 1.1rem 1.25rem;
+      background: #fcfdff;
+      position: relative;
+    }
+    .sim-pane.mlfont-pane {
+      border-top: 4px solid var(--accent-green);
+    }
+    .sim-pane.fullfont-pane {
+      border-top: 4px solid var(--accent-slate);
+    }
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .badge-slate {
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .progress-track {
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 100%;
+      transition: width 0.08s linear;
+    }
+    .progress-bar.green {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    .progress-bar.slate {
+      background: linear-gradient(90deg, #94a3b8, #475569);
+    }
+    .preview-viewport {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.9rem 1rem;
+      background: #ffffff;
+      min-height: 175px;
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+    .preview-viewport.loading-faint {
+      opacity: 0.22;
+      filter: blur(1.5px);
+    }
+    .preview-viewport.loading-hf {
+      opacity: 0.88;
+      filter: none;
+    }
+    .preview-nav {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.55rem;
+    }
+    .preview-title {
+      font-weight: 700;
+      font-size: 1.02rem;
+      margin-bottom: 0.45rem;
+    }
+    .preview-body {
+      font-size: 0.9rem;
+      color: #1e293b;
+      margin: 0;
+    }
+    .slice-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.65rem;
+    }
+    .slice-pill {
+      font-family: monospace;
+      font-size: 0.74rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .slice-pill.hf {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: #86efac;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
     }
     th, td {
       text-align: left;
@@ -87,18 +236,150 @@
       background: #f1f5f9;
       font-weight: 600;
     }
+    .waterfall-bar-wrap {
+      width: 140px;
+      background: #f1f5f9;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .waterfall-bar {
+      height: 100%;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1>MLFont Sliced Webfonts — Live Browser Demo</h1>
-      <p>
-        This page uses <strong>Noto Sans SC Sliced</strong> (30,759 Simplified Chinese
-        codepoints partitioned into 102 machine-learning co-occurrence slices).
-        Instead of downloading the full 8.89&nbsp;MB WOFF2 font file, your browser
-        inspects the characters rendered below via CSS <code>unicode-range</code>
-        and only downloads the small <code>.woff2</code> slices required for this page.
+      <h1>MLFont Sliced Webfonts — Website Loading Simulator &amp; Live Inspector</h1>
+      <p style="margin-bottom: 0.5rem;">
+        Test how fast MLFont sliced webfonts load on real websites across mobile and desktop
+        network profiles, inspect which <code>.woff2</code> slices are triggered via CSS
+        <code>unicode-range</code>, and compare latency against unsliced full fonts and
+        heuristic baselines.
+      </p>
+    </div>
+
+    <!-- Interactive Side-by-Side Website Font Loading Simulator -->
+    <div class="card" id="simulator-card">
+      <h2>1. Interactive Website Font Loading Simulator (Side-by-Side Comparison)</h2>
+      <p style="color: var(--muted); margin-top: -0.25rem; font-size: 0.92rem;">
+        Select a real website archetype (including the 2017 <code>go/mlfont-demo</code> and
+        WebPageTest benchmark sites) or edit the page text directly, choose a network profile,
+        and click <strong>Replay Visual Loading</strong> to watch side-by-side progressive rendering.
+      </p>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="sim-font">Font Bundle</label>
+          <select id="sim-font" onchange="onSimFontChange()">
+            <option value="notosanssc">Noto Sans SC (Simplified Chinese, 30,759 CPs, 102 Slices)</option>
+            <option value="notosanstc">Noto Sans TC (Traditional Chinese, 20,637 CPs, 82 Slices)</option>
+            <option value="notosansjp">Noto Sans JP (Japanese, 16,663 CPs, 62 Slices)</option>
+            <option value="notosanskr">Noto Sans KR (Korean, 22,853 CPs, 52 Slices)</option>
+            <option value="notosans_lgc">Noto Sans LGC (Pan-European, 2,297 CPs, 20 Slices)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="sim-page">Real Website Sample</label>
+          <select id="sim-page" onchange="onSimPageChange()"></select>
+        </div>
+
+        <div class="control-group">
+          <label for="sim-net">Network Profile</label>
+          <select id="sim-net" onchange="runWebsiteSimulation(false)">
+            <option value="Cable-5Mbps">Desktop Cable (5.0 Mbps, 28 ms RTT)</option>
+            <option value="Mobile-4G-LTE">Mobile 4G LTE (12.0 Mbps, 70 ms RTT)</option>
+            <option value="GIN-3g">Mobile 3G (400 Kbps, 400 ms RTT)</option>
+            <option value="Fast-3G">Fast 3G (1.6 Mbps, 150 ms RTT)</option>
+            <option value="residential-DSL">Residential DSL (2.0 Mbps, 50 ms RTT)</option>
+            <option value="Broadband-Fiber">Broadband Fiber (20.0 Mbps, 20 ms RTT)</option>
+            <option value="GIN-2g">Mobile 2G (100 Kbps, 1200 ms RTT)</option>
+          </select>
+        </div>
+
+        <div class="control-group" style="min-width: 155px; flex: 0.6;">
+          <label for="sim-cache">Browser Cache</label>
+          <select id="sim-cache" onchange="runWebsiteSimulation(false)">
+            <option value="cold">Cold Cache (1st Visit)</option>
+            <option value="warm">Warm Session (2nd Page)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-bottom: 0.5rem;">
+        <button class="success" onclick="runWebsiteSimulation(true)">&#9654; Replay Visual Loading</button>
+        <button class="secondary" onclick="runWebsiteSimulation(false)">Recalculate Metrics</button>
+        <span id="sim-headline" style="font-size: 0.92rem; font-weight: 600; color: var(--accent-green);"></span>
+      </div>
+
+      <!-- Side-by-Side Visual Comparison Panes -->
+      <div class="sim-grid">
+        <div class="sim-pane mlfont-pane">
+          <div class="pane-header">
+            <strong>MLFont Smart Slices (Range-Compact GA)</strong>
+            <span class="badge badge-green" id="mlfont-status-badge">Ready</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--muted);" id="mlfont-Quick-stats"></div>
+          <div class="progress-track">
+            <div class="progress-bar green" id="mlfont-progress"></div>
+          </div>
+          <div class="preview-viewport" id="mlfont-viewport" contenteditable="true" oninput="onCustomViewportEdit()">
+            <div class="preview-nav" id="mlfont-nav"></div>
+            <div class="preview-title" id="mlfont-title"></div>
+            <p class="preview-body" id="mlfont-body"></p>
+          </div>
+          <div class="slice-pills" id="mlfont-slice-pills"></div>
+        </div>
+
+        <div class="sim-pane fullfont-pane">
+          <div class="pane-header">
+            <strong>Full Unsliced Font (Single WOFF2 File)</strong>
+            <span class="badge badge-slate" id="fullfont-status-badge">Ready</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--muted);" id="fullfont-Quick-stats"></div>
+          <div class="progress-track">
+            <div class="progress-bar slate" id="fullfont-progress"></div>
+          </div>
+          <div class="preview-viewport" id="fullfont-viewport">
+            <div class="preview-nav" id="fullfont-nav"></div>
+            <div class="preview-title" id="fullfont-title"></div>
+            <p class="preview-body" id="fullfont-body"></p>
+          </div>
+          <div class="slice-pills" id="fullfont-slice-pills"></div>
+        </div>
+      </div>
+
+      <!-- Detailed Strategy Comparison Table -->
+      <h3 style="margin-top: 1.35rem; margin-bottom: 0.35rem;">Strategy Latency &amp; Bandwidth Breakdown</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Slicing Strategy</th>
+            <th>Slices Downloaded</th>
+            <th>Font + CSS Transfer</th>
+            <th>First Text Paint</th>
+            <th>Total Font Load</th>
+            <th>Relative Waterfall</th>
+            <th>Speedup vs. Full</th>
+            <th>Bytes Saved</th>
+          </tr>
+        </thead>
+        <tbody id="sim-table-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Live Browser Resource Timing Inspector -->
+    <div class="card">
+      <h2>2. Live Browser Resource Timing Inspector (<code>mlfont.js</code>)</h2>
+      <p style="color: var(--muted); font-size: 0.92rem;">
+        Switch between live Hugging Face CDN font bundles below to inspect actual
+        <code>PerformanceResourceTiming</code> entries recorded by your browser in real time.
       </p>
       <div class="controls">
         <button onclick="switchSample('sc')">简体中文 (Noto Sans SC Sliced)</button>
@@ -108,22 +389,12 @@
         <button onclick="switchSample('lgc')">Pan-European LGC (Noto Sans Sliced)</button>
         <button class="secondary" onclick="refreshMetrics()">Refresh Slice Latency Metrics</button>
       </div>
-    </div>
-
-    <div class="card" id="sample-box">
-      <h2>示例文本 (Sample Rendered Text)</h2>
-      <p id="sample-text" contenteditable="true" style="font-size: 1.25rem; outline: none;">
+      <p id="sample-text" contenteditable="true" style="font-size: 1.15rem; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 6px; background: #fcfdff;">
         汉字作为一种语素文字，其每个单一字符都拥有具体的表意。因此，有些字符同时出现在同一页面上的概率会高于另一些字符。
         我们通过机器学习算法对网页内容进行主题建模与区间紧凑化遗传算法优化，将整套中文字体切分为静态子集切片，
         使得浏览器只需按需下载当前页面所需的少量 WOFF2 切片即可极速渲染完整字库。（点击此处可直接编辑输入任意生僻字，如：龘、龖、𰻝！）
       </p>
-    </div>
-
-    <div class="card">
-      <h2>HTML5 Performance API — Downloaded Font Slices (<code>mlfont.js</code>)</h2>
-      <p id="metrics-summary" style="color: var(--muted);">
-        Collecting Resource Timing metrics...
-      </p>
+      <p id="metrics-summary" style="color: var(--muted); font-weight: 500;"></p>
       <table>
         <thead>
           <tr>
@@ -144,6 +415,600 @@
   </div>
 
   <script>
+    // Network profiles matching mlfont/simulator.py
+    var NETWORK_PROFILES = {
+      'GIN-2g': { rttMs: 1200, bwBytesPerMs: 12.5, maxPar: 6, label: 'Mobile 2G (100 Kbps)' },
+      'GIN-3g': { rttMs: 400, bwBytesPerMs: 50.0, maxPar: 6, label: 'Mobile 3G (400 Kbps)' },
+      'Fast-3G': { rttMs: 150, bwBytesPerMs: 200.0, maxPar: 6, label: 'Fast 3G (1.6 Mbps)' },
+      'residential-DSL': { rttMs: 50, bwBytesPerMs: 250.0, maxPar: 6, label: 'Residential DSL (2.0 Mbps)' },
+      'Cable-5Mbps': { rttMs: 28, bwBytesPerMs: 625.0, maxPar: 6, label: 'Desktop Cable (5.0 Mbps)' },
+      'Mobile-4G-LTE': { rttMs: 70, bwBytesPerMs: 1500.0, maxPar: 6, label: 'Mobile 4G LTE (12.0 Mbps)' },
+      'Broadband-Fiber': { rttMs: 20, bwBytesPerMs: 2500.0, maxPar: 6, label: 'Broadband Fiber (20.0 Mbps)' }
+    };
+
+    // Calibrated physical WOFF2 font parameters and website presets from experiments/website_simulation_report.json
+    var FONT_SIM_METADATA = {
+      'notosanssc': {
+        family: "'Noto Sans SC Sliced', sans-serif",
+        totalSlices: 102,
+        codepoints: 30759,
+        fullWoff2Bytes: 6130712,
+        singleCssGzipBytes: 1737,
+        eqCssGzipBytes: 3290,
+        mlCssGzipBytes: 26874,
+        eaCssGzipBytes: 24512,
+        eaHfSliceBytes: 971048,
+        hfSliceBytes: 398151,
+        avgTopicSliceBytes: 90893,
+        pages: [
+          {
+            id: 'dev_china_portal',
+            title: '面向中国开发者的 Google 技术资源与开源生态平台',
+            category: 'Developer Portal (developers.google.com/china)',
+            nav: ['首页', 'Android 开发', 'TensorFlow 机器学习', 'Web 性能与字体', 'Firebase', '技术社区'],
+            body: '构建面向全球用户的现代化 Web 与移动应用。通过最新的 WebAssembly、Progressive Web Apps (PWA) 以及智能中文字体切片技术，显著降低首屏渲染延迟，提升核心网页指标（Core Web Vitals：LCP、FID、CLS）。借助机器学习共现主题模型与区间紧凑化遗传算法，浏览器仅需下载当前文档所需的少量 WOFF2 字体分片即可完成高质量排版渲染。',
+            mlSlices: [0, 1, 33, 36, 37, 45, 57, 71, 73, 86, 91],
+            mlBytes: 1178642,
+            eqSlicesCount: 56,
+            eqBytes: 5122158,
+            eaSlices: [86, 100, 101],
+            eaBytes: 995566,
+            hfCov: 96.8
+          },
+          {
+            id: 'sina_sports_nba',
+            title: 'NBA季后赛焦点战：勇士客场逆转火箭，库里末节狂砍22分率队晋级',
+            category: 'Sports - NBA (sports.sina.com.cn)',
+            nav: ['体育首页', 'NBA篮球', 'CBA联赛', '欧冠足球', '实时比分', '技术统计'],
+            body: '北京时间5月18日，NBA西部半决赛迎来抢七大战。金州勇士队在客场半场落后11分的不利局势下，下半场掀起猛烈三分雨。斯蒂芬·库里全场出战41分钟，三分球12投7中，砍下全场最高的36分、7个篮板和9次助攻，带领勇士以114比106力克休斯敦火箭，昂首挺进西部决赛。',
+            mlSlices: [0, 1, 2, 36, 43, 46, 48, 56, 58, 71, 73, 82, 83, 86, 90, 91],
+            mlBytes: 1618198,
+            eqSlicesCount: 52,
+            eqBytes: 4756184,
+            eaSlices: [86, 100, 101],
+            eaBytes: 995566,
+            hfCov: 91.7
+          },
+          {
+            id: 'tech_ai_maluuba',
+            title: '深度学习与自然语言理解前沿：从阅读理解到多智能体强化学习突破',
+            category: 'Technology - AI (tech.sina.com.cn)',
+            nav: ['科技前沿', '人工智能', '深度学习', '开源算法', '算力芯片', '学术论文'],
+            body: '人工智能研究实验室近期在机器阅读理解与混合奖励深度强化学习领域取得里程碑式进展。研究团队提出了一种结合分层注意力机制与分布式价值估计的神经网络架构，通过将非负稀疏自编码器与判别式香农熵差分损失函数相结合，自动发现潜在语义簇并优化大规模汉字字库的子集切分。',
+            mlSlices: [0, 1, 2, 33, 35, 45, 48, 57, 58, 82, 83, 90, 91, 98, 101],
+            mlBytes: 1561518,
+            eqSlicesCount: 56,
+            eqBytes: 5122158,
+            eaSlices: [86, 93, 97, 100, 101],
+            eaBytes: 1258615,
+            hfCov: 94.1
+          },
+          {
+            id: 'world_politics_news',
+            title: '多边经贸合作与全球数字治理峰会发表联合声明，深化绿色转型与跨境贸易互通',
+            category: 'Politics & Economy (news.sina.com.cn)',
+            nav: ['国际新闻', '宏观经济', '外交动态', '数字贸易', '气候变化', '智库观察'],
+            body: '二十国集团与多边经贸部长会议今日在日内瓦闭幕。与会各国代表围绕全球供应链韧性、跨境电子商务规则、清洁能源基础设施投资以及人工智能安全治理框架展开深入磋商，一致同意削减技术性贸易壁垒，推动包容性可持续增长。',
+            mlSlices: [0, 1, 33, 36, 43, 46, 48, 56, 57, 71, 73, 82, 90],
+            mlBytes: 1386554,
+            eqSlicesCount: 54,
+            eqBytes: 4939916,
+            eaSlices: [32, 86, 100, 101],
+            eaBytes: 1121000,
+            hfCov: 94.1
+          },
+          {
+            id: 'entertainment_spring_gala',
+            title: '新春佳节文化盛典与春节档电影票房破纪录：非遗民俗与现代视听艺术交相辉映',
+            category: 'Entertainment - Lunar New Year (ent.sina.com.cn)',
+            nav: ['娱乐头条', '春节晚会', '院线电影', '国风音乐', '非遗传承', '票房排行榜'],
+            body: '除夕夜张灯结彩、喜气洋洋，新春联欢晚会以精湛的舞台光影技术融合传统非物质文化遗产：京剧武生、川剧变脸、江南丝竹与现代交响乐团同台献艺，舞龙舞狮与漫天烟花点燃了亿万观众辞旧迎新的团圆热情。',
+            mlSlices: [0, 1, 2, 36, 43, 45, 46, 48, 56, 57, 71, 86, 90],
+            mlBytes: 1353210,
+            eqSlicesCount: 57,
+            eqBytes: 5214024,
+            eaSlices: [86, 100, 101],
+            eaBytes: 995566,
+            hfCov: 91.8
+          },
+          {
+            id: 'cooking_recipe_beef',
+            title: '家常秘制红烧牛腩炖萝卜食谱：汤汁浓郁、酥烂入味的经典暖胃佳肴',
+            category: 'Cooking Recipe - Beef (meishi.sina.com.cn)',
+            nav: ['美食菜谱', '家常热菜', '煲汤炖品', '烘焙甜点', '时令食材', '厨艺技巧'],
+            body: '精选主料：新鲜牛坑腩800克、白萝卜1根、生姜5片、八角2颗、桂皮1小段、香叶3片、草果1颗、冰糖25克、绍兴黄酒3汤匙。牛腩冷水下锅焯水洗净，炒锅熬出琥珀色糖色翻炒牛腩，加入葱姜蒜香料与黄酒酱油慢炖90分钟，加入白萝卜焖煮收汁即可。',
+            mlSlices: [0, 1, 2, 35, 36, 43, 45, 46, 48, 56, 57, 58, 61, 69, 71, 72, 73, 74, 75, 77, 82, 83, 86, 90, 91, 98, 101],
+            mlBytes: 2618090,
+            eqSlicesCount: 52,
+            eqBytes: 4756184,
+            eaSlices: [17, 86, 93, 97, 99, 100, 101],
+            eaBytes: 1509483,
+            hfCov: 68.3
+          },
+          {
+            id: 'novel_tangqi_fiction',
+            title: '卷三·苍梧云海与桃林旧梦：宿命流转间的古风仙侠长篇小说连载',
+            category: 'Novel - Literature (book.sina.com.cn)',
+            nav: ['书库首页', '古典仙侠', '历史架空', '诗词歌赋', '作家专栏', '读者书评'],
+            body: '暮春三月，十里桃林落英缤纷，绯色花瓣随微风拂过青石阶梯，坠入碧波荡漾的镜湖之中。白衣少年凭栏远眺，苍梧山巅云雾缭绕，隐约可见琉璃飞檐与古刹钟声穿越千载岁月悠然回荡。',
+            mlSlices: [0, 1, 2, 33, 35, 36, 43, 44, 45, 46, 47, 48, 56, 57, 58, 59, 70, 71, 78, 82, 83, 86, 90, 91, 98, 101],
+            mlBytes: 2536618,
+            eqSlicesCount: 57,
+            eqBytes: 5213428,
+            eaSlices: [45, 61, 71, 85, 86, 97, 98, 100, 101],
+            eaBytes: 1758272,
+            hfCov: 74.5
+          },
+          {
+            id: 'shenzhenware_hardware',
+            title: '深圳湾硬件评测：新一代远场语音交互智能音箱与端侧神经网络芯片拆解',
+            category: 'Hardware & IoT (shenzhenware.com)',
+            nav: ['深圳湾首页', '智能音频', '具身机器人', 'AR眼镜', '芯片拆解', '创客社区'],
+            body: '随着端侧大模型与低功耗数字信号处理器（DSP）的快速演进，智能家居语音终端正在经历从云端指令识别向全双工自然对话的跨越。实测表明，得益于波束成形、回声消除以及本地量化语音识别引擎的协同优化，五米远场高噪唤醒率超过96%。',
+            mlSlices: [0, 1, 33, 35, 36, 46, 48, 56, 57, 58, 71, 73, 82, 86],
+            mlBytes: 1458506,
+            eqSlicesCount: 57,
+            eqBytes: 5213428,
+            eaSlices: [86, 100, 101],
+            eaBytes: 995566,
+            hfCov: 92.1
+          }
+        ]
+      },
+      'notosanstc': {
+        family: "'Noto Sans TC Sliced', sans-serif",
+        totalSlices: 82,
+        codepoints: 20637,
+        fullWoff2Bytes: 4144544,
+        singleCssGzipBytes: 20023,
+        eqCssGzipBytes: 21664,
+        mlCssGzipBytes: 34897,
+        hfSliceBytes: 338266,
+        avgTopicSliceBytes: 76181,
+        pages: [
+          {
+            id: 'tc_taipei_tech_portal',
+            title: '台灣半導體製程與雲端人工智慧開發者平台：高速網頁字型與邊緣運算實踐',
+            category: 'Developer Portal (TC)',
+            nav: ['首頁', '先進製程', '雲端架構', '開源模型', '前端效能', '技術論壇'],
+            body: '在現代化跨平台網頁應用程式中，繁體中文字型包含超過兩萬個常用與罕用漢字，完整字型檔案往往超過四百萬位元組。透過機器學習共現主題模型與基因演算法區間最佳化，系統能將繁體字庫精準切分為八十二個高內聚力的靜態 WOFF2 切片。',
+            mlSlices: [0, 1, 2, 15, 17, 23, 25, 26, 27, 41, 50, 58],
+            mlBytes: 1130025,
+            eqSlicesCount: 51,
+            eqBytes: 3899071,
+            hfCov: 90.8
+          },
+          {
+            id: 'tc_culture_literature',
+            title: '故宮典藏書法藝術與數位時代漢字排版美學：從碑帖石刻到可變網路字型',
+            category: 'Culture & Literature (TC)',
+            nav: ['藝文首頁', '書畫典藏', '古籍善本', '數位人文', '字型設計', '特展導覽'],
+            body: '漢字書法自甲骨金文、秦篆漢隸、魏碑唐楷以至宋明刻本，承載了數千年東亞文明的審美意趣。邁入高解析度螢幕與雲端閱讀時代，字型設計師與電腦科學家攜手合作，運用統計學習演算法解決大型中文字集在網際網路上的即時傳輸瓶頸。',
+            mlSlices: [0, 1, 2, 14, 15, 16, 17, 23, 27, 28, 30, 35, 41, 58, 59, 66],
+            mlBytes: 1422733,
+            eqSlicesCount: 55,
+            eqBytes: 4202553,
+            hfCov: 88.3
+          },
+          {
+            id: 'tc_gastronomy_guide',
+            title: '台北職人美食與夜市風味指南：紅燒牛肉麵、小籠湯包與高山烏龍茶的極致饗宴',
+            category: 'Culinary & Travel (TC)',
+            nav: ['美食首頁', '在地小吃', '米其林指南', '茶藝文化', '節慶料理', '私房食譜'],
+            body: '漫步於永康街與大稻埕歷史街區，空氣中瀰漫著慢火熬煮牛骨高湯的醇厚香氣。師傅嚴選台灣本地溫體牛腱心，搭配岡山豆瓣醬、川味花椒與八角細火慢燉數小時，佐以十八摺小籠包與阿里山清香烏龍茶。',
+            mlSlices: [0, 1, 2, 16, 17, 23, 25, 27, 28, 30, 35, 36, 38, 41, 50, 58, 59, 66, 68, 71],
+            mlBytes: 1769049,
+            eqSlicesCount: 50,
+            eqBytes: 3822980,
+            hfCov: 75.6
+          }
+        ]
+      },
+      'notosansjp': {
+        family: "'Noto Sans JP Sliced', sans-serif",
+        totalSlices: 62,
+        codepoints: 16663,
+        fullWoff2Bytes: 3338400,
+        singleCssGzipBytes: 19391,
+        eqCssGzipBytes: 20602,
+        mlCssGzipBytes: 29089,
+        hfSliceBytes: 358880,
+        avgTopicSliceBytes: 78967,
+        pages: [
+          {
+            id: 'jp_web_dev_docs',
+            title: '次世代ウェブタイポグラフィと日本語フォントの高速配信アーキテクチャ',
+            category: 'Developer Portal (JP)',
+            nav: ['ホーム', 'ウェブ標準', 'フォント最適化', 'パフォーマンス計測', 'APIリファレンス'],
+            body: '日本語のデジタル組版では、ひらがな・カタカナ・英数字に加えて第一水準および第二水準漢字など一万六千文字以上のグリフが必要となります。MLFontは文字の共起確率をオンラインLDAおよび深層ニューラルトピックモデルで学習し、62個の最適なWOFF2スライスへと分割します。',
+            mlSlices: [0, 1, 2, 14, 25, 36, 40],
+            mlBytes: 792217,
+            eqSlicesCount: 34,
+            eqBytes: 2705862,
+            hfCov: 98.7
+          },
+          {
+            id: 'jp_sports_baseball',
+            title: '日本シリーズ第7戦：劇的な逆転サヨナラ本塁打でリーグ覇者が日本一に輝く',
+            category: 'Sports News (JP)',
+            nav: ['スポーツ総合', 'プロ野球', '侍ジャパン', 'Jリーグ', '試合速報', '選手名鑑'],
+            body: '満員のスタジアムが熱狂に包まれた最終第7戦は、球史に残る投手戦となった。先発左腕が8回まで散発3安打無失点の快投を見せると、9回裏二死一・二塁の場面で主砲がライトスタンド中段へ飛び込む逆転サヨナラ3ランホームランを放った。',
+            mlSlices: [0, 1, 13, 19, 20, 23, 25, 26, 36, 40],
+            mlBytes: 1079877,
+            eqSlicesCount: 35,
+            eqBytes: 2784013,
+            hfCov: 93.5
+          },
+          {
+            id: 'jp_literature_essay',
+            title: '古都の四季と日本の美意識：嵐山の紅葉と静寂の庭園をめぐる随筆',
+            category: 'Literature & Culture (JP)',
+            nav: ['文芸トップ', 'エッセイ', '書評', '伝統工芸', '歴史紀行'],
+            body: '秋の夕暮れ、渡月橋を渡る風がひんやりと頬を撫でる頃、山々は錦繍の紅葉に染め上げられる。苔むした石畳の路地を抜け、静まり返った禅寺の縁側に腰を下ろせば、竹林を揺らす風の音と鹿威しの澄んだ響きが心の奥深くまで染み渡っていく。',
+            mlSlices: [0, 1, 13, 14, 17, 19, 20, 23, 25, 26, 29, 36, 39, 40],
+            mlBytes: 1393001,
+            eqSlicesCount: 42,
+            eqBytes: 3336810,
+            hfCov: 85.5
+          }
+        ]
+      },
+      'notosanskr': {
+        family: "'Noto Sans KR Sliced', sans-serif",
+        totalSlices: 52,
+        codepoints: 22853,
+        fullWoff2Bytes: 3105200,
+        singleCssGzipBytes: 16668,
+        eqCssGzipBytes: 17582,
+        mlCssGzipBytes: 26571,
+        hfSliceBytes: 110516,
+        avgTopicSliceBytes: 106598,
+        pages: [
+          {
+            id: 'kr_cloud_engineering',
+            title: '차세대 웹 타이포그래피와 머신러닝 기반 한글 웹폰트 서브셋 최적화 기술',
+            category: 'Developer Portal (KR)',
+            nav: ['홈', '클라우드 아키텍처', '프론트엔드 성능', '인공지능 모델', '오픈소스'],
+            body: '현대의 한국어 웹폰트는 완성형 한글 만 천여 자와 한자 및 특수기호를 포함하여 총 이만 이천여 개의 글리프를 담고 있습니다. MLFont 라이브러리는 문서 내 글자 동시출현 확률을 학습하는 온라인 토픽 모델과 구간 압축 유전 알고리즘을 결합하여 폰트를 52개의 고효율 WOFF2 슬라이스로 분할합니다.',
+            mlSlices: [0, 1, 2, 6, 12, 24],
+            mlBytes: 493427,
+            eqSlicesCount: 24,
+            eqBytes: 2577059,
+            hfCov: 95.5
+          },
+          {
+            id: 'kr_kpop_entertainment',
+            title: '서울 국제 영화제 및 케이팝 글로벌 음악 페스티벌 개막: 전통 국악과 현대 미디어 아트의 만남',
+            category: 'Entertainment & Culture (KR)',
+            nav: ['연예 홈', '영화제 소식', '콘서트', '음반 차트', '문화 칼럼'],
+            body: '가을밤 한강 공원과 광화문 광장을 수놓은 글로벌 음악 축제가 전 세계 팬들의 뜨거운 함성 속에 막을 올렸다. 화려한 레이저 조명과 초대형 LED 무대 위에서 펼쳐진 국악 관현악단과 아티스트들의 협연은 한국 대중문화의 독창적인 예술성을 증명했다.',
+            mlSlices: [0, 1, 2, 6, 11, 12, 24],
+            mlBytes: 596871,
+            eqSlicesCount: 24,
+            eqBytes: 2577059,
+            hfCov: 96.2
+          },
+          {
+            id: 'kr_economy_finance',
+            title: '고대역폭 메모리(HBM) 반도체 수출 호조와 차세대 친환경 모빌리티 산업 전망 보고서',
+            category: 'Economy & Tech (KR)',
+            nav: ['경제 종합', '반도체 산업', '금융 시장', '모빌리티', '글로벌 무역'],
+            body: '인공지능 데이터센터용 고성능 메모리 반도체 수요가 급증함에 따라 국내 주요 기술 기업들의 분기 수출 실적이 역대 최고치를 경신했다. 연구개발 투자 확대와 차세대 패키징 공정 혁신이 글로벌 공급망 경쟁력 강화의 핵심 동력으로 작용하고 있다.',
+            mlSlices: [0, 1, 6, 12],
+            mlBytes: 326567,
+            eqSlicesCount: 24,
+            eqBytes: 2577059,
+            hfCov: 99.0
+          }
+        ]
+      },
+      'notosans_lgc': {
+        family: "'Noto Sans Sliced', sans-serif",
+        totalSlices: 20,
+        codepoints: 2297,
+        fullWoff2Bytes: 161472,
+        singleCssGzipBytes: 688,
+        eqCssGzipBytes: 988,
+        mlCssGzipBytes: 2026,
+        hfSliceBytes: 14537,
+        avgTopicSliceBytes: 21092,
+        pages: [
+          {
+            id: 'lgc_multilingual_eu_news',
+            title: 'Pan-European Digital Infrastructure & Multilingual Web Typography Initiative',
+            category: 'Multilingual EU Portal (Latin/Greek/Cyrillic)',
+            nav: ['Home', 'Français', 'Deutsch', 'Polski', 'Русский', 'Ελληνικά'],
+            body: "Modern European web platforms seamlessly serve documents across Latin, Greek, and Cyrillic scripts. L'architecture de segmentation intelligente réduit la latence (é, è, ê, œ). Zażółć gęślą jaźń. Машинное обучение оптимизирует загрузку кириллических шрифтов. Η ψηφιακή τυπογραφία επιταχύνει την απόδοση.",
+            mlSlices: [0, 1, 7, 8, 17],
+            mlBytes: 113198,
+            eqSlicesCount: 6,
+            eqBytes: 134316,
+            hfCov: 67.6
+          },
+          {
+            id: 'lgc_slavic_hellenic_encyclopedia',
+            title: 'Comparative Philology of the Mediterranean and Eastern European Scripts',
+            category: 'Encyclopedia (Greek & Cyrillic)',
+            nav: ['Overview', 'Epigraphy', 'Cyrillic Evolution', 'Hellenic Manuscripts', 'Phonology'],
+            body: 'From the classical inscriptions of Athens and Alexandria (Ἀθῆναι, Ἀλεξάνδρεια, φιλοσοφία, δημοκρατία) to the medieval scriptoria of Ohrid, Tarnovo, and Novgorod (Славянская письменность, кириллица, просвещение), European alphabetic writing reflects centuries of exchange.',
+            mlSlices: [0, 1, 7, 8, 17],
+            mlBytes: 113198,
+            eqSlicesCount: 5,
+            eqBytes: 112065,
+            hfCov: 84.6
+          },
+          {
+            id: 'lgc_scientific_typography',
+            title: 'W3C CSS Fonts Module Level 4: Unicode-Range Subsetting and Brotli Compression',
+            category: 'Technical Spec (Latin)',
+            nav: ['Specification', 'Algorithms', 'Brotli Stream', 'FontFaceSet API', 'Benchmarks'],
+            body: 'The @font-face unicode-range descriptor defines the specific range of Unicode codepoints supported by a given font resource. User agents inspect the intersection of document text nodes with the declared intervals before initiating HTTP/2 fetches.',
+            mlSlices: [0, 1],
+            mlBytes: 42714,
+            eqSlicesCount: 1,
+            eqBytes: 23239,
+            hfCov: 99.2
+          }
+        ]
+      }
+    };
+
+    var activeReplayTimers = [];
+
+    function clearReplayTimers() {
+      for (var i = 0; i < activeReplayTimers.length; i++) {
+        clearTimeout(activeReplayTimers[i]);
+      }
+      activeReplayTimers = [];
+    }
+
+    function onSimFontChange() {
+      var fkey = document.getElementById('sim-font').value;
+      var meta = FONT_SIM_METADATA[fkey];
+      var pageSelect = document.getElementById('sim-page');
+      pageSelect.innerHTML = meta.pages.map(function(p, idx) {
+        return '<option value="' + idx + '">' + p.category + ' — ' + p.title.slice(0, 28) + '...</option>';
+      }).join('');
+      if (window.MLFont) {
+        window.MLFont.load(fkey === 'notosans_lgc' ? 'notosans-lgc' : fkey);
+      }
+      onSimPageChange();
+    }
+
+    function onSimPageChange() {
+      var fkey = document.getElementById('sim-font').value;
+      var meta = FONT_SIM_METADATA[fkey];
+      var pIdx = parseInt(document.getElementById('sim-page').value || '0', 10);
+      var page = meta.pages[pIdx] || meta.pages[0];
+
+      var navHtml = page.nav.map(function(n) { return '<span>' + n + '</span>'; }).join(' &bull; ');
+      document.getElementById('mlfont-nav').innerHTML = navHtml;
+      document.getElementById('fullfont-nav').innerHTML = navHtml;
+      document.getElementById('mlfont-title').textContent = page.title;
+      document.getElementById('fullfont-title').textContent = page.title;
+      document.getElementById('mlfont-body').textContent = page.body;
+      document.getElementById('fullfont-body').textContent = page.body;
+
+      document.getElementById('mlfont-viewport').style.fontFamily = meta.family;
+      document.getElementById('fullfont-viewport').style.fontFamily = meta.family;
+
+      runWebsiteSimulation(true);
+    }
+
+    function onCustomViewportEdit() {
+      var editedTitle = document.getElementById('mlfont-title').textContent;
+      var editedBody = document.getElementById('mlfont-body').textContent;
+      document.getElementById('fullfont-title').textContent = editedTitle;
+      document.getElementById('fullfont-body').textContent = editedBody;
+      runWebsiteSimulation(false);
+    }
+
+    function computeStrategyTiming(net, cssBytes, fontBytes, numSlices, hfBytes, isWarm) {
+      var cssMs = isWarm ? 0 : (net.rttMs + cssBytes / net.bwBytesPerMs + 12);
+      var waves = numSlices > 0 ? Math.ceil(numSlices / net.maxPar) : 0;
+      var fontMs = numSlices > 0 ? (waves * net.rttMs + fontBytes / net.bwBytesPerMs) : 0;
+      var totalMs = Math.round(cssMs + fontMs);
+      var firstPaintMs = numSlices === 0 ? Math.round(cssMs) :
+          Math.round(cssMs + net.rttMs + hfBytes / net.bwBytesPerMs);
+      if (firstPaintMs > totalMs) firstPaintMs = totalMs;
+      return {
+        totalMs: totalMs,
+        firstPaintMs: firstPaintMs,
+        transferBytes: fontBytes + (isWarm ? 0 : cssBytes),
+        numSlices: numSlices
+      };
+    }
+
+    function runWebsiteSimulation(animate) {
+      clearReplayTimers();
+      var fkey = document.getElementById('sim-font').value;
+      var meta = FONT_SIM_METADATA[fkey];
+      var pIdx = parseInt(document.getElementById('sim-page').value || '0', 10);
+      var page = meta.pages[pIdx] || meta.pages[0];
+      var netKey = document.getElementById('sim-net').value;
+      var net = NETWORK_PROFILES[netKey];
+      var isWarm = document.getElementById('sim-cache').value === 'warm';
+
+      // Adjust slice count dynamically if user edited the text
+      var currentText = (document.getElementById('mlfont-title').textContent +
+                         document.getElementById('mlfont-body').textContent).replace(/\s+/g, '');
+      var uniqueChars = new Set(Array.from(currentText)).size;
+      var baseChars = new Set(Array.from((page.title + page.body).replace(/\s+/g, ''))).size;
+      var scale = baseChars > 0 ? Math.max(0.25, uniqueChars / baseChars) : 1.0;
+
+      var mlSlicesList = page.mlSlices.slice();
+      var mlSlicesCount = isWarm ? Math.max(1, Math.round(mlSlicesList.length * 0.18)) :
+          Math.min(meta.totalSlices, Math.max(1, Math.round(mlSlicesList.length * scale)));
+      var mlFontBytes = isWarm ? Math.round(mlSlicesCount * meta.avgTopicSliceBytes) :
+          Math.round((page.mlBytes - meta.mlCssGzipBytes) * scale);
+
+      var eqSlicesCount = isWarm ? Math.max(1, Math.round(page.eqSlicesCount * 0.08)) :
+          Math.min(meta.totalSlices, Math.max(1, Math.round(page.eqSlicesCount * scale)));
+      var eqFontBytes = isWarm ? Math.round(eqSlicesCount * meta.avgTopicSliceBytes) :
+          Math.round((page.eqBytes - meta.eqCssGzipBytes) * scale);
+
+      var fullSlicesCount = isWarm ? 0 : 1;
+      var fullFontBytes = isWarm ? 0 : meta.fullWoff2Bytes;
+
+      var mlTiming = computeStrategyTiming(
+        net, meta.mlCssGzipBytes, mlFontBytes, mlSlicesCount, meta.hfSliceBytes, isWarm
+      );
+      var eqTiming = computeStrategyTiming(
+        net, meta.eqCssGzipBytes, eqFontBytes, eqSlicesCount, meta.avgTopicSliceBytes * 6, isWarm
+      );
+      var fullTiming = computeStrategyTiming(
+        net, meta.singleCssGzipBytes, fullFontBytes, fullSlicesCount, fullFontBytes, isWarm
+      );
+
+      var speedupCold = fullTiming.totalMs > 0 ?
+          (fullTiming.totalMs / Math.max(1, mlTiming.totalMs)).toFixed(2) + 'x' : 'Cached';
+      var bytesSavedPct = fullTiming.transferBytes > 0 ?
+          (100 * (1 - mlTiming.transferBytes / fullTiming.transferBytes)).toFixed(1) + '%' : '0.0%';
+
+      document.getElementById('sim-headline').textContent =
+        isWarm ?
+        ('Warm Session: MLFont downloads only ' + mlSlicesCount + ' new topic slices (' +
+         (mlTiming.transferBytes / 1024).toFixed(0) + ' KB in ' + mlTiming.totalMs + ' ms)') :
+        ('Cold Cache: MLFont is ' + speedupCold + ' faster (' + mlTiming.totalMs + ' ms vs. ' +
+         fullTiming.totalMs + ' ms) and saves ' + bytesSavedPct + ' bandwidth!');
+
+      document.getElementById('mlfont-Quick-stats').innerHTML =
+        'Slices: <strong>' + mlSlicesCount + ' / ' + meta.totalSlices + '</strong> &bull; ' +
+        'Transfer: <strong>' + (mlTiming.transferBytes / 1024).toFixed(1) + ' KB</strong> &bull; ' +
+        '1st Paint: <strong>' + mlTiming.firstPaintMs + ' ms</strong> &bull; ' +
+        'Total Load: <strong>' + mlTiming.totalMs + ' ms</strong>';
+
+      document.getElementById('fullfont-Quick-stats').innerHTML =
+        'Slices: <strong>' + fullSlicesCount + ' / 1</strong> &bull; ' +
+        'Transfer: <strong>' + (fullTiming.transferBytes / 1024).toFixed(1) + ' KB</strong> &bull; ' +
+        '1st Paint: <strong>' + fullTiming.firstPaintMs + ' ms</strong> &bull; ' +
+        'Total Load: <strong>' + fullTiming.totalMs + ' ms</strong>';
+
+      // Render slice pills
+      var shownSlices = isWarm ? mlSlicesList.slice(-mlSlicesCount) : mlSlicesList.slice(0, mlSlicesCount);
+      document.getElementById('mlfont-slice-pills').innerHTML = shownSlices.map(function(sIdx) {
+        var isHf = sIdx <= 1;
+        return '<span class="slice-pill' + (isHf ? ' hf' : '') + '">slice_' +
+               String(sIdx).padStart(3, '0') + (isHf ? ' (HF)' : '') + '</span>';
+      }).join('');
+      document.getElementById('fullfont-slice-pills').innerHTML =
+        '<span class="slice-pill">full_font.woff2 (' + (meta.fullWoff2Bytes / 1024).toFixed(0) + ' KB)</span>';
+
+      // Populate comparison table
+      var rows = [
+        {
+          name: 'MLFont Smart Slices (Range-Compact GA)',
+          slices: mlSlicesCount + ' / ' + meta.totalSlices,
+          kb: (mlTiming.transferBytes / 1024).toFixed(1) + ' KB',
+          fp: mlTiming.firstPaintMs + ' ms',
+          tot: mlTiming.totalMs,
+          color: '#16a34a'
+        },
+        {
+          name: 'Heuristic Equal-Bin (' + meta.totalSlices + ' Slices)',
+          slices: eqSlicesCount + ' / ' + meta.totalSlices,
+          kb: (eqTiming.transferBytes / 1024).toFixed(1) + ' KB',
+          fp: eqTiming.firstPaintMs + ' ms',
+          tot: eqTiming.totalMs,
+          color: '#d97706'
+        },
+        {
+          name: 'Full Unsliced Font (Single WOFF2)',
+          slices: fullSlicesCount + ' / 1',
+          kb: (fullTiming.transferBytes / 1024).toFixed(1) + ' KB',
+          fp: fullTiming.firstPaintMs + ' ms',
+          tot: fullTiming.totalMs,
+          color: '#64748b'
+        }
+      ];
+      if (page.eaBytes && !isWarm) {
+        var eaTiming = computeStrategyTiming(
+          net, meta.eaCssGzipBytes, page.eaBytes - meta.eaCssGzipBytes,
+          page.eaSlices.length, meta.eaHfSliceBytes || (meta.hfSliceBytes * 1.4), false
+        );
+        rows.splice(1, 0, {
+          name: 'Google Fonts Early Access (2017 Archival)',
+          slices: page.eaSlices.length + ' / 102',
+          kb: (eaTiming.transferBytes / 1024).toFixed(1) + ' KB',
+          fp: eaTiming.firstPaintMs + ' ms',
+          tot: eaTiming.totalMs,
+          color: '#0d9488'
+        });
+      }
+
+      var maxMs = Math.max(1, fullTiming.totalMs, eqTiming.totalMs, mlTiming.totalMs);
+      document.getElementById('sim-table-tbody').innerHTML = rows.map(function(r) {
+        var pctWidth = Math.max(3, Math.round((r.tot / maxMs) * 100));
+        var sp = fullTiming.totalMs > 0 && r.tot > 0 ? (fullTiming.totalMs / r.tot).toFixed(2) + 'x' : '—';
+        var rawBytes = parseFloat(r.kb) * 1024;
+        var saved = fullTiming.transferBytes > 0 ?
+            (100 * (1 - rawBytes / fullTiming.transferBytes)).toFixed(1) + '%' : '—';
+        return '<tr>' +
+          '<td><strong>' + r.name + '</strong></td>' +
+          '<td>' + r.slices + '</td>' +
+          '<td>' + r.kb + '</td>' +
+          '<td>' + r.fp + '</td>' +
+          '<td><strong>' + r.tot + ' ms</strong></td>' +
+          '<td><div class="waterfall-bar-wrap"><div class="waterfall-bar" style="width:' +
+            pctWidth + '%;background:' + r.color + ';"></div></div></td>' +
+          '<td><strong>' + sp + '</strong></td>' +
+          '<td>' + saved + '</td>' +
+          '</tr>';
+      }).join('');
+
+      // Visual replay animation compressed into ~2.4 seconds max wall time
+      var mlVp = document.getElementById('mlfont-viewport');
+      var fullVp = document.getElementById('fullfont-viewport');
+      var mlBar = document.getElementById('mlfont-progress');
+      var fullBar = document.getElementById('fullfont-progress');
+      var mlBadge = document.getElementById('mlfont-status-badge');
+      var fullBadge = document.getElementById('fullfont-status-badge');
+
+      if (!animate || maxMs === 0) {
+        mlVp.className = 'preview-viewport';
+        fullVp.className = 'preview-viewport';
+        mlBar.style.width = '100%';
+        fullBar.style.width = '100%';
+        mlBadge.textContent = 'Loaded (' + mlTiming.totalMs + ' ms)';
+        fullBadge.textContent = 'Loaded (' + fullTiming.totalMs + ' ms)';
+        return;
+      }
+
+      var timeScale = Math.min(1.0, 2400.0 / Math.max(600, maxMs));
+      var mlFpDelay = Math.max(80, Math.round(mlTiming.firstPaintMs * timeScale));
+      var mlTotDelay = Math.max(160, Math.round(mlTiming.totalMs * timeScale));
+      var fullTotDelay = Math.max(200, Math.round(fullTiming.totalMs * timeScale));
+
+      mlVp.className = 'preview-viewport loading-faint';
+      fullVp.className = 'preview-viewport loading-faint';
+      mlBar.style.width = '8%';
+      fullBar.style.width = '5%';
+      mlBadge.textContent = 'Fetching slices...';
+      fullBadge.textContent = 'Downloading ' + (meta.fullWoff2Bytes / 1024).toFixed(0) + ' KB...';
+
+      activeReplayTimers.push(setTimeout(function() {
+        mlVp.className = 'preview-viewport loading-hf';
+        mlBar.style.width = '68%';
+        mlBadge.textContent = '1st Paint (' + page.hfCov + '% chars @ ' + mlTiming.firstPaintMs + ' ms)';
+      }, mlFpDelay));
+
+      activeReplayTimers.push(setTimeout(function() {
+        mlVp.className = 'preview-viewport';
+        mlBar.style.width = '100%';
+        mlBadge.textContent = '100% Ready (' + mlTiming.totalMs + ' ms)';
+      }, mlTotDelay));
+
+      activeReplayTimers.push(setTimeout(function() {
+        fullBar.style.width = '50%';
+      }, Math.round(fullTotDelay * 0.5)));
+
+      activeReplayTimers.push(setTimeout(function() {
+        fullVp.className = 'preview-viewport';
+        fullBar.style.width = '100%';
+        fullBadge.textContent = '100% Ready (' + fullTiming.totalMs + ' ms)';
+      }, fullTotDelay));
+    }
+
     var SAMPLES = {
       sc: {
         font: 'notosanssc',
@@ -208,6 +1073,10 @@
           '</tr>';
       }).join('');
     }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      onSimFontChange();
+    });
 
     window.addEventListener('load', function() {
       setTimeout(refreshMetrics, 800);

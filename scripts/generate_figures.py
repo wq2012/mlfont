@@ -383,6 +383,141 @@ def plot_fig4_production_traffic(
     _save_both(fig, "fig4_production_traffic", png_dir, pdf_dir)
 
 
+def plot_fig5_website_simulation(
+    web_report: Dict[str, object],
+    png_dir: Path,
+    pdf_dir: Path | None,
+) -> None:
+    """Fig 5: Real-website simulation & Headless Chrome benchmark latency comparison."""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 4.5))
+
+    # Panel (a): Per-website cold-cache load latency across 8 Chinese websites on Cable-5Mbps
+    sc_pages = web_report["fonts"]["notosanssc"]["page_results"]
+    page_order = [
+        ("dev_china_portal", "Dev\nPortal"),
+        ("sina_sports_nba", "Sports\nNBA"),
+        ("tech_ai_maluuba", "Tech\nAI"),
+        ("world_politics_news", "World\nPolitics"),
+        ("entertainment_spring_gala", "Spring\nGala"),
+        ("shenzhenware_hardware", "Smart\nHardware"),
+        ("novel_tangqi_fiction", "Tangqi\nNovel"),
+        ("cooking_recipe_beef", "Cooking\nRecipe"),
+    ]
+    strat_specs = [
+        ("single_slice", "Full Unsliced WOFF2 (5.99 MB)", COLORS["single"]),
+        ("equal_bin_102", "Equal-Bin (102 Slices)", COLORS["equal_bin"]),
+        ("most_1000_500_equal_bin_100", "Most + Equal-Bin", COLORS["most_eq"]),
+        ("range_compact_most1000_500_topics100", "MLFont Range-Compact GA", COLORS["ga"]),
+        ("google_fonts_ea_2017", "Google Fonts EA (2017)", "#16a085"),
+    ]
+
+    x1 = np.arange(len(page_order))
+    w1 = 0.155
+    for idx, (sname, label, col) in enumerate(strat_specs):
+        vals: List[float] = []
+        for pid, _ in page_order:
+            match = next(
+                (
+                    p
+                    for p in sc_pages
+                    if p["page_id"] == pid
+                    and p["strategy_name"] == sname
+                    and p["profile_name"] == "Cable-5Mbps"
+                    and p["cache_mode"] == "cold"
+                ),
+                None,
+            )
+            vals.append((match["total_font_load_ms"] / 1000.0) if match else 0.0)
+        offset = (idx - len(strat_specs) / 2.0 + 0.5) * w1
+        ax1.bar(
+            x1 + offset,
+            vals,
+            w1,
+            label=label,
+            color=col,
+            edgecolor="black",
+            lw=0.4,
+        )
+
+    ax1.set_xticks(x1)
+    ax1.set_xticklabels([lbl for _, lbl in page_order], fontsize=8.5)
+    ax1.set_ylabel("Cold-Cache Font Load Latency on Cable 5 Mbps (s)")
+    ax1.set_title("(a) Per-Website Cold Load Latency (Noto Sans SC, 8 Real Websites)")
+    ax1.set_ylim(0, 12.8)
+    ax1.grid(True, axis="y", ls=":", alpha=0.5)
+    ax1.legend(loc="upper right", ncol=2, frameon=True, fontsize=7.6)
+
+    # Panel (b): Headless Chrome End-to-End document.fonts.ready Latency Across 5 Noto Fonts
+    chrome_list = web_report.get("headless_chrome_benchmark", [])
+    font_order = [
+        ("notosanssc", "Noto Sans\nSC"),
+        ("notosanstc", "Noto Sans\nTC"),
+        ("notosansjp", "Noto Sans\nJP"),
+        ("notosanskr", "Noto Sans\nKR"),
+        ("notosans_lgc", "Noto Sans\nLGC"),
+    ]
+    chrome_specs = [
+        ("single_slice", "Full Unsliced WOFF2", COLORS["single"]),
+        ("equal_bin", "Equal-Bin Baseline", COLORS["equal_bin"]),
+        ("range_compact", "MLFont (Range-Compact GA)", COLORS["ga"]),
+    ]
+    x2 = np.arange(len(font_order))
+    w2 = 0.24
+
+    single_means: List[float] = []
+    ga_means: List[float] = []
+
+    for idx, (prefix, label, col) in enumerate(chrome_specs):
+        means: List[float] = []
+        for fkey, _ in font_order:
+            rows = [
+                c["fonts_ready_ms"] / 1000.0
+                for c in chrome_list
+                if c["font_key"] == fkey and c["strategy_name"].startswith(prefix)
+            ]
+            val = float(np.mean(rows)) if rows else 0.0
+            means.append(val)
+        if prefix == "single_slice":
+            single_means = means
+        elif prefix == "range_compact":
+            ga_means = means
+        offset = (idx - 1.0) * w2
+        ax2.bar(
+            x2 + offset,
+            means,
+            w2,
+            label=label,
+            color=col,
+            edgecolor="black",
+            lw=0.45,
+        )
+
+    for i, (s_val, g_val) in enumerate(zip(single_means, ga_means)):
+        if s_val > 0 and g_val > 0:
+            sp = s_val / g_val
+            ax2.text(
+                x2[i] + w2,
+                g_val + 0.25,
+                f"{sp:.1f}x",
+                ha="center",
+                va="bottom",
+                fontsize=8.5,
+                fontweight="bold",
+                color="#1e8449",
+            )
+
+    ax2.set_xticks(x2)
+    ax2.set_xticklabels([lbl for _, lbl in font_order])
+    ax2.set_ylabel("Mean Chrome document.fonts.ready Latency (s)")
+    ax2.set_title("(b) Headless Chrome Benchmark Across 5 Noto Fonts (Cable 5 Mbps)")
+    ax2.set_ylim(0, 11.8)
+    ax2.grid(True, axis="y", ls=":", alpha=0.5)
+    ax2.legend(loc="upper right", frameon=True, fontsize=8.2)
+
+    fig.tight_layout()
+    _save_both(fig, "fig5_website_simulation", png_dir, pdf_dir)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -421,7 +556,13 @@ def main() -> None:
     traffic_csv = args.experiments_dir / "production_traffic_2017_2021.csv"
     if traffic_csv.exists():
         plot_fig4_production_traffic(traffic_csv, args.png_dir, args.pdf_dir)
-    print(f"Successfully generated all 4 figures in {args.png_dir} and {args.pdf_dir}")
+
+    web_sim_path = args.experiments_dir / "website_simulation_report.json"
+    if web_sim_path.exists():
+        web_report = json.loads(web_sim_path.read_text(encoding="utf-8"))
+        plot_fig5_website_simulation(web_report, args.png_dir, args.pdf_dir)
+
+    print(f"Successfully generated all figures in {args.png_dir} and {args.pdf_dir}")
 
 
 if __name__ == "__main__":

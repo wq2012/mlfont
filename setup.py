@@ -35,6 +35,7 @@ setuptools.setup(
             "mlfont-export=scripts.export_model:main",
             "mlfont-slice=scripts.inference:main",
             "mlfont-inference=scripts.inference:main",
+            "mlfont-simulate=scripts.simulate_website:main",
         ],
     },
     classifiers=[

@@ -805,3 +805,306 @@ def test_public_exports_and_skewed_edge_cases(tmp_path: Path) -> None:
     assert strat_tiny.num_slices == 6
     tiny_sizes = [len(s) for s in strat_tiny.subsets]
     assert max(tiny_sizes) - min(tiny_sizes) <= 1
+
+
+def test_website_simulator_html_extraction_and_profiles(tmp_path):
+    """Test HTML text/codepoint extraction, file loading, and network profiles."""
+    import pytest
+    from mlfont.simulator import (
+        BrowserNetworkProfile,
+        extract_visible_text_from_html,
+        extract_webpage_codepoints,
+        get_network_profile,
+        get_real_website_benchmark_pages,
+        load_webpage_sample,
+    )
+
+    p_3g = get_network_profile("gin-3g")
+    assert p_3g.name == "GIN-3g"
+    assert p_3g.bandwidth_kbps == 400.0
+    assert p_3g.rtt_ms == 400.0
+
+    # Verify documented network profile aliases resolve properly
+    assert get_network_profile("GIN-2g-poor").bandwidth_kbps == 32.0
+    assert get_network_profile("Broadband-20Mbps").bandwidth_kbps == 20000.0
+    assert get_network_profile("residential-ADSL2+").bandwidth_kbps == 20000.0
+
+    custom_p = BrowserNetworkProfile(
+        "Custom-WiFi", rtt_ms=15.0, bandwidth_bytes_per_ms=2500.0, max_parallel_requests=6
+    )
+    assert get_network_profile(custom_p) is custom_p
+    assert custom_p.rtt_ms == 15.0
+    assert custom_p.bandwidth_kbps == 20000.0
+
+    with pytest.raises(ValueError, match="Unknown network profile"):
+        get_network_profile("nonexistent-network-999")
+
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>忽略标题</title>
+      <style>body { font-family: sans-serif; content: "隐藏样式"; }</style>
+      <script>const secret = "隐藏脚本";</script>
+    </head>
+    <body>
+      <!-- HTML 注释内容不应被提取 -->
+      <h1>开发者门户 &amp; WebFont 测试</h1>
+      <p>第一段：机器学习字体分片。</p>
+      <noscript>禁用JS提示</noscript>
+      <template><p>模板内容</p></template>
+    </body>
+    </html>
+    """
+    vis_text = extract_visible_text_from_html(html)
+    assert "开发者门户 & WebFont 测试" in vis_text
+    assert "第一段：机器学习字体分片。" in vis_text
+    assert "隐藏样式" not in vis_text
+    assert "隐藏脚本" not in vis_text
+    assert "注释内容" not in vis_text
+    assert "禁用JS提示" not in vis_text
+    assert "模板内容" not in vis_text
+
+    cps = extract_webpage_codepoints(html)
+    assert ord("开") in cps
+    assert ord("&") in cps
+    assert 0x20 in cps  # Collapsed whitespace includes ASCII space
+    assert ord("隐") not in cps
+
+    # Plain text mode, valid_codepoints filter, and empty input edge case
+    assert extract_webpage_codepoints("") == set()
+    plain_cps = extract_webpage_codepoints("Hello\nWorld")
+    assert 0x20 in plain_cps
+    assert ord("H") in plain_cps
+    assert ord("\n") not in plain_cps
+    filtered_cps = extract_webpage_codepoints("Hello\nWorld", valid_codepoints={ord("H")})
+    assert filtered_cps == {ord("H")}
+
+    # Load from .html and .txt files
+    html_file = tmp_path / "sample_page.html"
+    html_file.write_text(html, encoding="utf-8")
+    loaded_html = load_webpage_sample(str(html_file), page_id="sample_page")
+    assert loaded_html.page_id == "sample_page"
+    assert ord("开") in loaded_html.codepoints
+
+    txt_file = tmp_path / "plain_note.txt"
+    txt_file.write_text("纯文本测试内容", encoding="utf-8")
+    loaded_txt = load_webpage_sample(str(txt_file), title="Plain Note")
+    assert loaded_txt.title == "Plain Note"
+    assert ord("纯") in loaded_txt.codepoints
+
+    # Benchmark catalog across all 5 fonts
+    all_pages = get_real_website_benchmark_pages("all")
+    assert len(all_pages) == 20
+    sc_pages = get_real_website_benchmark_pages("notosanssc")
+    assert len(sc_pages) == 8
+    with pytest.raises(ValueError, match="Unknown font_key"):
+        get_real_website_benchmark_pages("invalid_font")
+
+
+def test_website_font_simulator_and_cli(tmp_path):
+    """Test WebsiteFontSimulator page load, warm session, comparison, and CLI."""
+    import json
+    import pytest
+    from mlfont import SlicingStrategy
+    from mlfont.simulator import (
+        WebPageSample,
+        WebsiteFontSimulator,
+        get_real_website_benchmark_pages,
+        save_website_simulation_report_json,
+    )
+    from scripts.simulate_website import main as simulate_cli_main
+
+    # Build a 3-slice strategy vs equal_bin_3 vs 1-slice full strategy
+    s0 = set(range(0x0020, 0x0080))
+    s1 = set(range(0x4E00, 0x4E50))
+    s2 = set(range(0x4E50, 0x4F00))
+    all_cps = sorted(s0 | s1 | s2)
+    sliced_strat = SlicingStrategy(subsets=[s0, s1, s2], name="mlfont_3slice")
+    eq_strat = SlicingStrategy(subsets=[s0, s1, s2], name="equal_bin_3")
+    full_strat = SlicingStrategy(subsets=[s0 | s1 | s2], name="single_slice")
+
+    sim = WebsiteFontSimulator(
+        font_key="notosanssc",
+        codepoints=all_cps,
+        strategies=[full_strat, sliced_strat, eq_strat],
+        slice_byte_sizes_map={
+            "single_slice": [100_000],
+            "mlfont_3slice": [10_000, 40_000, 50_000],
+            "equal_bin_3": [10_000, 40_000, 50_000],
+        },
+        full_font_woff2_bytes=100_000,
+    )
+
+    assert sim._get_high_freq_slice_indices("single_slice", full_strat) == {0}
+    assert sim._get_high_freq_slice_indices("equal_bin_3", eq_strat) == set()
+    assert sim._get_high_freq_slice_indices("mlfont_3slice", sliced_strat) == {0, 1}
+
+    with pytest.raises(ValueError, match="Unknown strategy"):
+        sim.simulate_page_load(
+            WebPageSample("p0", "P0", "u", "Cat", "notosanssc", "<p>Hi</p>"),
+            "nonexistent_strategy",
+            "GIN-3g",
+        )
+
+    # Page using all 3 slices so equal_bin_3 Wave-1 downloads all 3 slices
+    # while mlfont Tier-1 is s0+s1
+    page_all3 = WebPageSample(
+        page_id="p_all3",
+        title="Page All 3",
+        url="https://example.com/all3",
+        category="Test",
+        font_key="notosanssc",
+        html_content="<p>Hello 一丁七 乐乒乓</p>",
+    )
+    res_ml_all3 = sim.simulate_page_load(page_all3, "mlfont_3slice", "GIN-3g")
+    res_eq_all3 = sim.simulate_page_load(page_all3, "equal_bin_3", "GIN-3g")
+    assert res_ml_all3.high_freq_token_coverage_pct > 0.0
+    assert res_eq_all3.high_freq_token_coverage_pct == 0.0
+    assert res_ml_all3.first_text_paint_ms < res_eq_all3.first_text_paint_ms
+
+    # Page using only s0 and s1 (not s2)
+    page1 = WebPageSample(
+        page_id="p1",
+        title="Page 1",
+        url="https://example.com/1",
+        category="Test",
+        font_key="notosanssc",
+        html_content="<p>Hello 一丁七</p>",
+    )
+    res_sliced = sim.simulate_page_load(page1, "mlfont_3slice", "GIN-3g")
+    res_full = sim.simulate_page_load(page1, "single_slice", "GIN-3g")
+
+    assert res_sliced.required_slice_indices == [0, 1]
+    assert res_sliced.downloaded_slice_indices == [0, 1]
+    assert res_sliced.font_bytes_downloaded == 50_000
+    assert res_full.font_bytes_downloaded == 100_000
+    assert res_sliced.total_font_load_ms < res_full.total_font_load_ms
+    assert res_sliced.first_text_paint_ms <= res_sliced.total_font_load_ms
+
+    # Warm cache session: second load of same slices should take 0 ms and 0 font bytes
+    page2 = WebPageSample(
+        page_id="p2",
+        title="Page 2",
+        url="https://example.com/2",
+        category="Test",
+        font_key="notosanssc",
+        html_content="<p>World 万丈三</p>",
+    )
+    session_results = sim.simulate_browsing_session([page1, page2], "mlfont_3slice", "GIN-3g")
+    assert len(session_results) == 2
+    assert session_results[1].num_slices_cached == 2
+    assert session_results[1].downloaded_slice_indices == []
+    assert session_results[1].font_bytes_downloaded == 0
+    assert session_results[1].total_font_load_ms == 0.0
+
+    # Empty page codepoints edge case
+    empty_page = WebPageSample(
+        page_id="empty",
+        title="Empty",
+        url="https://example.com/empty",
+        category="Test",
+        font_key="notosanssc",
+        html_content="",
+    )
+    res_empty = sim.simulate_page_load(empty_page, "mlfont_3slice", "GIN-3g")
+    assert res_empty.num_slices_downloaded == 0
+    assert res_empty.font_bytes_downloaded == 0
+
+    # Compare strategies & save JSON report
+    report = sim.compare_strategies(
+        pages=[page1, page2],
+        profiles=["GIN-3g", "Cable-5Mbps"],
+    )
+    assert len(report.summaries) == 6
+    mlfont_3g = [
+        s for s in report.summaries
+        if s.strategy_name == "mlfont_3slice" and s.profile_name == "GIN-3g"
+    ][0]
+    assert mlfont_3g.speedup_vs_single_slice_cold > 1.2
+    assert mlfont_3g.bytes_saved_vs_single_slice_cold_pct > 45.0
+
+    json_out = tmp_path / "sim_report.json"
+    save_website_simulation_report_json([report], [], str(json_out))
+    assert json_out.exists()
+    parsed = json.loads(json_out.read_text(encoding="utf-8"))
+    assert "fonts" in parsed and "notosanssc" in parsed["fonts"]
+
+    # Test CLI entrypoint on Noto Sans LGC with --profiles alias and mlfont-* font_key normalization
+    cli_json = tmp_path / "cli_sim.json"
+    lgc_pages = get_real_website_benchmark_pages("notosans_lgc")
+    sample_html_path = tmp_path / "custom_lgc.html"
+    sample_html_path.write_text(lgc_pages[0].html_content, encoding="utf-8")
+
+    simulate_cli_main([
+        "--font_key", "mlfont-notosans-lgc",
+        "--profiles", "GIN-2g-poor,Cable-5Mbps",
+        "--html_file", str(sample_html_path),
+        "--output_json", str(cli_json),
+    ])
+    assert cli_json.exists()
+
+
+def test_hf_model_card_website_simulation_section(tmp_path: Path) -> None:
+    """Verify write_hf_model_card and all 5 pretrained model cards include subsection 5."""
+    from scripts.run_noto_experiments import (
+        FONT_SPECS,
+        REPO_ROOT,
+        _build_website_sim_section,
+        _load_eval_results_json,
+        write_hf_model_card,
+    )
+
+    # 1. Verify all 5 checked-in model cards contain subsection 5 and no raw $ math
+    for spec in FONT_SPECS:
+        hf_name = str(spec["hf_name"])
+        key = str(spec["key"])
+        card_path = REPO_ROOT / "pretrained_models" / hf_name / "README.md"
+        assert card_path.exists()
+        content = card_path.read_text(encoding="utf-8")
+        assert (
+            "### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification"
+            in content
+        )
+        assert f"mlfont-simulate --font_key {key} --html_file" in content
+        assert "web/demo.html" in content
+        assert "Real Headless Google Chrome" in content
+        assert "$" not in content
+
+    # 2. Test write_hf_model_card in a temporary bundle directory
+    spec0 = FONT_SPECS[0]
+    bdir0 = REPO_ROOT / "pretrained_models" / str(spec0["hf_name"])
+    strat0 = SlicingStrategy.load_json(bdir0 / "strategy.json")
+    eval_res0 = _load_eval_results_json(bdir0 / "evaluation_metrics.json")
+    ga_res0 = [r for r in eval_res0 if r.strategy_name == strat0.name]
+    write_hf_model_card(
+        bundle_dir=tmp_path,
+        spec=spec0,
+        strategy=strat0,
+        eval_results=ga_res0,
+        all_strat_results=eval_res0,
+        total_woff2_bytes=444484,
+        css_bytes=7974,
+        wall_time_sec=24.0,
+    )
+    gen_card = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert (
+        "### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification"
+        in gen_card
+    )
+    assert "lgc_scientific_typography" in gen_card
+
+    # 3. Edge case: missing simulation report path still produces CLI/demo instructions cleanly
+    fallback_lines = _build_website_sim_section(
+        key="notosans_lgc",
+        hf_name="mlfont-notosans-lgc",
+        title="Noto Sans (Pan-European LGC)",
+        strategy_name="range_compact_topics20",
+        sim_report_path=tmp_path / "nonexistent_report.json",
+    )
+    fallback_text = "\n".join(fallback_lines)
+    assert (
+        "### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification"
+        in fallback_text
+    )
+    assert "mlfont-simulate --font_key notosans_lgc" in fallback_text

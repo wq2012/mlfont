@@ -89,6 +89,46 @@ To include the library, add the following code to the bottom of your `<head>` se
 
 You can inspect downloaded slice metrics in your browser DevTools console via `MLFont.printReport()` or `MLFont.getMetrics()`, or forward anonymized telemetry beacons to your own analytics endpoint via `data-endpoint="https://your-analytics.example.com/mlfont-timing"`.
 
+### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification
+
+Across **3 real-world sample websites** for **Noto Sans JP (Japanese)** (full unsliced WOFF2: `3,260.2 KB`), **`range_compact_most500_500_topics60`** downloads an average of only **`10.33 / 62`** slices (`1,062.9 KB` vs. `3,279.1 KB` unsliced, saving **`67.6%`** bandwidth). On `Cable-5Mbps` (`5 Mbps`, `28 ms` RTT), this achieves a **`2.94x`** cold-cache load speedup (**`1,851 ms`** vs. `5,437 ms` for `single_slice`), with **First Text Paint at `689 ms`** and **Warm-Session Load at `568 ms`** (and **`2.94x`** speedup on `GIN-3g`: **`23,117 ms`** vs. `67,965 ms`):
+
+| Strategy | Slices Dl / Total | Transfer (KB) | Bytes Saved | Cable-5Mbps 1st Paint (ms) | Cable-5Mbps Cold Load (ms) | Cable-5Mbps Warm Load (ms) | GIN-3g Cold Load (ms) | Cold Speedup (Cable / 3G) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `single_slice` | 1.00 / 1 | 3,279.1 KB | 0.0% | 5,437 ms | **5,437 ms** | 0 ms | 67,965 ms | **1.00x / 1.00x** |
+| `equal_bin_62` | 37.00 / 62 | 2,873.3 KB | 12.4% | 859 ms | **4,924 ms** | 989 ms | 61,789 ms | **1.10x / 1.10x** |
+| `most_500_500_equal_bin_60` | 14.00 / 62 | 1,270.6 KB | 61.2% | 678 ms | **2,207 ms** | 1,727 ms | 27,636 ms | **2.46x / 2.46x** |
+| `language_slice` | 2.00 / 10 | 1,949.9 KB | 40.5% | 3,261 ms | **3,261 ms** | 0 ms | 40,745 ms | **1.67x / 1.67x** |
+| `online_lda_topics60_greedy` | 9.33 / 62 | 930.8 KB | 71.6% | 696 ms | **1,628 ms** | 521 ms | 20,281 ms | **3.34x / 3.35x** |
+| `dnntm_topics60_greedy` | 7.67 / 62 | 805.1 KB | 75.5% | 695 ms | **1,412 ms** | 644 ms | 17,573 ms | **3.85x / 3.87x** |
+| **range_compact_most500_500_topics60 (This Model)** | 10.33 / 62 | 1,062.9 KB | 67.6% | 689 ms | **1,851 ms** | 568 ms | 23,117 ms | **2.94x / 2.94x** |
+
+#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+
+Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+
+| Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `jp_web_dev_docs` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 165.7 ms | **5,594 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_web_dev_docs` | `equal_bin_62` | 34 | **Yes** | 2,642.4 KB | 91.7 ms | **4,617 ms** | 1.81x | **1.21x** (19.4%) |
+| `jp_web_dev_docs` | **range_compact_most500_500_topics60 (This Model)** | 7 | **Yes** | 773.6 KB | 79.1 ms | **1,431 ms** | 2.09x | **3.91x** (76.4%) |
+| `jp_sports_baseball` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 164.7 ms | **5,593 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_sports_baseball` | `equal_bin_62` | 35 | **Yes** | 2,718.8 KB | 93.5 ms | **4,744 ms** | 1.76x | **1.18x** (17.1%) |
+| `jp_sports_baseball` | **range_compact_most500_500_topics60 (This Model)** | 10 | **Yes** | 1,054.6 KB | 63.6 ms | **1,875 ms** | 2.59x | **2.98x** (67.8%) |
+| `jp_literature_essay` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 250.8 ms | **5,679 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_literature_essay` | `equal_bin_62` | 42 | **Yes** | 3,258.6 KB | 264.9 ms | **5,828 ms** | 0.95x | **0.97x** (0.6%) |
+| `jp_literature_essay` | **range_compact_most500_500_topics60 (This Model)** | 14 | **Yes** | 1,360.4 KB | 198.7 ms | **2,540 ms** | 1.26x | **2.24x** (58.5%) |
+
+You can test your own HTML files, live URLs, or text snippets against `mlfont-notosansjp` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
+
+```bash
+# Simulate a local HTML file with mlfont-notosansjp across all 7 network profiles:
+mlfont-simulate --font_key notosansjp --html_file path/to/index.html --network_profile all
+
+# Simulate a live URL and verify in real Headless Google Chrome:
+mlfont-simulate --font_key notosansjp --url https://example.com --network_profile Cable-5Mbps --headless_chrome
+```
+
 ## Training Configuration
 
 * **Target Font**: `NotoSansJP-Regular.otf` (16,663 Unicode codepoints)

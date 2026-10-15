@@ -89,6 +89,45 @@ To include the library, add the following code to the bottom of your `<head>` se
 
 You can inspect downloaded slice metrics in your browser DevTools console via `MLFont.printReport()` or `MLFont.getMetrics()`, or forward anonymized telemetry beacons to your own analytics endpoint via `data-endpoint="https://your-analytics.example.com/mlfont-timing"`.
 
+### 5. Simulating Real-Website Font Loading Latency & Headless Chrome Verification
+
+Across **3 real-world sample websites** for **Noto Sans (Pan-European LGC)** (full unsliced WOFF2: `157.7 KB`), **`range_compact_topics20`** downloads an average of only **`4.00 / 20`** slices (`87.6 KB` vs. `158.4 KB` unsliced, saving **`44.7%`** bandwidth). On `Cable-5Mbps` (`5 Mbps`, `28 ms` RTT), this achieves a **`1.57x`** cold-cache load speedup (**`201 ms`** vs. `316 ms` for `single_slice`), with **First Text Paint at `94 ms`** and **Warm-Session Load at `0 ms`** (and **`1.56x`** speedup on `GIN-3g`: **`2,596 ms`** vs. `4,043 ms`):
+
+| Strategy | Slices Dl / Total | Transfer (KB) | Bytes Saved | Cable-5Mbps 1st Paint (ms) | Cable-5Mbps Cold Load (ms) | Cable-5Mbps Warm Load (ms) | GIN-3g Cold Load (ms) | Cold Speedup (Cable / 3G) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `single_slice` | 1.00 / 1 | 158.4 KB | 0.0% | 316 ms | **316 ms** | 0 ms | 4,043 ms | **1.00x / 1.00x** |
+| `equal_bin_20` | 4.00 / 20 | 87.8 KB | 44.6% | 201 ms | **201 ms** | 32 ms | 2,599 ms | **1.57x / 1.56x** |
+| `language_slice` | 3.00 / 8 | 138.8 KB | 12.4% | 284 ms | **284 ms** | 49 ms | 3,642 ms | **1.11x / 1.11x** |
+| `online_lda_topics20_greedy` | 3.67 / 20 | 82.0 KB | 48.2% | 97 ms | **192 ms** | 0 ms | 2,480 ms | **1.64x / 1.63x** |
+| `dnntm_topics20_greedy` | 3.33 / 20 | 74.7 KB | 52.8% | 97 ms | **180 ms** | 32 ms | 2,333 ms | **1.75x / 1.73x** |
+| **range_compact_topics20 (This Model)** | 4.00 / 20 | 87.6 KB | 44.7% | 94 ms | **201 ms** | 0 ms | 2,596 ms | **1.57x / 1.56x** |
+
+#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+
+Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+
+| Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `lgc_multilingual_eu_news` | `single_slice` | 1 | **Yes** | 158.4 KB | 38.8 ms | **354 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_multilingual_eu_news` | `equal_bin_20` | 6 | **Yes** | 131.2 KB | 41.7 ms | **313 ms** | 0.93x | **1.13x** (17.2%) |
+| `lgc_multilingual_eu_news` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 24.0 ms | **261 ms** | 1.62x | **1.36x** (30.2%) |
+| `lgc_slavic_hellenic_encyclopedia` | `single_slice` | 1 | **Yes** | 158.4 KB | 60.6 ms | **376 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_slavic_hellenic_encyclopedia` | `equal_bin_20` | 5 | **Yes** | 109.4 KB | 28.7 ms | **264 ms** | 2.11x | **1.42x** (30.9%) |
+| `lgc_slavic_hellenic_encyclopedia` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 30.5 ms | **268 ms** | 1.99x | **1.41x** (30.2%) |
+| `lgc_scientific_typography` | `single_slice` | 1 | **Yes** | 158.4 KB | 23.9 ms | **339 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_scientific_typography` | `equal_bin_20` | 1 | **Yes** | 22.7 KB | 23.0 ms | **116 ms** | 1.04x | **2.92x** (85.7%) |
+| `lgc_scientific_typography` | **range_compact_topics20 (This Model)** | 2 | **Yes** | 41.7 KB | 17.0 ms | **141 ms** | 1.41x | **2.40x** (73.7%) |
+
+You can test your own HTML files, live URLs, or text snippets against `mlfont-notosans-lgc` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
+
+```bash
+# Simulate a local HTML file with mlfont-notosans-lgc across all 7 network profiles:
+mlfont-simulate --font_key notosans_lgc --html_file path/to/index.html --network_profile all
+
+# Simulate a live URL and verify in real Headless Google Chrome:
+mlfont-simulate --font_key notosans_lgc --url https://example.com --network_profile Cable-5Mbps --headless_chrome
+```
+
 ## Training Configuration
 
 * **Target Font**: `NotoSans-Regular.ttf` (2,297 Unicode codepoints)
