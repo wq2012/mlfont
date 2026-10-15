@@ -13,7 +13,7 @@ import numpy as np
 
 from mlfont.configs import get_preset_config
 from mlfont.data import DocumentCorpusProcessor, parse_codepoints_file
-from mlfont.dnntm import DnnTmConfig, DnnTmLearner
+from mlfont.dnntm import DnnTmConfig, DnnTmLearner, DnnTmLossType
 from mlfont.export import save_safetensors_model
 from mlfont.frequency import generate_most_and_equal_bin_strategy
 from mlfont.olda import OnlineLdaConfig, OnlineLdaLearner
@@ -77,8 +77,23 @@ def main() -> None:
     parser.add_argument(
         "--normalization_method",
         type=str,
-        default="global_max",
-        choices=["topic_sum", "row_sum", "global_max", "spectral_norm", "none"],
+        default="sinkhorn",
+        choices=[
+            "sinkhorn",
+            "bistochastic",
+            "topic_sum",
+            "row_sum",
+            "global_max",
+            "spectral_norm",
+            "none",
+        ],
+    )
+    parser.add_argument(
+        "--loss_type",
+        type=str,
+        default=DnnTmLossType.ALL_COMBINED.value,
+        choices=[e.value for e in DnnTmLossType],
+        help="Loss objective variant for DNNTM training.",
     )
     parser.add_argument(
         "--range_cost_weight",
@@ -122,6 +137,7 @@ def main() -> None:
             n_topics=args.n_topics,
             most_sizes=most_list,
             normalization_method=args.normalization_method,
+            loss_type=args.loss_type,
             random_seed=args.seed,
         )
         ga_cfg = RangeCompactConfig(
@@ -150,12 +166,14 @@ def main() -> None:
         lambda_matrix = learner.lambda_matrix_
         rem_cps = learner.remaining_codepoints_ or codepoints
         most_sizes = olda_cfg.most_sizes
+        norm_method = olda_cfg.normalization_method
     else:
         learner_dnn = DnnTmLearner(corpus, codepoints, dnntm_cfg)
         topic_strategy = learner_dnn.fit()
         lambda_matrix = learner_dnn.lambda_matrix_
         rem_cps = learner_dnn.remaining_codepoints_ or codepoints
         most_sizes = dnntm_cfg.most_sizes
+        norm_method = dnntm_cfg.normalization_method
 
     assert lambda_matrix is not None
     np.save(out_dir / "lambda_matrix.npy", lambda_matrix)
@@ -184,7 +202,7 @@ def main() -> None:
         config=ga_cfg,
         frequency_array=freq_arr,
         most_sizes=most_sizes,
-        normalization_method=olda_cfg.normalization_method,
+        normalization_method=norm_method,
     )
     ga_strategy = ga_learner.run()
     ga_strategy.save_json(out_dir / "strategy.json")

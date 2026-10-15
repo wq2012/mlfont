@@ -491,6 +491,58 @@ def potts_viterbi_smooth_topics(
         mu -= np.mean(mu)
 
     assert best_topics is not None
+    best_counts = np.bincount(best_topics, minlength=n_topics)
+    if int(np.count_nonzero(best_counts == 0)) > n_topics // 2 and n_cp >= n_topics:
+        sub_len = max(1, int(round(target_count)))
+        sub_starts: List[int] = []
+        sub_ends: List[int] = []
+        for s_idx, e_idx in zip(seg_starts, seg_ends):
+            for pos in range(int(s_idx), int(e_idx), sub_len):
+                sub_starts.append(pos)
+                sub_ends.append(min(int(e_idx), pos + sub_len))
+        sym_mu = 1e-6 * np.arange(n_topics, dtype=np.float64)
+        topics_fb = np.empty(n_cp, dtype=np.int64)
+        running_fb = np.zeros(n_topics, dtype=np.float64)
+        for s_idx, e_idx in zip(sub_starts, sub_ends):
+            seg_len = int(e_idx - s_idx)
+            over_mask = running_fb >= target_count
+            eff_mu = (
+                sym_mu
+                + np.where(over_mask, 10.0 * (w_r + val_range), 0.0)
+                + 0.25 * step_scale * (running_fb / max(1.0, target_count))
+            )
+            if seg_len == 1:
+                t_best = int(np.argmin(base_unary[:, s_idx] + eff_mu))
+                topics_fb[s_idx] = t_best
+                running_fb[t_best] += 1.0
+                continue
+            backptr = np.empty((seg_len, n_topics), dtype=np.int32)
+            v_curr = base_unary[:, s_idx] + eff_mu
+            backptr[0] = k_arange
+            for offset in range(1, seg_len):
+                col = s_idx + offset
+                m_prev = float(np.min(v_curr))
+                best_prev = int(np.argmin(v_curr))
+                jump_cost = m_prev + w_r
+                stay_mask = v_curr <= jump_cost
+                backptr[offset] = np.where(stay_mask, k_arange, best_prev)
+                v_curr = (
+                    base_unary[:, col]
+                    + eff_mu
+                    + np.where(stay_mask, v_curr, jump_cost)
+                )
+            curr_t = int(np.argmin(v_curr))
+            topics_fb[e_idx - 1] = curr_t
+            for offset in range(seg_len - 1, 0, -1):
+                curr_t = int(backptr[offset, curr_t])
+                topics_fb[s_idx + offset - 1] = curr_t
+            running_fb += np.bincount(topics_fb[s_idx:e_idx], minlength=n_topics)
+        fb_counts = np.bincount(topics_fb, minlength=n_topics)
+        fb_imb = float(np.max(fb_counts) - np.min(fb_counts)) + float(
+            np.count_nonzero(fb_counts == 0) * n_cp
+        )
+        if fb_imb < best_imbalance:
+            best_topics = topics_fb
     return best_topics
 
 
@@ -502,10 +554,10 @@ def build_island_bridged_topics(
 ) -> Optional[np.ndarray]:
     """Constructs a range-compact monochromatic-island topic assignment for sparse CJK matrices.
 
-    When a font repertoire has a large sparse tail (n_cp > 5000, where most
-    codepoints are unobserved in the corpus), greedy column-by-column balancing
-    interleaves foreground active codepoints with background bin topics, creating
-    two range breaks per active singleton. This solver:
+    When a font repertoire has a large sparse tail (where most codepoints are
+    unobserved in the corpus), greedy column-by-column balancing interleaves
+    foreground active codepoints with background bin topics, creating two range
+    breaks per active singleton. This solver:
       1. Identifies active foreground columns and foreground topics from
          ``rem_frequency_array`` (or the column-spread distribution of ``matrix``).
       2. Trades isolated lowest-frequency length-1 singletons for short contiguous
@@ -516,7 +568,7 @@ def build_island_bridged_topics(
          contiguous archive runs.
     """
     n_topics, n_rem = matrix.shape
-    if n_rem <= 5000 or n_topics <= 2:
+    if n_rem < n_topics * 2 or n_topics <= 2:
         return None
     cp_arr = np.asarray(codepoint_list, dtype=np.int64)
     gap_mask = (cp_arr[1:] - cp_arr[:-1]) != 1
@@ -596,10 +648,10 @@ def build_island_bridged_topics(
         col_weights = 1.0 + np.log1p(rem_freq)
     else:
         col_spread = np.ptp(matrix, axis=0)
-        bg_spread = float(np.quantile(col_spread, 0.50))
-        if bg_spread <= 0.0:
+        if float(np.max(col_spread)) <= 1e-12:
             return None
-        core_mask = col_spread > bg_spread * 2.2
+        bg_spread = float(np.quantile(col_spread, 0.50))
+        core_mask = col_spread > max(1e-9, bg_spread * 2.2)
         if int(np.sum(core_mask)) < n_topics:
             return None
         core_idx = np.flatnonzero(core_mask)
@@ -653,7 +705,9 @@ def build_island_bridged_topics(
             if not in_isl:
                 s_cur = i
                 in_isl = True
-            elif i > 0 and gap_mask[i - 1]:
+            elif (i > 0 and gap_mask[i - 1]) or (
+                n_rem < 5000 and i - s_cur >= row_cap
+            ):
                 islands.append((s_cur, i))
                 s_cur = i
         else:
@@ -690,12 +744,19 @@ def build_island_bridged_topics(
     rem_slots = np.maximum(0, row_cap - counts)
     diff_s = len(unassigned) - int(np.sum(rem_slots))
     if diff_s < 0:
-        for k in np.argsort(rem_slots)[::-1]:
-            take = min(-diff_s, int(rem_slots[k]))
-            rem_slots[k] -= take
-            diff_s += take
-            if diff_s == 0:
-                break
+        if n_rem < 5000:
+            while diff_s < 0 and int(np.max(rem_slots)) > 0:
+                for k in np.argsort(rem_slots)[::-1]:
+                    if rem_slots[k] > 0 and diff_s < 0:
+                        rem_slots[k] -= 1
+                        diff_s += 1
+        else:
+            for k in np.argsort(rem_slots)[::-1]:
+                take = min(-diff_s, int(rem_slots[k]))
+                rem_slots[k] -= take
+                diff_s += take
+                if diff_s == 0:
+                    break
     pos = 0
     for k in range(n_topics):
         cnt = int(rem_slots[k])
@@ -718,11 +779,13 @@ class RangeCompactGeneticLearner:
         self,
         codepoint_list: Sequence[int],
         lambda_matrix: np.ndarray,
-        config: RangeCompactConfig,
+        config: Optional[RangeCompactConfig] = None,
         frequency_array: Optional[np.ndarray] = None,
         most_sizes: Sequence[int] = (),
         normalization_method: str = "topic_sum",
     ) -> None:
+        if config is None:
+            config = RangeCompactConfig()
         if len(codepoint_list) == 0:
             raise ValueError("codepoint_list cannot be empty")
         if lambda_matrix.ndim != 2:
@@ -852,9 +915,12 @@ class RangeCompactGeneticLearner:
         counts = np.bincount(t, minlength=self.n_topics)
         w_r = self.config.range_cost_weight
         w_t = 1.0 - w_r
+        avg_floor = max(1, n // self.n_topics)
+        avg_ceil = max(1, (n + self.n_topics - 1) // self.n_topics)
 
         # 1. Rescue any vanished topics (count == 0) using shortest/lowest-loss runs of k_max
         zero_topics = np.flatnonzero(counts == 0)
+        many_zeros = len(zero_topics) > self.n_topics // 2
         for k_zero in zero_topics:
             k_max = int(np.argmax(counts))
             is_max = t == k_max
@@ -865,7 +931,10 @@ class RangeCompactGeneticLearner:
             r_starts = np.flatnonzero(padded[1:] & ~padded[:-1])
             r_ends = np.flatnonzero(~padded[1:] & padded[:-1])
             r_lens = r_ends - r_starts
-            target_take = max(1, min(int(counts[k_max]) - 1, n // (2 * self.n_topics)))
+            if many_zeros:
+                target_take = max(1, min(int(counts[k_max]) - avg_floor, avg_floor))
+            else:
+                target_take = max(1, min(int(counts[k_max]) - 1, n // (2 * self.n_topics)))
             short_mask = r_lens <= target_take
             if np.any(short_mask):
                 cand_idx = int(np.flatnonzero(short_mask)[0])
@@ -875,9 +944,10 @@ class RangeCompactGeneticLearner:
                 counts[k_zero] += e_i - s_i
             else:
                 s_i = int(r_starts[0])
-                t[s_i] = int(k_zero)
-                counts[k_max] -= 1
-                counts[k_zero] += 1
+                take = max(1, min(target_take, int(r_lens[0]) - 1)) if many_zeros else 1
+                t[s_i : s_i + take] = int(k_zero)
+                counts[k_max] -= take
+                counts[k_zero] += take
 
         # 2. Enforce max(counts) - min(counts) <= target_diff via whole-run & border transfers
         steps = 0
@@ -890,6 +960,12 @@ class RangeCompactGeneticLearner:
             if excess <= 0:
                 break
             batch_sz = max(1, (excess + 1) // 2)
+            if int(counts[k_max]) > 2 * avg_ceil:
+                batch_sz = min(
+                    batch_sz,
+                    max(1, int(counts[k_max]) - avg_floor),
+                    max(1, avg_ceil - int(counts[k_min])),
+                )
             batch_sz = min(batch_sz, int(counts[k_max]) - 1)
 
             # Decompose k_max into maximal contiguous runs [r_starts, r_ends)

@@ -128,21 +128,21 @@ Before assigning codepoints to slices, `mlfont.maths.normalize_lambda_matrix` (`
 - **`row_sum`**: Row-normalizes each topic across codepoints so that `sum_v Phi_{k,v} = 1`.
 - **`global_max`** *(Default)*: Scales the matrix by its global maximum `max_{k,v} |Lambda_{k,v}|` so entries lie in `[0, 1]`.
 - **`spectral_norm`**: Scales the matrix by its spectral norm (largest singular value `sigma_max(Lambda)`).
-- **`sinkhorn` (`bistochastic`)**: Applies Sinkhorn-Knopp iterative alternating row and column scaling (`sinkhorn_knopp_normalize`) so that topic rows simultaneously have uniform slice capacity `(V_rem / K)` and codepoint columns have unit marginal mass `1`, calibrated to `[0, 1]` max scale.
+- **`sinkhorn` (`bistochastic`)**: Applies Sinkhorn-Knopp iterative alternating row and column scaling (`sinkhorn_knopp_normalize`) so that topic rows simultaneously have uniform slice capacity `(V_rem / K)` and codepoint columns have unit marginal mass `1.0`.
 
 ### 3. Unified Discriminative & Nonnegative Autoencoder DNNTM (`mlfont.dnntm`)
 
-`DnnTmLearner` (`DNNTMSolver`) trains a multi-layer feed-forward network `f_theta` (`n_layers=2`, `ELU` hidden activations, `Softmax` output layer) that maps real document mini-batches `X_real`, synthetic Bernoulli noise documents `X_fake ~ Bernoulli(0.05)`, and one-hot single-codepoint identity probes `I_{V_active}` to topic distributions `T_real = f_theta(X_real)`, `T_fake = f_theta(X_fake)`, and `T_word = f_theta(I_{V_active})`. Furthermore, `DnnTmLearner` includes a nonnegative linear decoder `W_dec = softplus(U_dec) in R_+^{K x V_active}` to support five loss objectives (`DNNTMLossType`):
+`DnnTmLearner` (`DNNTMSolver`) trains a multi-layer feed-forward network `f_theta` (`n_layers=2`, `ELU` hidden activations, `Softmax` output layer) that maps real document mini-batches `X_real`, synthetic Bernoulli noise documents `X_fake ~ Bernoulli(0.05)`, and one-hot single-codepoint identity probes `I_{V_active}` to topic distributions `T_real = f_theta(X_real)`, `T_fake = f_theta(X_fake)`, and `T_word = f_theta(I_{V_active})`. Furthermore, `DnnTmLearner` includes a projected nonnegative linear decoder `W_dec in R_+^{K x V_active}` (`project_nonnegative`, row-normalized as `W_hat_dec`) to support five loss objectives (`DNNTMLossType` / `DnnTmLossType`):
 - **`REAL_FAKE_DIFF`**, **`REAL_FAKE_AND_REAL_AVERAGE_DIFF`**, and **`ALL_COMBINED`** *(Default)*: Non-negative Shannon Entropy Difference Losses shifted by `+ln(K)` to guarantee non-negativity:
 ```
 L_DNNTM = (H_mean(T_real) - H_mean(T_fake) + ln(K))
         + (H_mean(T_real) - H(mean_doc(T_real)) + ln(K))
         + (H_mean(T_word) - H(mean_word(T_word)) + ln(K)) >= 0
 ```
-- **`AUTOENCODER`**: Nonnegative sparse autoencoder reconstruction loss `BCE(sigma(T_real W_dec + b_dec), X_real) + lambda_1 ||T_real||_1`.
-- **`HYBRID_AUTOENCODER`**: Unifies the `ALL_COMBINED` discriminative Shannon entropy difference loss with the nonnegative sparse autoencoder reconstruction loss.
+- **`AUTOENCODER`**: Projected nonnegative sparse autoencoder loss combining KL-divergence document reconstruction `D_KL(X_hat_real || T_real W_hat_dec)`, simplex topic-entropy sparsity `lambda_1 (H_mean(T_real) + ln(K) - H(mean_doc(T_real)))`, and decoder weight decay `lambda_2 ||W_dec||_F^2`.
+- **`HYBRID_AUTOENCODER`**: Unifies the `ALL_COMBINED` discriminative Shannon entropy difference loss with the projected nonnegative sparse autoencoder loss (`L_DNNTM + 0.5 * L_AE`).
 
-After training, Bayes' rule yields `Lambda_{k,v} = P(v | k) propto DF(c_v) * T_{word, v, k}`, followed by two-tier Hungarian contiguous-bin alignment.
+After training, Bayes' rule yields `Lambda_{k,v} = P(v | k) propto DF(c_v) * T_{word, v, k}` (blended with the nonnegative decoder rows `W_hat_dec` for `AUTOENCODER` and `HYBRID_AUTOENCODER`), followed by two-tier Hungarian contiguous-bin alignment.
 
 ### 4. Memetic Range-Compact Genetic Algorithm (`mlfont.range_compact`)
 
@@ -437,7 +437,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 
 | DNNTM Loss Objective (`DNNTMLossType`) | CSS Ranges | `GIN-2g` Mean (P95) `ms` | `GIN-3g` Mean (P95) `ms` | `DSL` Mean (P95) `ms` | Session Utilization `%` |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `AUTOENCODER` (Nonnegative Sparse BCE + L1) | 590 | 26.70 (197.50) | 7.55 (55.87) | 1.25 (9.23) | 30.75% |
+| `AUTOENCODER` (Nonnegative Sparse KL + Entropy) | 590 | 26.70 (197.50) | 7.55 (55.87) | 1.25 (9.23) | 30.75% |
 | `HYBRID_AUTOENCODER` (Entropy Diff + Sparse AE) | 565 | 24.95 (126.73) | 7.06 (35.85) | 1.17 (5.92) | 30.66% |
 | `REAL_FAKE_AND_REAL_AVERAGE_DIFF` | 497 | 24.32 (121.68) | 6.88 (34.42) | 1.14 (5.68) | 31.01% |
 | `REAL_FAKE_DIFF` | **480** | 23.85 (120.08) | 6.75 (33.97) | 1.11 (5.61) | 31.70% |

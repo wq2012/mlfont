@@ -35,9 +35,11 @@ from mlfont.data import (
 )
 from mlfont.dnntm import (
     DNNTMConfig,
+    DNNTMLossType,
     DNNTMSolver,
     DnnTmConfig,
     DnnTmLearner,
+    DnnTmLossType,
     DnnTopicNetwork,
 )
 from mlfont.evaluator import (
@@ -65,6 +67,7 @@ from mlfont.maths import (
     balance_topics_unbalanced,
     create_params_decay,
     normalize_lambda_matrix,
+    sinkhorn_knopp_normalize,
 )
 from mlfont.olda import (
     OnlineLDAConfig,
@@ -108,6 +111,7 @@ from mlfont.subsetter import (
     format_unicode_ranges,
     generate_css,
     slice_font_file,
+    slice_font_to_woff2,
 )
 
 
@@ -229,11 +233,13 @@ __version__ = "0.1.0"
 
 __all__ = [
     "DNNTMConfig",
+    "DNNTMLossType",
     "DNNTMSolver",
     "DecayConfig",
     "DistributionStats",
     "DnnTmConfig",
     "DnnTmLearner",
+    "DnnTmLossType",
     "DnnTopicNetwork",
     "DocumentCorpusProcessor",
     "EvaluationParams",
@@ -307,7 +313,10 @@ __all__ = [
     "save_codepoints_file",
     "save_evaluation_results_json",
     "save_safetensors_model",
+    "sinkhorn_knopp_normalize",
     "slice_font_file",
+    "slice_font_to_woff2",
     "swap_topic_mutation",
     "traditional_chinese_production_config",
 ]
+

@@ -71,21 +71,36 @@ def normalize_lambda_matrix(
         if norm2 > 0.0:
             normalized /= norm2
     elif method in ("sinkhorn", "bistochastic"):
-        rows, cols = normalized.shape
-        target_row_sum = float(cols) / float(max(1, rows))
-        eps = max(1e-12, float(np.max(normalized)) * 1e-9)
-        normalized = np.maximum(normalized, eps)
-        for _ in range(25):
-            r_sums = np.sum(normalized, axis=1, keepdims=True)
-            r_sums = np.where(r_sums > 0.0, r_sums, 1.0)
-            normalized *= target_row_sum / r_sums
-            c_sums = np.sum(normalized, axis=0, keepdims=True)
-            c_sums = np.where(c_sums > 0.0, c_sums, 1.0)
-            normalized /= c_sums
+        normalized = sinkhorn_knopp_normalize(normalized)
     elif method == "none":
         pass
 
     return normalized
+
+
+def sinkhorn_knopp_normalize(
+    matrix: np.ndarray,
+    n_iters: int = 25,
+) -> np.ndarray:
+    """Applies iterative Sinkhorn-Knopp bi-stochastic scaling to a topic-codepoint matrix.
+
+    Alternatingly rescales topic rows to uniform slice capacity (n_codepoints / n_topics)
+    and codepoint columns to unit mass 1.0.
+    """
+    normalized = np.array(matrix, dtype=np.float64, copy=True)
+    rows, cols = normalized.shape
+    target_row_sum = float(cols) / float(max(1, rows))
+    eps = max(1e-12, float(np.max(normalized)) * 1e-9)
+    normalized = np.maximum(normalized, eps)
+    for _ in range(max(1, int(n_iters))):
+        r_sums = np.sum(normalized, axis=1, keepdims=True)
+        r_sums = np.where(r_sums > 0.0, r_sums, 1.0)
+        normalized *= target_row_sum / r_sums
+        c_sums = np.sum(normalized, axis=0, keepdims=True)
+        c_sums = np.where(c_sums > 0.0, c_sums, 1.0)
+        normalized /= c_sums
+    return normalized
+
 
 
 class ParamsDecayBase(abc.ABC):

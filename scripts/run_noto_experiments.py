@@ -666,7 +666,9 @@ def main() -> None:
 
         # 7. Run Normalization, DNNTM Loss, & Slice Count Ablations on LGC
         if key == "notosans_lgc":
-            print("  Running Lambda-Matrix Normalization, DNNTM Loss, & Slice Count K Ablations on LGC...")
+            print(
+                "  Running Lambda-Matrix Normalization, DNNTM Loss, & Slice Count K Ablations..."
+            )
             norm_ablation = []
             for norm_method in ("topic_sum", "row_sum", "global_max", "spectral_norm", "sinkhorn"):
                 s_norm = generate_greedy_topic_strategy(

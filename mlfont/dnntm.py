@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 import math
 from typing import List, Optional, Sequence
 
@@ -19,6 +20,19 @@ from mlfont.maths import (
 )
 from mlfont.olda import align_and_smooth_topic_matrix
 from mlfont.schemas import SlicingStrategy
+
+
+class DnnTmLossType(str, Enum):
+    """Supported training loss objectives for DnnTmLearner."""
+
+    REAL_FAKE_DIFF = "REAL_FAKE_DIFF"
+    REAL_FAKE_AND_REAL_AVERAGE_DIFF = "REAL_FAKE_AND_REAL_AVERAGE_DIFF"
+    ALL_COMBINED = "ALL_COMBINED"
+    AUTOENCODER = "AUTOENCODER"
+    HYBRID_AUTOENCODER = "HYBRID_AUTOENCODER"
+
+
+DNNTMLossType = DnnTmLossType
 
 
 @dataclass
@@ -39,7 +53,7 @@ class DnnTmConfig:
     init_learning_rate: float = 0.01
     learning_rate_decay: float = 0.95
     learning_rate_decay_steps: int = 100
-    loss_type: str = "ALL_COMBINED"  # REAL_FAKE_DIFF, REAL_FAKE_AND_REAL_AVERAGE_DIFF, ALL_COMBINED, AUTOENCODER, HYBRID_AUTOENCODER
+    loss_type: str = "ALL_COMBINED"
     activation: str = "ELU"  # RELU, ELU, TANH, SIGMOID
     l1_sparsity_weight: float = 0.05
     l2_reg_weight: float = 1e-4
@@ -127,7 +141,8 @@ class DnnTopicNetwork(nn.Module):
 
 
 class DnnTmLearner:
-    """Trains a Deep Neural Network Topic Model (Entropy-Difference and/or Nonnegative Autoencoder)."""
+    """Trains a Deep Neural Network Topic Model (Entropy-Diff or Nonnegative Autoencoder)."""
+
 
     def __init__(
         self,

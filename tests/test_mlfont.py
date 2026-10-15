@@ -707,3 +707,96 @@ def test_cli_scripts_end_to_end(tmp_path: Path, monkeypatch) -> None:
     )
     inference.main()
     assert (slice_dir / "clifont_sliced.css").exists()
+
+    # Also test mlfont-train with --normalization_method sinkhorn and --loss_type
+    train_dnn_dir = tmp_path / "trained_dnn"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-train",
+            "--data_dir",
+            str(data_dir),
+            "--output_dir",
+            str(train_dnn_dir),
+            "--algorithm",
+            "dnntm",
+            "--n_topics",
+            "4",
+            "--most_sizes",
+            "8",
+            "--normalization_method",
+            "sinkhorn",
+            "--loss_type",
+            "HYBRID_AUTOENCODER",
+        ],
+    )
+    train.main()
+    assert (train_dnn_dir / "strategy.json").exists()
+
+
+def test_public_exports_and_skewed_edge_cases(tmp_path: Path) -> None:
+    import random
+    import mlfont
+    from mlfont.range_compact import (
+        build_island_bridged_topics,
+        potts_viterbi_smooth_topics,
+    )
+
+    assert hasattr(mlfont, "DNNTMLossType")
+    assert hasattr(mlfont, "DnnTmLossType")
+    assert hasattr(mlfont, "sinkhorn_knopp_normalize")
+    assert hasattr(mlfont, "slice_font_to_woff2")
+
+    mat = np.array([[2.0, 1.0, 3.0], [1.0, 4.0, 1.0]], dtype=np.float64)
+    sk = mlfont.sinkhorn_knopp_normalize(mat)
+    np.testing.assert_allclose(sk.sum(axis=0), np.ones(3), atol=1e-3)
+    np.testing.assert_allclose(sk.sum(axis=1), np.full(2, 1.5), atol=1e-3)
+
+    # Skewed matrix: K=50, N=10000 where row 0 dominates everywhere
+    skewed = np.full((50, 10000), 1e-6, dtype=np.float64)
+    skewed[0, :] = 1.0
+    cps_10k = list(range(10000))
+    smoothed = potts_viterbi_smooth_topics(cps_10k, skewed, range_cost_weight=0.18)
+    counts = np.bincount(smoothed, minlength=50)
+    assert int((counts == 0).sum()) == 0
+    assert int(counts.max() - counts.min()) <= 1
+
+    ga_skewed = RangeCompactGeneticLearner(
+        codepoint_list=cps_10k,
+        lambda_matrix=skewed,
+        normalization_method="none",
+    )
+    repaired = ga_skewed._repair_max_diff(
+        np.zeros(10000, dtype=np.int64), max_diff=0, rng=random.Random(42)
+    )
+    rep_counts = np.bincount(repaired, minlength=50)
+    assert int((rep_counts == 0).sum()) == 0
+    assert int(rep_counts.max() - rep_counts.min()) == 0
+    num_runs = int(1 + np.sum(repaired[1:] != repaired[:-1]))
+    assert num_runs == 50
+
+    # Small sparse island bridging (N=100, K=6) and V_rem = K + 1 aspect ratio
+    small_sparse = np.full((6, 100), 1e-4, dtype=np.float64)
+    for k in range(6):
+        small_sparse[k, k * 5 : (k + 1) * 5] = 0.9
+    bridged = build_island_bridged_topics(list(range(100)), small_sparse)
+    assert bridged is not None
+    b_counts = np.bincount(bridged, minlength=6)
+    assert int(b_counts.max() - b_counts.min()) <= 1
+
+    cps_7 = list(range(0x0041, 0x0041 + 7))
+    lam_6x7 = np.random.default_rng(7).uniform(0.1, 1.0, size=(6, 7))
+    ga_tiny = RangeCompactGeneticLearner(
+        codepoint_list=cps_7,
+        lambda_matrix=lam_6x7,
+        config=RangeCompactConfig(
+            max_iteration=20,
+            decay_max_diff=DecayConfig(min_val=1.0, max_val=2.0),
+        ),
+    )
+    strat_tiny = ga_tiny.run()
+    assert strat_tiny.num_slices == 6
+    tiny_sizes = [len(s) for s in strat_tiny.subsets]
+    assert max(tiny_sizes) - min(tiny_sizes) <= 1
+

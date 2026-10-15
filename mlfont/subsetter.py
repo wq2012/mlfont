@@ -202,3 +202,7 @@ def slice_font_file(
     css_path.write_text(css_text, encoding="utf-8")
 
     return artifacts, css_path
+
+
+slice_font_to_woff2 = slice_font_file
+
