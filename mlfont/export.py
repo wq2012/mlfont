@@ -174,6 +174,8 @@ def export_pretrained_bundle(
     # 3. Physically slice font or generate CSS
     family = font_family or strategy.name or "MLFont Sliced"
     css_path = out / "font_sliced.css"
+    cdn_css_path = out / "font_sliced_cdn.css"
+    basename = Path(font_path).stem if font_path is not None else "font"
     total_woff2_bytes = 0
     num_written_woff2 = 0
     woff2_slice_byte_sizes: List[int] = []
@@ -196,10 +198,35 @@ def export_pretrained_bundle(
         css_text = generate_css(
             strategy=strategy,
             font_family=family,
-            font_basename="font",
+            font_basename=basename,
             extension="woff2",
         )
         css_path.write_text(css_text, encoding="utf-8")
+
+    # Generate CDN-ready stylesheet pointing directly to Hugging Face WOFF2 slices
+    hf_url_prefix = f"https://huggingface.co/wq2012/{out.name}/resolve/main/woff2"
+    clean_family_map = {
+        "NotoSans-Regular Sliced": "Noto Sans Sliced",
+        "NotoSansKR-Regular Sliced": "Noto Sans KR Sliced",
+        "NotoSansJP-Regular Sliced": "Noto Sans JP Sliced",
+        "NotoSansTC-Regular Sliced": "Noto Sans TC Sliced",
+        "NotoSansSC-Regular Sliced": "Noto Sans SC Sliced",
+    }
+    clean_family = clean_family_map.get(family, family)
+    cdn_css_text = generate_css(
+        strategy=strategy,
+        font_family=clean_family,
+        font_url_prefix=hf_url_prefix,
+        font_basename=basename,
+        extension="woff2",
+        font_display="swap",
+    )
+    cdn_css_path.write_text(cdn_css_text, encoding="utf-8")
+
+    # Copy browser loader & latency telemetry script (mlfont.js) if present
+    repo_js = Path(__file__).resolve().parent.parent / "web" / "mlfont.js"
+    if repo_js.exists():
+        (out / "mlfont.js").write_text(repo_js.read_text(encoding="utf-8"), encoding="utf-8")
 
     # 4. Save config.json
     config_payload: Dict[str, object] = {
@@ -226,6 +253,38 @@ def export_pretrained_bundle(
         (out / "evaluation_metrics.json").write_text(
             json.dumps(eval_payload, indent=2), encoding="utf-8"
         )
+
+    # 6. Write a default Model Card README.md if not already present
+    readme_path = out / "README.md"
+    if not readme_path.exists():
+        default_card = (
+            f"# {out.name}: MLFont Sliced Web Font Bundle\n\n"
+            f"- **Strategy Name:** `{strategy.name}`\n"
+            f"- **Font Family:** `{clean_family}` (self-hosted: `{family}`)\n"
+            f"- **Total Slices:** `{strategy.num_slices}` "
+            f"(`{strategy.num_codepoints:,}` codepoints, "
+            f"`{strategy.count_unicode_ranges():,}` CSS `unicode-range` intervals)\n\n"
+            f"## Using This Sliced Font in Your Website (Frontend Developer Guide)\n\n"
+            f"### Link (HTML `<head>`)\n"
+            f"```html\n"
+            f'<link rel="stylesheet" href="/fonts/{out.name}/font_sliced.css">\n'
+            f"```\n\n"
+            f"### Or CSS `@import`\n"
+            f"```css\n"
+            f"@import url('/fonts/{out.name}/font_sliced.css');\n"
+            f"```\n\n"
+            f"### Example CSS\n"
+            f"```css\n"
+            f"body {{\n"
+            f"  font-family: '{clean_family}', sans-serif;\n"
+            f"}}\n"
+            f"```\n\n"
+            f"### Latency Metrics (`mlfont.js` — Recommended)\n"
+            f"```html\n"
+            f'<script src="/fonts/{out.name}/mlfont.js" async></script>\n'
+            f"```\n"
+        )
+        readme_path.write_text(default_card, encoding="utf-8")
 
     return out
 

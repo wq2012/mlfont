@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MLFont Sliced Webfonts — Live Frontend Demo &amp; Latency Inspector</title>
+
+  <!--
+    Option 1 (Drop-in JS Loader + HTML5 Performance API Telemetry):
+    Automatically injects the sliced @font-face rules for Noto Sans SC Sliced
+    and records per-slice download latency via the HTML5 Performance API.
+  -->
+  <script src="./mlfont.js" data-mlfont="notosanssc" data-debug="true" async></script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --border: #e2e8f0;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans SC Sliced', 'NotoSansSC-Regular Sliced',
+                   'Noto Sans TC Sliced', 'Noto Sans JP Sliced',
+                   'Noto Sans KR Sliced', 'Noto Sans Sliced',
+                   Roboto, 'Noto Sans', sans-serif;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.55rem 1rem;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #334155;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>MLFont Sliced Webfonts — Live Browser Demo</h1>
+      <p>
+        This page uses <strong>Noto Sans SC Sliced</strong> (30,759 Simplified Chinese
+        codepoints partitioned into 102 machine-learning co-occurrence slices).
+        Instead of downloading the full 8.89&nbsp;MB WOFF2 font file, your browser
+        inspects the characters rendered below via CSS <code>unicode-range</code>
+        and only downloads the small <code>.woff2</code> slices required for this page.
+      </p>
+      <div class="controls">
+        <button onclick="switchSample('sc')">简体中文 (Noto Sans SC Sliced)</button>
+        <button onclick="switchSample('tc')">繁體中文 (Noto Sans TC Sliced)</button>
+        <button onclick="switchSample('jp')">日本語 (Noto Sans JP Sliced)</button>
+        <button onclick="switchSample('kr')">한국어 (Noto Sans KR Sliced)</button>
+        <button onclick="switchSample('lgc')">Pan-European LGC (Noto Sans Sliced)</button>
+        <button class="secondary" onclick="refreshMetrics()">Refresh Slice Latency Metrics</button>
+      </div>
+    </div>
+
+    <div class="card" id="sample-box">
+      <h2>示例文本 (Sample Rendered Text)</h2>
+      <p id="sample-text" contenteditable="true" style="font-size: 1.25rem; outline: none;">
+        汉字作为一种语素文字，其每个单一字符都拥有具体的表意。因此，有些字符同时出现在同一页面上的概率会高于另一些字符。
+        我们通过机器学习算法对网页内容进行主题建模与区间紧凑化遗传算法优化，将整套中文字体切分为静态子集切片，
+        使得浏览器只需按需下载当前页面所需的少量 WOFF2 切片即可极速渲染完整字库。（点击此处可直接编辑输入任意生僻字，如：龘、龖、𰻝！）
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>HTML5 Performance API — Downloaded Font Slices (<code>mlfont.js</code>)</h2>
+      <p id="metrics-summary" style="color: var(--muted);">
+        Collecting Resource Timing metrics...
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Font Family</th>
+            <th>Slice #</th>
+            <th>Start (ms)</th>
+            <th>TTFB (ms)</th>
+            <th>Duration (ms)</th>
+            <th>Transfer Size</th>
+            <th>Cached</th>
+          </tr>
+        </thead>
+        <tbody id="metrics-tbody">
+          <tr><td colspan="7">Waiting for browser font slice downloads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    var SAMPLES = {
+      sc: {
+        font: 'notosanssc',
+        family: "'Noto Sans SC Sliced', sans-serif",
+        text: '汉字作为一种语素文字，其每个单一字符都拥有具体的表意。因此，有些字符同时出现在同一页面上的概率会高于另一些字符。我们通过机器学习算法对网页内容进行主题建模与区间紧凑化遗传算法优化，将整套中文字体切分为静态子集切片，使得浏览器只需按需下载当前页面所需的少量 WOFF2 切片即可极速渲染完整字库。'
+      },
+      tc: {
+        font: 'notosanstc',
+        family: "'Noto Sans TC Sliced', sans-serif",
+        text: '漢字作為一種語素文字，其每個單一字符都擁有具體的表意。透過機器學習演算法對繁體中文網頁進行主題建模與區間緊湊化基因演算法最佳化，瀏覽器僅需載入當前頁面所需的少數 WOFF2 字型切片，即可高速呈現完整字體。'
+      },
+      jp: {
+        font: 'notosansjp',
+        family: "'Noto Sans JP Sliced', sans-serif",
+        text: '日本語のウェブフォント（漢字・ひらがな・カタカナ）は文字数が非常に多く、ファイルサイズが数メガバイトに達します。MLFontは機械学習による共起トピックモデルを用いてフォントを最適なスライスに分割し、高速なページ表示を実現します。'
+      },
+      kr: {
+        font: 'notosanskr',
+        family: "'Noto Sans KR Sliced', sans-serif",
+        text: '한글과 한자를 포함한 한국어 웹폰트는 글리프 수가 많아 전체 폰트 파일 용량이 매우 큽니다. MLFont는 머신러닝 토픽 모델링과 유전 알고리즘을 통해 웹페이지에 필요한 폰트 슬라이스만 빠르게 로드합니다.'
+      },
+      lgc: {
+        font: 'notosans-lgc',
+        family: "'Noto Sans Sliced', sans-serif",
+        text: 'Pan-European Typography: English, Français, Deutsch, Polski (Zażółć gęślą jaźń), Русский (Широкая электрификация южных губерний), Ελληνικά (Ξεσκεπάζω την ψυχοφθόρα βδελυγμία).'
+      }
+    };
+
+    function switchSample(key) {
+      var item = SAMPLES[key];
+      if (!item || !window.MLFont) return;
+      window.MLFont.load(item.font).then(function() {
+        var el = document.getElementById('sample-text');
+        el.style.fontFamily = item.family;
+        el.textContent = item.text;
+        setTimeout(refreshMetrics, 600);
+      });
+    }
+
+    function refreshMetrics() {
+      if (!window.MLFont) return;
+      var m = window.MLFont.getMetrics();
+      document.getElementById('metrics-summary').textContent =
+        'Slices downloaded: ' + m.numSlicesDownloaded +
+        ' | Total WOFF2 transfer: ' + (m.totalSliceTransferBytes / 1024).toFixed(1) + ' KB' +
+        ' | Wall-clock font download window: ' + m.wallClockFontDownloadMs + ' ms';
+
+      var tbody = document.getElementById('metrics-tbody');
+      if (m.slices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">No external slice requests recorded yet (or served from memory cache).</td></tr>';
+        return;
+      }
+      tbody.innerHTML = m.slices.map(function(s) {
+        return '<tr>' +
+          '<td>' + s.font + '</td>' +
+          '<td><code>slice_' + String(s.sliceIndex).padStart(3, '0') + '</code></td>' +
+          '<td>' + s.startTimeMs + ' ms</td>' +
+          '<td>' + s.ttfbMs + ' ms</td>' +
+          '<td><strong>' + s.durationMs + ' ms</strong></td>' +
+          '<td>' + (s.transferBytes / 1024).toFixed(1) + ' KB</td>' +
+          '<td>' + (s.cached ? 'Yes (Cache)' : 'Network') + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    window.addEventListener('load', function() {
+      setTimeout(refreshMetrics, 800);
+      setTimeout(refreshMetrics, 2500);
+    });
+  </script>
+</body>
+</html>

@@ -408,6 +408,12 @@ def test_baselines_subsetter_and_evaluator(tmp_path: Path) -> None:
     assert loaded_bundle.lambda_matrix is not None
     assert loaded_bundle.lambda_matrix.shape == (4, 26)
     assert loaded_bundle.predict_required_slices("AZ") == [0, 3]
+    assert (bundle_dir / "font_sliced_cdn.css").exists()
+    assert "font-display: swap;" in (bundle_dir / "font_sliced_cdn.css").read_text(encoding="utf-8")
+    assert (bundle_dir / "mlfont.js").exists()
+    readme_text = (bundle_dir / "README.md").read_text(encoding="utf-8")
+    assert "Using This Sliced Font in Your Website" in readme_text
+    assert "mlfont.js" in readme_text
 
 
 def test_sparse_vocabulary_max_diff_and_aliases(tmp_path: Path) -> None:
@@ -779,7 +785,7 @@ def test_public_exports_and_skewed_edge_cases(tmp_path: Path) -> None:
     # Small sparse island bridging (N=100, K=6) and V_rem = K + 1 aspect ratio
     small_sparse = np.full((6, 100), 1e-4, dtype=np.float64)
     for k in range(6):
-        small_sparse[k, k * 5 : (k + 1) * 5] = 0.9
+        small_sparse[k, k * 5:(k + 1) * 5] = 0.9
     bridged = build_island_bridged_topics(list(range(100)), small_sparse)
     assert bridged is not None
     b_counts = np.bincount(bridged, minlength=6)
@@ -799,4 +805,3 @@ def test_public_exports_and_skewed_edge_cases(tmp_path: Path) -> None:
     assert strat_tiny.num_slices == 6
     tiny_sizes = [len(s) for s in strat_tiny.subsets]
     assert max(tiny_sizes) - min(tiny_sizes) <= 1
-

@@ -597,12 +597,12 @@ def build_island_bridged_topics(
                 l_far = (
                     (j == 0)
                     or (c_i - int(core_idx[j - 1]) - 1 > max_bridge)
-                    or bool(np.any(gap_mask[int(core_idx[j - 1]) : c_i]))
+                    or bool(np.any(gap_mask[int(core_idx[j - 1]):c_i]))
                 )
                 r_far = (
                     (j == len(core_idx) - 1)
                     or (int(core_idx[j + 1]) - c_i - 1 > max_bridge)
-                    or bool(np.any(gap_mask[c_i : int(core_idx[j + 1])]))
+                    or bool(np.any(gap_mask[c_i:int(core_idx[j + 1])]))
                 )
                 if l_far and r_far:
                     keep[j] = False
@@ -669,12 +669,12 @@ def build_island_bridged_topics(
                 l_far = (
                     (j == 0)
                     or (c_i - int(core_idx[j - 1]) - 1 > max_bridge)
-                    or bool(np.any(gap_mask[int(core_idx[j - 1]) : c_i]))
+                    or bool(np.any(gap_mask[int(core_idx[j - 1]):c_i]))
                 )
                 r_far = (
                     (j == len(core_idx) - 1)
                     or (int(core_idx[j + 1]) - c_i - 1 > max_bridge)
-                    or bool(np.any(gap_mask[c_i : int(core_idx[j + 1])]))
+                    or bool(np.any(gap_mask[c_i:int(core_idx[j + 1])]))
                 )
                 if l_far and r_far:
                     keep[j] = False
@@ -761,7 +761,7 @@ def build_island_bridged_topics(
     for k in range(n_topics):
         cnt = int(rem_slots[k])
         if cnt > 0:
-            t_full[unassigned[pos : pos + cnt]] = k
+            t_full[unassigned[pos:pos + cnt]] = k
             pos += cnt
     if pos < len(unassigned):
         t_full[unassigned[pos:]] = n_topics - 1
@@ -945,7 +945,7 @@ class RangeCompactGeneticLearner:
             else:
                 s_i = int(r_starts[0])
                 take = max(1, min(target_take, int(r_lens[0]) - 1)) if many_zeros else 1
-                t[s_i : s_i + take] = int(k_zero)
+                t[s_i:s_i + take] = int(k_zero)
                 counts[k_max] -= take
                 counts[k_zero] += take
 
@@ -1074,10 +1074,10 @@ class RangeCompactGeneticLearner:
                 best_suff_i = int(np.argmin(suff_cost))
                 if pref_cost[best_pref_i] <= suff_cost[best_suff_i]:
                     s_i = int(ls[best_pref_i])
-                    t[s_i : s_i + batch_sz] = k_min
+                    t[s_i:s_i + batch_sz] = k_min
                 else:
                     e_i = int(le[best_suff_i])
-                    t[e_i - batch_sz : e_i] = k_min
+                    t[e_i - batch_sz:e_i] = k_min
                 counts[k_max] -= batch_sz
                 counts[k_min] += batch_sz
 

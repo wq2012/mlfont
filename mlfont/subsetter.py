@@ -55,6 +55,7 @@ def generate_css(
     extension: str = "woff2",
     font_style: str = "normal",
     font_weight: int = 400,
+    font_display: Optional[str] = None,
 ) -> str:
     """Generates a complete CSS stylesheet with @font-face rules for a SlicingStrategy.
 
@@ -73,6 +74,7 @@ def generate_css(
     if prefix:
         prefix = prefix + "/"
 
+    display_line = f"  font-display: {font_display};\n" if font_display else ""
     blocks: List[str] = []
     for idx, subset in enumerate(strategy.subsets):
         if not subset:
@@ -86,6 +88,7 @@ def generate_css(
             f"  font-family: '{font_family}';\n"
             f"  font-style: {font_style};\n"
             f"  font-weight: {font_weight};\n"
+            f"{display_line}"
             f"  src: url({src_url}) format('{css_format}');\n"
             f"  unicode-range: {urange_str};\n"
             f"}}"
@@ -205,4 +208,3 @@ def slice_font_file(
 
 
 slice_font_to_woff2 = slice_font_file
-

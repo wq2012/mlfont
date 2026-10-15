@@ -275,7 +275,20 @@ def write_hf_model_card(
         )
     metrics_table = "\n".join(table_lines)
     font_file = str(spec["font_file"])
+    font_stem = Path(font_file).stem
     preset_name = str(spec["preset"])
+    key = str(spec["key"])
+    clean_family_map = {
+        "notosans_lgc": ("Noto Sans Sliced", "notosans-lgc"),
+        "notosanskr": ("Noto Sans KR Sliced", "notosanskr"),
+        "notosansjp": ("Noto Sans JP Sliced", "notosansjp"),
+        "notosanstc": ("Noto Sans TC Sliced", "notosanstc"),
+        "notosanssc": ("Noto Sans SC Sliced", "notosanssc"),
+    }
+    clean_family, js_preset = clean_family_map.get(
+        key, (f"{font_stem} Sliced", hf_name.replace("mlfont-", ""))
+    )
+    legacy_family = f"{font_stem} Sliced"
     n_cps_str = f"{strategy.num_codepoints:,}"
     n_ranges_str = f"{strategy.count_unicode_ranges():,}"
     woff2_kb = f"{total_woff2_bytes / 1024.0:.1f}"
@@ -323,6 +336,124 @@ def write_hf_model_card(
         "* **Open-Source Repository**: https://github.com/wq2012/mlfont",
         "* **PyPI Package**: https://pypi.org/project/mlfont/",
         "",
+        "## Using This Sliced Font in Your Website (Frontend Developer Guide)",
+        "",
+        (
+            "While basic Latin webfonts are typically 20–100 KB, Pan-Unicode and "
+            f"East Asian fonts like **{title}** (`{font_file}`) are much larger "
+            f"({size_str} in WOFF2) because they include **{n_cps_str} characters**. "
+            "In any large corpus of documents, there are strong co-occurrence "
+            f"patterns in character usage. By scanning webpages in `{langs_str}`, "
+            "**MLFont** models which characters are most likely to appear together, "
+            f"informing a static subset slicing strategy that sorts all {n_cps_str} "
+            f"glyphs into **{strategy.num_slices} slices** ({n_ranges_str} compact "
+            "CSS `unicode-range` intervals)."
+        ),
+        "",
+        (
+            f"Using this method, your entire web page renders in **{title}** while "
+            "the browser only downloads the small subset of `.woff2` font slices "
+            "required for the characters present on that page—which is dramatically "
+            "faster than loading the whole font. Cross-page and cross-site browser "
+            "caching further increases the latency benefits over time. "
+            "*(Note: The slicing optimization works automatically in all modern "
+            "[browsers that support CSS `unicode-range`](https://caniuse.com/font-unicode-range).)*"
+        ),
+        "",
+        "### 1. Link to Sliced Font CSS (HTML `<link>` or CSS `@import`)",
+        "",
+        "Add a `<link>` element to the `<head>` section of your HTML:",
+        "",
+        "```html",
+        "<link rel=\"stylesheet\"",
+        (
+            "      href=\"https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/"
+            f"pretrained_models/{hf_name}/font_sliced_cdn.css\">"
+        ),
+        "```",
+        "",
+        "Or in your CSS / SCSS stylesheet:",
+        "",
+        "```css",
+        (
+            "@import url('https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/"
+            f"pretrained_models/{hf_name}/font_sliced_cdn.css');"
+        ),
+        "```",
+        "",
+        "### 2. Designate Font Family in CSS",
+        "",
+        f"Style your text with the `'{clean_family}'` family in your CSS:",
+        "",
+        "```css",
+        "body {",
+        f"  font-family: '{clean_family}', '{legacy_family}', Roboto, 'Noto Sans', sans-serif;",
+        "}",
+        "```",
+        "",
+        (
+            "*(Note: `font_sliced_cdn.css` streams the `.woff2` slices on-demand "
+            "directly from Hugging Face's global CDN "
+            f"`https://huggingface.co/wq2012/{hf_name}/resolve/main/woff2/...` with "
+            "`font-display: swap` and CORS `Access-Control-Allow-Origin: *`, so you "
+            "do not need to host the `.woff2` files yourself. To **self-host** on "
+            "your own server/CDN, download this repository and link `font_sliced.css` "
+            "alongside the `woff2/` folder.)*"
+        ),
+        "",
+        "### 3. Alternative: One-Line Drop-In JavaScript Loader (`mlfont.js`)",
+        "",
+        (
+            "You can also load the sliced stylesheet directly from Hugging Face CDN "
+            "using a single `<script>` tag with `data-mlfont`:"
+        ),
+        "",
+        "```html",
+        "<script src=\"https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/web/mlfont.js\"",
+        f"        data-mlfont=\"{js_preset}\"",
+        "        async></script>",
+        "```",
+        "",
+        "Or programmatically in JavaScript:",
+        "",
+        "```javascript",
+        f"MLFont.load('{js_preset}');",
+        "```",
+        "",
+        "### 4. Latency Metrics & Browser Telemetry (Recommended — `mlfont.js`)",
+        "",
+        (
+            "Included in this bundle (`mlfont.js`, an open-source reproduction and "
+            "extension of Google Fonts' `//fonts.gstatic.com/ea/timing/v1/mlfont.js`) "
+            "is a small, zero-dependency JS library that accesses the HTML5 "
+            "[Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) "
+            "to measure webfont slice performance. **No user-specific data is collected.** "
+            "The JS library collects:"
+        ),
+        "",
+        (
+            "1. **Download time metrics of individual font slices** "
+            "(slice index, TTFB, download duration, transfer bytes, cache hit status)"
+        ),
+        "2. **Download time of the sliced `@font-face` CSS file**",
+        "3. **Page `onload` and First Contentful Paint (`FCP`) time**",
+        "",
+        "To include the library, add the following code to the bottom of your `<head>` section:",
+        "",
+        "```html",
+        (
+            "<script src=\"https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/"
+            "web/mlfont.js\" async></script>"
+        ),
+        "```",
+        "",
+        (
+            "You can inspect downloaded slice metrics in your browser DevTools console "
+            "via `MLFont.printReport()` or `MLFont.getMetrics()`, or forward anonymized "
+            "telemetry beacons to your own analytics endpoint via "
+            "`data-endpoint=\"https://your-analytics.example.com/mlfont-timing\"`."
+        ),
+        "",
         "## Training Configuration",
         "",
         f"* **Target Font**: `{font_file}` ({n_cps_str} Unicode codepoints)",
@@ -349,6 +480,24 @@ def write_hf_model_card(
         "## Model Files Included",
         "",
         (
+            "* `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet "
+            f"(`font-family: '{clean_family}'`) streaming `.woff2` slices "
+            "directly from Hugging Face CDN"
+        ),
+        (
+            "* `font_sliced.css`: Self-hosted `@font-face` stylesheet "
+            f"(`font-family: '{legacy_family}'`) with compact `unicode-range` descriptors"
+        ),
+        (
+            "* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API "
+            "slice latency telemetry library (`MLFont.getMetrics` / `window.GoogleFonts`)"
+        ),
+        (
+            f"* `woff2/*.woff2`: {strategy.num_slices} physical WOFF2 font "
+            "slices generated via `fontTools.subset`"
+        ),
+        f"* `nam/*.nam`: {strategy.num_slices} Google Fonts `.nam` codepoint subset files",
+        (
             "* `model.safetensors`: Learned topic-codepoint weight matrices "
             "(`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, "
             "`remaining_codepoints`, `frequency_array`, and `dna_assignment` "
@@ -365,15 +514,6 @@ def write_hf_model_card(
             "* `config.json`: Model and font bundle summary metadata "
             "(including per-slice WOFF2 byte sizes)"
         ),
-        (
-            "* `font_sliced.css`: Production-ready `@font-face` stylesheet "
-            "with compact `unicode-range` descriptors"
-        ),
-        (
-            f"* `woff2/*.woff2`: {strategy.num_slices} physical WOFF2 font "
-            "slices generated via `fontTools.subset`"
-        ),
-        f"* `nam/*.nam`: {strategy.num_slices} Google Fonts `.nam` codepoint subset files",
         "* `evaluation_metrics.json`: Full benchmark metrics across all 7 network/session profiles",
         "",
         f"## Benchmark Performance ({n_test:,} Wikipedia Test Pages, Session Length L = 10)",
@@ -382,7 +522,7 @@ def write_hf_model_card(
     ]
     card = "\n".join(card_lines) + f"""
 
-## Usage
+## Python API Usage (ML Researchers & Custom Font Slicing)
 
 Install `mlfont`:
 

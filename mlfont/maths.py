@@ -102,7 +102,6 @@ def sinkhorn_knopp_normalize(
     return normalized
 
 
-
 class ParamsDecayBase(abc.ABC):
     """Base class for decaying hyperparameter schedules."""
 

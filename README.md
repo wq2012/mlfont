@@ -18,15 +18,16 @@
 2. [Open-Source Reproduction Notice](#open-source-reproduction-notice)
 3. [System Architecture and Visual Overview](#system-architecture-and-visual-overview)
 4. [Algorithmic Pipeline](#algorithmic-pipeline)
-5. [Installation](#installation)
-6. [Quickstart: Python API](#quickstart-python-api)
-7. [Command-Line Interface (CLI) and Reproducible Pipelines](#command-line-interface-cli-and-reproducible-pipelines)
-8. [Pretrained Models and Sliced Noto WOFF2 Bundles](#pretrained-models-and-sliced-noto-woff2-bundles)
-9. [Archival 2017 Google Fonts Production Strategies and Traffic Results](#archival-2017-google-fonts-production-strategies-and-traffic-results)
-10. [Open-Source Reproduction Benchmarks](#open-source-reproduction-benchmarks)
-11. [Ablation and Multi-Seed Stability Studies](#ablation-and-multi-seed-stability-studies)
-12. [Testing, Code Quality, and PyPI Packaging](#testing-code-quality-and-pypi-packaging)
-13. [Citations](#citations)
+5. [Using Sliced Web Fonts in Your Website (Frontend Developer Guide)](#using-sliced-web-fonts-in-your-website-frontend-developer-guide)
+6. [Installation (Python Library & CLI)](#installation-python-library--cli)
+7. [Quickstart: Python API](#quickstart-python-api)
+8. [Command-Line Interface (CLI) and Reproducible Pipelines](#command-line-interface-cli-and-reproducible-pipelines)
+9. [Pretrained Models and Sliced Noto WOFF2 Bundles](#pretrained-models-and-sliced-noto-woff2-bundles)
+10. [Archival 2017 Google Fonts Production Strategies and Traffic Results](#archival-2017-google-fonts-production-strategies-and-traffic-results)
+11. [Open-Source Reproduction Benchmarks](#open-source-reproduction-benchmarks)
+12. [Ablation and Multi-Seed Stability Studies](#ablation-and-multi-seed-stability-studies)
+13. [Testing, Code Quality, and PyPI Packaging](#testing-code-quality-and-pypi-packaging)
+14. [Citations](#citations)
 
 ---
 
@@ -181,7 +182,127 @@ with `p = 3.0` (`decay_power`), ensuring `max_k |S_k| - min_k |S_k| <= max_diff(
 
 ---
 
-## Installation
+## Using Sliced Web Fonts in Your Website (Frontend Developer Guide)
+
+While Latin webfonts are typically 20–400 KB, CJK and Pan-Unicode fonts weigh **4.7 MB to 9+ MB in WOFF2** because they contain **16,663 to 30,759+ glyphs**. By modeling which characters co-occur together across web pages, **MLFont** partitions the font into small `.woff2` slices (`20` to `102` slices) indexed by CSS `@font-face` `unicode-range` descriptors.
+
+When a user visits your webpage, **any modern browser (Chrome, Edge, Firefox, Safari) automatically inspects the characters present in the DOM and downloads ONLY the small `.woff2` slices needed for that page**—while cross-page and cross-site browser caching accumulates the slices across the browsing session.
+
+> **Interactive Browser Demo:** Open [`web/demo.html`](web/demo.html) locally in your browser to switch live between all 5 sliced Noto fonts (`Noto Sans SC Sliced`, `Noto Sans TC Sliced`, `Noto Sans JP Sliced`, `Noto Sans KR Sliced`, `Noto Sans Sliced`) and inspect real-time per-slice `.woff2` download latencies via the HTML5 Performance API!
+
+### Available Ready-to-Use Sliced Fonts
+
+| Language / Script | CSS `font-family` Name | Slices (Total / Full WOFF2) | Direct CDN Stylesheet (`font_sliced_cdn.css`) | Self-Hosted Stylesheet (`font_sliced.css`) |
+| :--- | :--- | :---: | :--- | :--- |
+| **Simplified Chinese (`zh-Hans`)** | `'Noto Sans SC Sliced'` | `102` (`8.89 MB`) | [`mlfont-notosanssc/font_sliced_cdn.css`](https://huggingface.co/wq2012/mlfont-notosanssc/resolve/main/font_sliced_cdn.css) | [`pretrained_models/mlfont-notosanssc/font_sliced.css`](pretrained_models/mlfont-notosanssc/font_sliced.css) |
+| **Traditional Chinese (`zh-Hant`)** | `'Noto Sans TC Sliced'` | `82` (`5.94 MB`) | [`mlfont-notosanstc/font_sliced_cdn.css`](https://huggingface.co/wq2012/mlfont-notosanstc/resolve/main/font_sliced_cdn.css) | [`pretrained_models/mlfont-notosanstc/font_sliced.css`](pretrained_models/mlfont-notosanstc/font_sliced.css) |
+| **Japanese (`ja`)** | `'Noto Sans JP Sliced'` | `62` (`4.67 MB`) | [`mlfont-notosansjp/font_sliced_cdn.css`](https://huggingface.co/wq2012/mlfont-notosansjp/resolve/main/font_sliced_cdn.css) | [`pretrained_models/mlfont-notosansjp/font_sliced.css`](pretrained_models/mlfont-notosansjp/font_sliced.css) |
+| **Korean (`ko`)** | `'Noto Sans KR Sliced'` | `52` (`5.29 MB`) | [`mlfont-notosanskr/font_sliced_cdn.css`](https://huggingface.co/wq2012/mlfont-notosanskr/resolve/main/font_sliced_cdn.css) | [`pretrained_models/mlfont-notosanskr/font_sliced.css`](pretrained_models/mlfont-notosanskr/font_sliced.css) |
+| **Latin, Greek & Cyrillic (`LGC`)** | `'Noto Sans Sliced'` | `20` (`434.1 KB`) | [`mlfont-notosans-lgc/font_sliced_cdn.css`](https://huggingface.co/wq2012/mlfont-notosans-lgc/resolve/main/font_sliced_cdn.css) | [`pretrained_models/mlfont-notosans-lgc/font_sliced.css`](pretrained_models/mlfont-notosans-lgc/font_sliced.css) |
+
+---
+
+### Option 1: Direct CSS `<link>` or `@import` (Recommended)
+
+ mirroring the original Google Fonts Early Access workflow (`@import url(//fonts.googleapis.com/earlyaccess/notosansscsliced.css);`), you can either self-host `font_sliced.css` + the `woff2/` directory on your own CDN/static server, or use the zero-hosting **`font_sliced_cdn.css`** stylesheet (which points directly to the CORS-enabled Hugging Face global CDN `.woff2` slices with `font-display: swap`):
+
+#### Link (HTML `<head>`)
+```html
+<!-- Self-hosted (copy font_sliced.css and woff2/ to your web server): -->
+<link rel="stylesheet" href="/fonts/mlfont-notosanssc/font_sliced.css">
+
+<!-- OR Zero-hosting via jsDelivr + Hugging Face CDN: -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/pretrained_models/mlfont-notosanssc/font_sliced_cdn.css">
+```
+
+#### Or CSS `@import`
+```css
+@import url('https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/pretrained_models/mlfont-notosanssc/font_sliced_cdn.css');
+```
+
+#### Example CSS Usage
+```css
+body {
+  font-family: 'Noto Sans SC Sliced', sans-serif;
+}
+```
+
+---
+
+### Option 2: One-Line JavaScript Loader (`web/mlfont.js`)
+
+If you prefer a single `<script>` tag that both injects the sliced `@font-face` stylesheet from the CDN (`sc`, `tc`, `jp`, `kr`, or `lgc`) and automatically initializes HTML5 Performance API latency telemetry, include [`web/mlfont.js`](web/mlfont.js) with the `data-mlfont` attribute:
+
+```html
+<!-- Automatically injects 'Noto Sans SC Sliced' CSS and starts latency telemetry -->
+<script
+  src="https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/web/mlfont.js"
+  data-mlfont="notosanssc"
+  async>
+</script>
+```
+
+Or load multiple sliced fonts dynamically in JavaScript:
+```html
+<script src="https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/web/mlfont.js"></script>
+<script>
+  // Load Simplified Chinese + Japanese sliced fonts dynamically:
+  MLFont.load('notosanssc');
+  MLFont.load('notosansjp');
+</script>
+```
+
+| `data-mlfont` / `MLFont.load(...)` Key | Injected CSS `font-family` | Hugging Face Repository |
+| :--- | :--- | :--- |
+| `'notosanssc'` (or `'sc'`, `'zh-cn'`, `'zh-hans'`) | `'Noto Sans SC Sliced'` | [`wq2012/mlfont-notosanssc`](https://huggingface.co/wq2012/mlfont-notosanssc) |
+| `'notosanstc'` (or `'tc'`, `'zh-tw'`, `'zh-hant'`) | `'Noto Sans TC Sliced'` | [`wq2012/mlfont-notosanstc`](https://huggingface.co/wq2012/mlfont-notosanstc) |
+| `'notosansjp'` (or `'jp'`, `'ja'`) | `'Noto Sans JP Sliced'` | [`wq2012/mlfont-notosansjp`](https://huggingface.co/wq2012/mlfont-notosansjp) |
+| `'notosanskr'` (or `'kr'`, `'ko'`) | `'Noto Sans KR Sliced'` | [`wq2012/mlfont-notosanskr`](https://huggingface.co/wq2012/mlfont-notosanskr) |
+| `'notosans-lgc'` (or `'lgc'`, `'notosans'`) | `'Noto Sans Sliced'` | [`wq2012/mlfont-notosans-lgc`](https://huggingface.co/wq2012/mlfont-notosans-lgc) |
+
+---
+
+### Latency Metrics (`web/mlfont.js` — Recommended)
+
+In the original 2017 Google Fonts Early Access launch of `Noto Sans SC Sliced`, websites included `<script src="//fonts.gstatic.com/ea/timing/v1/mlfont.js" async></script>` (`//depot/google3/java/com/google/fonts/server/stats/timing-mlfont.js`) at the bottom of `<head>` to collect anonymous HTML5 Performance API (`window.performance.getEntries()`) latency metrics.
+
+We provide a clean-room, open-source browser library in [`web/mlfont.js`](web/mlfont.js) (and bundled inside every `pretrained_models/mlfont-*/mlfont.js` directory) that reproduces and extends the original `timing-mlfont.js` collector (`window.MLFont` and `window.GoogleFonts`). It accesses the HTML5 Resource Timing and Navigation Timing APIs with **zero user-specific data (no PII)** to measure:
+- **Download time metrics of `.woff2` font slices** (per-slice download duration, TTFB, transfer size in bytes, and browser cache hit status)
+- **Download time of the sliced CSS file** (`font_sliced.css` / `font_sliced_cdn.css`)
+- **Page `onload` and `first-contentful-paint` time** (sampled at `0s, 2s, 5s, 10s` after load, matching the original 2017 schedule `[0, 2000, 5000, 10000]`)
+
+To include the telemetry library, add the following code to the bottom of your `<head>` section:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/web/mlfont.js" async></script>
+```
+
+You can inspect the collected latency report in your browser DevTools console at any time or forward it to your own analytics endpoint:
+
+```javascript
+// Print a formatted table of downloaded font slices and latencies to DevTools Console:
+MLFont.printReport();
+
+// Or inspect the structured JSON metrics programmatically:
+const metrics = MLFont.getMetrics();
+console.log('Slices downloaded:', metrics.summary.totalSlicesFetched);
+console.log('Cached slices:', metrics.summary.cachedSlicesCount);
+console.log('Total WOFF2 transfer (KB):', (metrics.summary.totalTransferBytes / 1024).toFixed(1));
+console.log('Max slice download latency (ms):', metrics.summary.maxSliceDurationMs);
+```
+
+To automatically beacon the JSON payload to your own telemetry server on `load` (`+0s, +2s, +5s, +10s`), add `data-endpoint`:
+```html
+<script
+  src="https://cdn.jsdelivr.net/gh/wq2012/mlfont@main/web/mlfont.js"
+  data-endpoint="https://your-metrics-endpoint.example.com/mlfont"
+  async>
+</script>
+```
+
+---
+
+## Installation (Python Library & CLI)
 
 ```bash
 pip install mlfont
@@ -296,7 +417,7 @@ python3 scripts/generate_figures.py --png-dir resources
 
 ## Pretrained Models and Sliced Noto WOFF2 Bundles
 
-All 5 pretrained models—complete with `model.safetensors` weights (`lambda_matrix`, `dnntm_lambda_matrix`, `codepoints`, `remaining_codepoints`, `frequency_array`, `dna_assignment`), `strategy.json`, `olda_strategy.json`, `dnntm_strategy.json`, `test_samples.json`, `.nam` subset files, `font_sliced.css` `@font-face` stylesheets, and physically sliced `.woff2` binaries—are included under [`pretrained_models/`](pretrained_models/) and published on the **Hugging Face Hub** in the [**MLFont Collection (`wq2012/mlfont`)**](https://huggingface.co/collections/wq2012/mlfont):
+All 5 pretrained models—complete with `model.safetensors` weights (`lambda_matrix`, `dnntm_lambda_matrix`, `codepoints`, `remaining_codepoints`, `frequency_array`, `dna_assignment`), `strategy.json`, `olda_strategy.json`, `dnntm_strategy.json`, `test_samples.json`, `.nam` subset files, `font_sliced.css` (self-hosted `@font-face` stylesheet), `font_sliced_cdn.css` (zero-hosting Hugging Face CDN `@font-face` stylesheet), `mlfont.js` (browser loader & HTML5 Performance API latency telemetry script), and physically sliced `.woff2` binaries—are included under [`pretrained_models/`](pretrained_models/) and published on the **Hugging Face Hub** in the [**MLFont Collection (`wq2012/mlfont`)**](https://huggingface.co/collections/wq2012/mlfont):
 
 | Hugging Face Model Repo | Local Directory | Target Font | Script Coverage | Valid Codepoints (Tail Active / Core) | Tier-1 (`most`) | Tier-2 `K` (`K_eff`) | Total Slices | Physical WOFF2 Size (CSS) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |

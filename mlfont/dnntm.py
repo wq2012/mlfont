@@ -143,7 +143,6 @@ class DnnTopicNetwork(nn.Module):
 class DnnTmLearner:
     """Trains a Deep Neural Network Topic Model (Entropy-Diff or Nonnegative Autoencoder)."""
 
-
     def __init__(
         self,
         corpus: Optional[DocumentCorpusProcessor] = None,
