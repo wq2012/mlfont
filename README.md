@@ -56,8 +56,8 @@ This repository provides a clean-room, open-source Python/PyTorch reproduction o
 | :--- | :--- | :--- |
 | **Execution Engine** | Internal MapReduce / Flume C++ & Python 2.7 pipelines | Standalone Python 3.10+ library with NumPy, SciPy, Scikit-Learn, and PyTorch |
 | **Training Corpus** | Internal Google web index crawls (`DocJoins`, 237,240 Chinese eval pages) | Public **Wikimedia / Wikipedia** dumps (`wikimedia/wikipedia`) across `en, de, fr, pl, ru, el, ko, ja, zh` |
-| **Topic Models** | Online LDA (`sklearn`) & TensorFlow 1.x `DNNTM` (Entropy Diff Loss) | Clean-room `OnlineLdaLearner` & PyTorch `DnnTmLearner` (Non-negative Shannon Entropy Diff Loss) |
-| **Combinatorial Optimizer** | Range-Compact Genetic Algorithm (`RangeCompactModel`) | Vectorized `RangeCompactGeneticLearner` with `PowerDecay` (`p=3.0`) and 7 mutation operators |
+| **Topic Models** | Online LDA (`sklearn`) & TensorFlow 1.x `DNNTM` (Entropy Diff Loss) | Clean-room `OnlineLdaLearner` & PyTorch `DnnTmLearner` (Discriminative Entropy Diff + Nonnegative Sparse Autoencoder Losses) + Sinkhorn-Knopp bi-stochastic normalization |
+| **Combinatorial Optimizer** | Range-Compact Genetic Algorithm (`RangeCompactModel`) | Memetic `RangeCompactGeneticLearner` with `PowerDecay` (`p=3.0`), 1D Potts-Viterbi dynamic programming, Sparse-Tail Monochromatic Island Bridging, and Tier-Capacity Invariance |
 | **Font Subsetting** | Internal `fontTools` + Google Fonts serving definitions | Open-source `fontTools.subset` (`woff2` Brotli compression) + standard `@font-face` CSS & `.nam` exports |
 | **Model Serialization** | Internal `cPickle` / `sstable` checkpoints | Safe, zero-code-execution **Hugging Face `safetensors`** (`model.safetensors`) + JSON strategies |
 
@@ -78,7 +78,7 @@ This repository provides a clean-room, open-source Python/PyTorch reproduction o
 |  Compute Document Frequency DF(c)     |   |  Filter out Tier-1 codepoints         |
 |  Partition top codepoints into        |   |  Learn K x V_rem affinity matrix:     |
 |  deterministic slices:                |   |   - OnlineLdaLearner (Variational EM) |
-|   most_1 (e.g. top 1,000 cps)         |   |   - DnnTmLearner (Entropy Diff Loss)  |
+|   most_1 (e.g. top 1,000 cps)         |   |   - DnnTmLearner (Entropy Diff + AE)  |
 |   most_2 (e.g. next 500 cps)          |   |  Two-tier Hungarian Bayes alignment   |
 +-------------------+-------------------+   +-------------------+-------------------+
                     |                                           |
@@ -86,11 +86,11 @@ This repository provides a clean-room, open-source Python/PyTorch reproduction o
                                           |
                                           v
 +-----------------------------------------------------------------------------------+
-|              4. TIER-3 RANGE-COMPACT GENETIC ALGORITHM (RangeCompactGA)           |
+|         4. TIER-3 MEMETIC RANGE-COMPACT GENETIC ALGORITHM (RangeCompactGA)        |
 |  Jointly minimize w_r * C_range(s) + (1 - w_r) * C_topic(s)                       |
 |  under PowerDecay slice-capacity curriculum:                                      |
 |     max_diff(t) = min_val + (max_val - min_val) * (1 - t / T)^p                   |
-|  Output: Hard partition of all V codepoints into M + K disjoint slices            |
+|  + 1D Potts-Viterbi relaxation + Sparse-Tail Island Bridging + Tier Invariance    |
 +-----------------------------------------+-----------------------------------------+
                                           |
                                           v
@@ -105,7 +105,7 @@ This repository provides a clean-room, open-source Python/PyTorch reproduction o
 
 ![Zipfian Codepoint Decay and Pareto Frontier](resources/fig1_architecture.png)
 
-*Figure 1: (a) Empirical Zipfian decay of codepoint document frequencies across five Google Noto fonts on Wikipedia corpora, motivating the Tier-1 high-frequency slices (`most_1..M`). (b) Pareto trade-off between mean per-glyph download latency (`GIN-3g`) and total CSS `unicode-range` intervals on `Noto Sans SC` (30,759 codepoints), including the archival 2017 Google Fonts Early Access strategy.*
+*Figure 1: (a) Empirical Zipfian decay of codepoint document frequencies across five Google Noto fonts on Wikipedia corpora, motivating the Tier-1 high-frequency slices (`most_1..M`). (b) Pareto trade-off between mean per-glyph download latency (`GIN-3g`) and total CSS `unicode-range` intervals on `Noto Sans SC` (30,759 codepoints), where MLFont Range-Compact GA (`5,935` ranges, `17.67 ms`) strictly dominates the archival 2017 Google Fonts Early Access strategy (`6,063` ranges, `30.29 ms`) on both CSS compactness and latency.*
 
 ---
 
@@ -123,25 +123,28 @@ We first compute the document frequency `DF(c_v) = sum_{d=1}^D x_{d,v}` for ever
 - **Tier-A (`K_eff` core slices)**: Bijectively aligns the `K_eff = min(K, ceil(1.15 * |C_core| / ceil(V_rem / K)))` dominant topics to the `K_eff` most core-populated contiguous Unicode bins, concentrating core active characters (`DF >= min_df`) into dense slices rather than diluting them with `DF = 0` characters.
 - **Tier-B (`K - K_eff` tail slices)**: Bijectively aligns the remaining `K - K_eff` tail topics to the sparse/unobserved Unicode bins with a smooth distance-decaying Dirichlet prior (`>= 0.0020`) plus `0.0020 * P(k | v)` and singleton (`DF = 1`) boosts, ensuring every row `k in {0, ..., K-1}` carries distinct learned posterior variation across active characters while keeping `DF = 0` Unicode blocks contiguous.
 
-Before assigning codepoints to slices, `mlfont.maths.normalize_lambda_matrix` (`normalize_topic_matrix`) applies one of four normalization schemes:
+Before assigning codepoints to slices, `mlfont.maths.normalize_lambda_matrix` (`normalize_topic_matrix`) applies one of five normalization schemes:
 - **`topic_sum`**: Column-normalizes each codepoint across topics so that `sum_k Phi_{k,v} = 1`.
 - **`row_sum`**: Row-normalizes each topic across codepoints so that `sum_v Phi_{k,v} = 1`.
 - **`global_max`** *(Default)*: Scales the matrix by its global maximum `max_{k,v} |Lambda_{k,v}|` so entries lie in `[0, 1]`.
 - **`spectral_norm`**: Scales the matrix by its spectral norm (largest singular value `sigma_max(Lambda)`).
+- **`sinkhorn` (`bistochastic`)**: Applies Sinkhorn-Knopp iterative alternating row and column scaling (`sinkhorn_knopp_normalize`) so that topic rows simultaneously have uniform slice capacity `(V_rem / K)` and codepoint columns have unit marginal mass `1`, calibrated to `[0, 1]` max scale.
 
-### 3. Deep Neural Network Topic Model — DNNTM (`mlfont.dnntm`)
+### 3. Unified Discriminative & Nonnegative Autoencoder DNNTM (`mlfont.dnntm`)
 
-`DnnTmLearner` (`DNNTMSolver`) trains a multi-layer feed-forward network `f_theta` (`n_layers=2`, `ELU` hidden activations, `Softmax` output layer) that maps real document mini-batches `X_real`, synthetic Bernoulli noise documents `X_fake ~ Bernoulli(0.05)`, and one-hot single-codepoint identity probes `I_{V_active}` to topic distributions `T_real = f_theta(X_real)`, `T_fake = f_theta(X_fake)`, and `T_word = f_theta(I_{V_active})`. Shifting each Shannon entropy difference by `+ln(K)` to guarantee non-negativity, DNNTM minimizes (`ALL_COMBINED` loss):
-
+`DnnTmLearner` (`DNNTMSolver`) trains a multi-layer feed-forward network `f_theta` (`n_layers=2`, `ELU` hidden activations, `Softmax` output layer) that maps real document mini-batches `X_real`, synthetic Bernoulli noise documents `X_fake ~ Bernoulli(0.05)`, and one-hot single-codepoint identity probes `I_{V_active}` to topic distributions `T_real = f_theta(X_real)`, `T_fake = f_theta(X_fake)`, and `T_word = f_theta(I_{V_active})`. Furthermore, `DnnTmLearner` includes a nonnegative linear decoder `W_dec = softplus(U_dec) in R_+^{K x V_active}` to support five loss objectives (`DNNTMLossType`):
+- **`REAL_FAKE_DIFF`**, **`REAL_FAKE_AND_REAL_AVERAGE_DIFF`**, and **`ALL_COMBINED`** *(Default)*: Non-negative Shannon Entropy Difference Losses shifted by `+ln(K)` to guarantee non-negativity:
 ```
 L_DNNTM = (H_mean(T_real) - H_mean(T_fake) + ln(K))
         + (H_mean(T_real) - H(mean_doc(T_real)) + ln(K))
         + (H_mean(T_word) - H(mean_word(T_word)) + ln(K)) >= 0
 ```
+- **`AUTOENCODER`**: Nonnegative sparse autoencoder reconstruction loss `BCE(sigma(T_real W_dec + b_dec), X_real) + lambda_1 ||T_real||_1`.
+- **`HYBRID_AUTOENCODER`**: Unifies the `ALL_COMBINED` discriminative Shannon entropy difference loss with the nonnegative sparse autoencoder reconstruction loss.
 
 After training, Bayes' rule yields `Lambda_{k,v} = P(v | k) propto DF(c_v) * T_{word, v, k}`, followed by two-tier Hungarian contiguous-bin alignment.
 
-### 4. Range-Compact Genetic Algorithm (`mlfont.range_compact`)
+### 4. Memetic Range-Compact Genetic Algorithm (`mlfont.range_compact`)
 
 `RangeCompactGeneticLearner` (`RangeCompactGASolver`) evolves a population of candidate slice assignment vectors `s in {0, ..., K-1}^{V_rem}` to minimize the weighted linear cost:
 
@@ -155,7 +158,10 @@ where `C_range(s) = 1 + sum_{v=1}^{V_rem - 1} I[c_{v+1} != c_v + 1 or s_{v+1} !=
 max_diff(t) = floor(min_val + (max_val - min_val) * max(0, 1 - t / T)^p)
 ```
 
-with `p = 3.0` (`decay_power`), ensuring `max_k |S_k| - min_k |S_k| <= max_diff(t)` and `min_k |S_k| >= 1`.
+with `p = 3.0` (`decay_power`), ensuring `max_k |S_k| - min_k |S_k| <= max_diff(t)` and `min_k |S_k| >= 1`. To bridge the gap between local evolutionary mutations and global interval compactness on 30,000-codepoint CJK fonts, `RangeCompactGeneticLearner` integrates three memetic mechanisms:
+1. **Lagrangian 1D Potts-Viterbi Dynamic Programming (`potts_viterbi_smooth_topics`)**: Solves the exact 1D Potts model relaxation along sorted Unicode chains in `O(V_rem * K)` time via tropical min-sum belief propagation with dual capacity penalties.
+2. **Sparse-Tail Monochromatic Island Bridging (`build_island_bridged_topics`)**: Identifies background archive slices (`T_bg`) vs. active foreground slices (`T_fg`) on sparse CJK repertoires (`V_rem > 5,000`), compacts background codepoints into monochromatic contiguous Unicode runs, and absorbs isolated length-`<= B` background islands enclosed by identical foreground slices (`s_{l-1} = s_{r+1} in T_fg`), eliminating two CSS `unicode-range` breaks per bridged island.
+3. **Tier-Capacity Invariance & Boundary-Preserving Repair (`_repair_max_diff`)**: Keeps the aggregate capacity of foreground slices (`T_fg`) and background slices (`T_bg`) invariant across mutations and repairs capacity violations starting from run boundaries to prevent new interior interval splits.
 
 ![Range-Compact Genetic Algorithm Convergence](resources/fig2_ga_convergence.png)
 
@@ -294,11 +300,11 @@ All 5 pretrained models—complete with `model.safetensors` weights (`lambda_mat
 
 | Hugging Face Model Repo | Local Directory | Target Font | Script Coverage | Valid Codepoints (Tail Active / Core) | Tier-1 (`most`) | Tier-2 `K` (`K_eff`) | Total Slices | Physical WOFF2 Size (CSS) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| [`wq2012/mlfont-notosans-lgc`](https://huggingface.co/wq2012/mlfont-notosans-lgc) | [`mlfont-notosans-lgc`](pretrained_models/mlfont-notosans-lgc/) | `NotoSans-Regular.ttf` | Latin, Greek, Cyrillic (`en, de, fr, pl, ru, el`) | `2,297` (`491` / `374`) | None | `20` (`4`) | `20` | `432.6 KB` (`7.8 KB`) |
-| [`wq2012/mlfont-notosanskr`](https://huggingface.co/wq2012/mlfont-notosanskr) | [`mlfont-notosanskr`](pretrained_models/mlfont-notosanskr/) | `NotoSansKR-Regular.otf` | Korean Hangul + Hanja (`ko`) | `22,853` (`3,198` / `2,085`) | `[300, 300]` | `50` (`6`) | `52` | `5.22 MB` (`86.7 KB`) |
-| [`wq2012/mlfont-notosansjp`](https://huggingface.co/wq2012/mlfont-notosansjp) | [`mlfont-notosansjp`](pretrained_models/mlfont-notosansjp/) | `NotoSansJP-Regular.otf` | Japanese Kanji + Kana (`ja`) | `16,663` (`3,238` / `2,512`) | `[500, 500]` | `60` (`12`) | `62` | `4.70 MB` (`93.3 KB`) |
-| [`wq2012/mlfont-notosanstc`](https://huggingface.co/wq2012/mlfont-notosanstc) | [`mlfont-notosanstc`](pretrained_models/mlfont-notosanstc/) | `NotoSansTC-Regular.otf` | Traditional Chinese (`zh-Hant`) | `20,637` (`5,325` / `4,078`) | `[600, 600]` | `80` (`20`) | `82` | `5.99 MB` (`121.7 KB`) |
-| [`wq2012/mlfont-notosanssc`](https://huggingface.co/wq2012/mlfont-notosanssc) | [`mlfont-notosanssc`](pretrained_models/mlfont-notosanssc/) | `NotoSansSC-Regular.otf` | Simplified Chinese (`zh-Hans`) | `30,759` (`5,925` / `4,461`) | `[1000, 500]` | `100` (`18`) | `102` | `8.93 MB` (`109.8 KB`) |
+| [`wq2012/mlfont-notosans-lgc`](https://huggingface.co/wq2012/mlfont-notosans-lgc) | [`mlfont-notosans-lgc`](pretrained_models/mlfont-notosans-lgc/) | `NotoSans-Regular.ttf` | Latin, Greek, Cyrillic (`en, de, fr, pl, ru, el`) | `2,297` (`491` / `374`) | None | `20` (`4`) | `20` | `434.1 KB` (`7.8 KB`) |
+| [`wq2012/mlfont-notosanskr`](https://huggingface.co/wq2012/mlfont-notosanskr) | [`mlfont-notosanskr`](pretrained_models/mlfont-notosanskr/) | `NotoSansKR-Regular.otf` | Korean Hangul + Hanja (`ko`) | `22,853` (`3,198` / `2,085`) | `[300, 300]` | `50` (`6`) | `52` | `5.29 MB` (`78.0 KB`) |
+| [`wq2012/mlfont-notosansjp`](https://huggingface.co/wq2012/mlfont-notosansjp) | [`mlfont-notosansjp`](pretrained_models/mlfont-notosansjp/) | `NotoSansJP-Regular.otf` | Japanese Kanji + Kana (`ja`) | `16,663` (`3,238` / `2,512`) | `[500, 500]` | `60` (`12`) | `62` | `4.67 MB` (`85.3 KB`) |
+| [`wq2012/mlfont-notosanstc`](https://huggingface.co/wq2012/mlfont-notosanstc) | [`mlfont-notosanstc`](pretrained_models/mlfont-notosanstc/) | `NotoSansTC-Regular.otf` | Traditional Chinese (`zh-Hant`) | `20,637` (`5,325` / `4,078`) | `[600, 600]` | `80` (`20`) | `82` | `5.94 MB` (`104.1 KB`) |
+| [`wq2012/mlfont-notosanssc`](https://huggingface.co/wq2012/mlfont-notosanssc) | [`mlfont-notosanssc`](pretrained_models/mlfont-notosanssc/) | `NotoSansSC-Regular.otf` | Simplified Chinese (`zh-Hans`) | `30,759` (`5,925` / `4,461`) | `[1000, 500]` | `100` (`18`) | `102` | `8.89 MB` (`83.9 KB`) |
 
 ---
 
@@ -357,7 +363,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `language_slice` | 8 | 6 / 300 | 92 | 40.17 (258.54) | 10.62 (66.28) | 1.95 (12.76) | 18.85% | 15.08% |
 | **`online_lda_topics20_greedy`** | 20 | **0 / 0** | 537 | 25.15 (144.76) | 7.11 (40.95) | 1.17 (6.76) | 19.16% | 31.26% |
 | **`dnntm_topics20_greedy`** | 20 | **0 / 0** | 549 | **23.29 (112.70)** | **6.59 (31.88)** | **1.09 (5.26)** | **31.79%** | **32.56%** |
-| **`range_compact_topics20`** | 20 | **0 / 0** | **384** | 25.64 (149.59) | 7.22 (42.16) | 1.20 (7.00) | 17.94% | 29.76% |
+| **`range_compact_topics20`** | 20 | **0 / 0** | **384** | 25.05 (142.01) | 7.06 (40.06) | 1.17 (6.64) | 18.05% | 30.31% |
 
 ### 2. Noto Sans KR (`NotoSansKR-Regular.otf` — 22,853 Codepoints, 400 Eval Pages in Korean `ko`)
 
@@ -371,7 +377,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `google_fonts_2017_kr` | 102 | 47 / 5467 | 7,229 | 83.54 (354.53) | 22.38 (94.50) | 4.03 (17.20) | 7.45% | 13.64% |
 | **`online_lda_topics50_greedy`** | 52 | **0 / 0** | 8,327 | **66.59** (348.80) | **17.48** (91.73) | **3.25** (16.99) | 7.04% | **12.03%** |
 | **`dnntm_topics50_greedy`** | 52 | **0 / 0** | 8,354 | 66.97 (**331.00**) | 17.59 (**87.21**) | 3.26 (**16.10**) | **8.88%** | 11.51% |
-| **`range_compact_most300_300_topics50`** | 52 | **0 / 0** | **7,859** | 70.36 (360.67) | 18.46 (94.44) | 3.43 (17.61) | 6.72% | 11.25% |
+| **`range_compact_most300_300_topics50`** | 52 | **0 / 0** | **6,769** | 80.22 (354.26) | 21.06 (93.00) | 3.91 (17.27) | 6.32% | 9.25% |
 
 ### 3. Noto Sans JP (`NotoSansJP-Regular.otf` — 16,663 Codepoints, 400 Eval Pages in Japanese `ja`)
 
@@ -384,7 +390,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `most_500_500_equal_bin_60` | 62 | 0 / 0 | 5,975 | 76.50 (387.35) | 20.50 (103.64) | 3.69 (18.69) | 5.45% | 8.92% |
 | **`online_lda_topics60_greedy`** | 62 | **0 / 0** | 8,888 | 34.87 (201.00) | 9.31 (53.61) | **1.68** (9.71) | 9.61% | **21.31%** |
 | **`dnntm_topics60_greedy`** | 62 | **0 / 0** | 8,710 | **34.80 (188.72)** | **9.30 (50.47)** | **1.68 (9.12)** | **10.22%** | 20.88% |
-| **`range_compact_most500_500_topics60`** | 62 | **0 / 0** | **8,447** | 37.13 (214.37) | 9.91 (57.09) | 1.79 (10.37) | 9.14% | 19.79% |
+| **`range_compact_most500_500_topics60`** | 62 | **0 / 0** | **7,298** | 42.53 (223.47) | 11.37 (59.70) | 2.05 (10.79) | 8.91% | 16.91% |
 
 ### 4. Noto Sans TC (`NotoSansTC-Regular.otf` — 20,637 Codepoints, 400 Eval Pages in Traditional Chinese `zh-Hant`)
 
@@ -397,7 +403,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `most_600_600_equal_bin_80` | 82 | 0 / 0 | 6,672 | 92.66 (446.08) | 24.90 (119.91) | 4.46 (21.47) | 4.33% | 9.83% |
 | **`online_lda_topics80_greedy`** | 82 | **0 / 0** | 11,867 | **50.11** (250.61) | **13.43** (67.58) | **2.42** (12.04) | 7.60% | **19.59%** |
 | **`dnntm_topics80_greedy`** | 82 | **0 / 0** | 11,410 | 51.65 (**226.65**) | 13.84 (**60.72**) | 2.49 (**10.93**) | **7.63%** | 19.30% |
-| **`range_compact_most600_600_topics80`** | 82 | **0 / 0** | **11,150** | 56.02 (267.26) | 14.99 (71.75) | 2.70 (12.87) | 7.00% | 16.93% |
+| **`range_compact_most600_600_topics80`** | 82 | **0 / 0** | **8,743** | 56.19 (265.70) | 15.07 (71.62) | 2.71 (12.79) | 7.07% | 17.37% |
 
 ### 5. Noto Sans SC (`NotoSansSC-Regular.otf` — 30,759 Codepoints, 400 Eval Pages in Simplified Chinese `zh-Hans`)
 
@@ -411,7 +417,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `google_fonts_ea_2017` | 102 | 0 / 0 | 6,063 | 115.96 (609.01) | 30.29 (160.05) | 5.67 (29.67) | 3.25% | 7.74% |
 | **`online_lda_topics100_greedy`** | 102 | **0 / 0** | 10,177 | 60.16 (314.64) | 15.93 (83.23) | 2.92 (15.27) | 6.30% | **16.90%** |
 | **`dnntm_topics100_greedy`** | 102 | **0 / 0** | 9,640 | **59.30 (311.97)** | **15.71 (82.49)** | **2.88 (15.14)** | **6.72%** | 16.57% |
-| **`range_compact_most1000_500_topics100`** | 102 | **0 / 0** | **9,220** | 66.51 (343.80) | 17.61 (90.79) | 3.23 (16.71) | 5.96% | 14.77% |
+| **`range_compact_most1000_500_topics100`** | 102 | **0 / 0** | **5,935** | 66.67 (356.73) | 17.67 (94.33) | 3.23 (17.32) | 5.97% | 14.64% |
 
 ---
 
@@ -422,11 +428,22 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | Normalization Method | CSS Ranges | `GIN-2g` Mean (P95) `ms` | `GIN-3g` Mean (P95) `ms` | Session Utilization `%` |
 | :--- | :---: | :---: | :---: | :---: |
 | `row_sum` (Row L1 per topic) | **421** | 25.15 (148.94) | 7.12 (42.16) | 31.15% |
-| `topic_sum` (Column L1 per codepoint) | 549 | 25.17 (157.28) | 7.12 (44.49) | **31.26%** |
-| **`global_max`** *(L_inf global max scaling)* | 537 | **25.15 (144.76)** | **7.11 (40.95)** | **31.26%** |
-| **`spectral_norm`** *(Spectral L2 norm scaling)* | 537 | **25.15 (144.76)** | **7.11 (40.95)** | **31.26%** |
+| `topic_sum` (Column L1 per codepoint) | 549 | 25.17 (157.28) | 7.12 (44.49) | 31.26% |
+| `global_max` *(L_inf global max scaling)* | 537 | 25.15 (144.76) | 7.11 (40.95) | 31.26% |
+| `spectral_norm` *(Spectral L2 norm scaling)* | 537 | 25.15 (144.76) | 7.11 (40.95) | 31.26% |
+| **`sinkhorn`** *(Sinkhorn-Knopp bi-stochastic scaling)* | 542 | **24.65 (144.00)** | **6.98 (40.76)** | **31.77%** |
 
-### 2. Effect of Number of Topic Slices `K` (`OnlineLdaLearner` on Noto Sans LGC)
+### 2. Effect of DNNTM Training Objective (`mlfont.dnntm.DnnTmLearner` on Noto Sans LGC, `K = 20`)
+
+| DNNTM Loss Objective (`DNNTMLossType`) | CSS Ranges | `GIN-2g` Mean (P95) `ms` | `GIN-3g` Mean (P95) `ms` | `DSL` Mean (P95) `ms` | Session Utilization `%` |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `AUTOENCODER` (Nonnegative Sparse BCE + L1) | 590 | 26.70 (197.50) | 7.55 (55.87) | 1.25 (9.23) | 30.75% |
+| `HYBRID_AUTOENCODER` (Entropy Diff + Sparse AE) | 565 | 24.95 (126.73) | 7.06 (35.85) | 1.17 (5.92) | 30.66% |
+| `REAL_FAKE_AND_REAL_AVERAGE_DIFF` | 497 | 24.32 (121.68) | 6.88 (34.42) | 1.14 (5.68) | 31.01% |
+| `REAL_FAKE_DIFF` | **480** | 23.85 (120.08) | 6.75 (33.97) | 1.11 (5.61) | 31.70% |
+| **`ALL_COMBINED` (Full Entropy Difference, Default)** | 549 | **23.29 (112.70)** | **6.59 (31.88)** | **1.09 (5.26)** | **32.56%** |
+
+### 3. Effect of Number of Topic Slices `K` (`OnlineLdaLearner` on Noto Sans LGC)
 
 | Number of Topic Slices (`K` / `K_eff`) | CSS Ranges | `GIN-2g` Mean `ms` | `GIN-3g` Mean `ms` | `DSL` Mean `ms` | Session Utilization `%` |
 | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -436,7 +453,7 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `K = 40` (`K_eff = 8`) | 589 | 29.75 | 8.84 | 1.35 | 35.79% |
 | `K = 60` (`K_eff = 12`) | 645 | 34.20 | 10.42 | 1.52 | **39.39%** |
 
-### 3. Effect of Browsing Session Length `L` (`Noto Sans SC`, `GIN-3g`)
+### 4. Effect of Browsing Session Length `L` (`Noto Sans SC`, `GIN-3g`)
 
 | Strategy (`Noto Sans SC`) | `L = 1` (`GIN-3g_no_session`) | `L = 3` (`GIN-3g_short_session`) | `L = 10` (`GIN-3g`) | Session Utilization (`L = 10`) |
 | :--- | :---: | :---: | :---: | :---: |
@@ -446,18 +463,18 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 | `google_fonts_ea_2017` | 148.94 ms | 77.47 ms | 30.29 ms | 7.74% |
 | **`online_lda_topics100_greedy`** | 81.79 ms | 36.68 ms | 15.93 ms | **16.90%** |
 | **`dnntm_topics100_greedy`** | **78.20 ms** | **35.89 ms** | **15.71 ms** | 16.57% |
-| **`range_compact_most1000_500_topics100` (GA)** | 86.54 ms | 39.88 ms | 17.61 ms | 14.77% |
+| **`range_compact_most1000_500_topics100` (GA)** | 89.11 ms | 40.78 ms | 17.67 ms | 14.64% |
 
-### 4. Multi-Seed Reproducibility (Seeds `42, 43, 44`)
+### 5. Multi-Seed Reproducibility (Seeds `42, 43, 44`)
 
 | Font Family | Learner | `GIN-3g` Mean ± Std (`ms`) | CSS Ranges ± Std |
 | :--- | :--- | :---: | :---: |
 | `Noto Sans LGC` | `Online LDA (K=20)` | `7.11 ± 0.03` | `528.0 ± 17.9` |
 | `Noto Sans LGC` | `DNNTM (K=20)` | `6.66 ± 0.20` | `539.0 ± 7.3` |
-| `Noto Sans LGC` | `Range-Compact GA (K=20)` | `7.36 ± 0.10` | `343.0 ± 44.0` |
+| `Noto Sans LGC` | `Range-Compact GA (K=20)` | `7.19 ± 0.10` | `339.0 ± 42.0` |
 | `Noto Sans SC` | `Online LDA (102 slices)` | `15.83 ± 0.08` | `10162.7 ± 33.8` |
 | `Noto Sans SC` | `DNNTM (102 slices)` | `15.83 ± 0.09` | `9698.0 ± 44.5` |
-| `Noto Sans SC` | `Range-Compact GA (102 slices)` | `17.70 ± 0.25` | `9205.3 ± 12.7` |
+| `Noto Sans SC` | `Range-Compact GA (102 slices)` | `17.70 ± 0.11` | `5931.7 ± 3.4` |
 
 ---
 

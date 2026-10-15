@@ -1,10 +1,10 @@
-/* [0] (128 glyphs, 42 ranges) */
+/* [0] (127 glyphs, 40 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_000.woff2) format('woff2');
-  unicode-range: U+20, U+22, U+24, U+26-29, U+2C-3C, U+3F, U+41-49, U+4C-50, U+52-55, U+59, U+61-69, U+6B-79, U+7E, U+C0, U+C2-C3, U+C5-C6, U+C9, U+CE, U+E0-E3, U+E6-EB, U+ED-F1, U+F4-F5, U+F7-F9, U+FB, U+FD-FE, U+100-103, U+10C-10D, U+131, U+153, U+159, U+161, U+16B, U+17E, U+219, U+28B-28E, U+2BE-2BF, U+32F, U+1E2B, U+1E6F, U+1F30-1F34, U+202F, U+20AC;
+  unicode-range: U+20, U+22, U+24, U+26-29, U+2C-3C, U+3F, U+41-49, U+4C-50, U+52-55, U+59, U+61-69, U+6B-79, U+7E, U+C0, U+C2, U+C5-C6, U+C9, U+CE-D2, U+E0-E3, U+E6-EB, U+ED-F1, U+F4-F5, U+F8-FB, U+FD-FE, U+101-103, U+10C-10D, U+130-131, U+153, U+159, U+161, U+16B, U+17E, U+219-21D, U+28B, U+2BE-2BF, U+32F, U+1E2B, U+1E6F, U+202F, U+20AC;
 }
 
 /* [1] (108 glyphs, 45 ranges) */
@@ -13,97 +13,97 @@
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_001.woff2) format('woff2');
-  unicode-range: U+23, U+40, U+57-58, U+5A, U+5F-60, U+6A, U+7A-7B, U+7D, U+B5-B6, U+BE-BF, U+C1, U+C7-C8, U+CA-CD, U+CF-D2, U+D4-D5, U+D7, U+D9-DB, U+DD-DE, U+E5, U+F2-F3, U+FA, U+104-10B, U+10E-11A, U+11C-11F, U+12B, U+141-144, U+14B-152, U+15A-15B, U+160, U+179-17D, U+2BC-2BD, U+3EF, U+45B-45F, U+46A, U+1E0D, U+1E63, U+1F0C, U+2013, U+201D, U+2032-2034, U+2153-2154, U+2206, U+2248, U+2264-2265, U+2C75;
+  unicode-range: U+23, U+40, U+57-58, U+5A, U+60, U+6A, U+7A-7B, U+7D, U+B5-B6, U+BE-BF, U+C1, U+C7-C8, U+CA-CD, U+D4-D5, U+D7, U+D9-DB, U+E5, U+F2-F3, U+104-10B, U+10E-11A, U+11C-11F, U+127-12B, U+141-144, U+14B-14F, U+15A-15B, U+160, U+179-17D, U+25A, U+27E-27F, U+2BC-2BD, U+30B-30C, U+3EE-3F2, U+469-46A, U+1E0D, U+1E63, U+1F0C, U+2012-2013, U+201D, U+2032-2034, U+2153-2154, U+2206, U+2248, U+2264-2265, U+25BC, U+2C75;
 }
 
-/* [2] (108 glyphs, 12 ranges) */
+/* [2] (107 glyphs, 13 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_002.woff2) format('woff2');
-  unicode-range: U+A1-A6, U+A8-AA, U+120-126, U+128-12A, U+12C-130, U+132-140, U+145-14A, U+154-158, U+15C-15E, U+162-16A, U+16C-178, U+17F-19F;
+  unicode-range: U+A1-A6, U+A8-AA, U+AF, U+120-126, U+12C-12F, U+132-140, U+145-14A, U+150-152, U+154-158, U+15C-15D, U+162-16A, U+16C-178, U+17F-19F;
 }
 
-/* [3] (110 glyphs, 1 ranges) */
+/* [3] (109 glyphs, 1 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_003.woff2) format('woff2');
-  unicode-range: U+1A0-20D;
+  unicode-range: U+1A0-20C;
 }
 
-/* [4] (111 glyphs, 7 ranges) */
+/* [4] (110 glyphs, 7 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_004.woff2) format('woff2');
-  unicode-range: U+20E-218, U+21A-250, U+252-258, U+25C-269, U+26B-270, U+274-27F, U+3E4-3E9;
+  unicode-range: U+20D-218, U+21E-250, U+252-258, U+25C-269, U+26B-270, U+274-27D, U+3E4-3ED;
 }
 
-/* [5] (108 glyphs, 9 ranges) */
+/* [5] (115 glyphs, 12 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_005.woff2) format('woff2');
-  unicode-range: U+280-28A, U+293-2AF, U+2B1-2BB, U+2C0-2C7, U+2C9-2CE, U+2D1-2F2, U+36E-36F, U+374-375, U+37A-37E;
+  unicode-range: U+280-28A, U+28C-28D, U+293-2AF, U+2B1-2BB, U+2C0-2C7, U+2C9-2CE, U+2D1-2F2, U+36E-36F, U+374-375, U+37A-37E, U+3AA-3AB, U+3D2-3D4;
 }
 
-/* [6] (119 glyphs, 7 ranges) */
+/* [6] (117 glyphs, 4 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_006.woff2) format('woff2');
-  unicode-range: U+2F3-2FF, U+302-309, U+30D-310, U+312-32E, U+330-360, U+362-36D, U+3FB-3FE;
+  unicode-range: U+2F3-2FF, U+302-309, U+30D-32E, U+330-36D;
 }
 
-/* [7] (128 glyphs, 30 ranges) */
+/* [7] (127 glyphs, 29 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_007.woff2) format('woff2');
-  unicode-range: U+7C, U+B1, U+B4, U+271-272, U+2B0, U+361, U+384-38A, U+38C, U+38E-3A1, U+3A3-3CE, U+3D0-3D1, U+3DC-3E3, U+3EE, U+3F0-3FA, U+460-461, U+470-471, U+4E8, U+929-92C, U+93F-941, U+1F00, U+1F04, U+1F14-1F15, U+1F18-1F19, U+1F41, U+1F4D, U+1F61, U+1F72, U+1F76, U+1FE4-1FE6, U+1FFC;
+  unicode-range: U+5F, U+7C, U+B1, U+B4, U+271-272, U+28E, U+2B0, U+384-38A, U+38C, U+38E-3A1, U+3A3-3A9, U+3AC-3CE, U+3D0-3D1, U+3D5-3E3, U+3F9-3FA, U+460-462, U+470-471, U+92A-92C, U+93F-941, U+1F00, U+1F04, U+1F14-1F15, U+1F18-1F19, U+1F41, U+1F4D, U+1F61-1F66, U+1F76, U+1FE5-1FE6, U+1FFB-1FFC;
 }
 
-/* [8] (128 glyphs, 39 ranges) */
+/* [8] (127 glyphs, 40 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_008.woff2) format('woff2');
-  unicode-range: U+25, U+2B, U+3E, U+5C, U+5E, U+A0, U+AB-AC, U+AE-B0, U+B2-B3, U+B7-BB, U+11B, U+127, U+259-25B, U+26A, U+273, U+290-292, U+2CF-2D0, U+300-301, U+30A-30C, U+311, U+410-451, U+456, U+469, U+923-924, U+927-928, U+1E53, U+1F55, U+1F73-1F75, U+1FDD-1FDE, U+1FF6, U+2014-2015, U+2022, U+2030, U+2116, U+2190-2192, U+2212, U+2219, U+2261, U+25BC;
+  unicode-range: U+25, U+2B, U+3E, U+5C, U+5E, U+A0, U+AB, U+AE, U+B0, U+B2-B3, U+B7-BC, U+11B, U+259, U+25B, U+26A, U+273, U+290-292, U+2CF-2D0, U+300-301, U+30A, U+410-429, U+42D-451, U+456, U+45B-45F, U+463, U+917, U+927-929, U+1E53, U+1F30, U+1F55-1F57, U+1F74, U+1FF6-1FFA, U+2014-2015, U+2022, U+2030, U+2116, U+2190-2192, U+2212, U+2219, U+2260-2261;
 }
 
-/* [9] (121 glyphs, 5 ranges) */
+/* [9] (110 glyphs, 4 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_009.woff2) format('woff2');
-  unicode-range: U+3D2-3DB, U+3EA-3ED, U+462-468, U+46B-46F, U+472-4D0;
+  unicode-range: U+3F3-3F8, U+464-468, U+46B-46F, U+472-4CF;
 }
 
-/* [10] (122 glyphs, 5 ranges) */
+/* [10] (123 glyphs, 4 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_010.woff2) format('woff2');
-  unicode-range: U+3FF-408, U+4D1-4E7, U+4E9-527, U+901-904, U+906-91B;
+  unicode-range: U+3FB-408, U+4D0-527, U+901-904, U+906-916;
 }
 
-/* [11] (110 glyphs, 13 ranges) */
+/* [11] (122 glyphs, 15 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_011.woff2) format('woff2');
-  unicode-range: U+409-40F, U+452-455, U+457-45A, U+91C-922, U+931-934, U+936-939, U+93C-93E, U+942-946, U+948-94C, U+950-954, U+958-972, U+97B-97F, U+1D00-1D1D;
+  unicode-range: U+409-40F, U+42A-42C, U+452-455, U+457-45A, U+918-924, U+92D-92F, U+931-934, U+936-939, U+93C-93E, U+942-946, U+948-94C, U+950-954, U+958-972, U+97B-97F, U+1D00-1D1D;
 }
 
 /* [12] (115 glyphs, 1 ranges) */
@@ -115,58 +115,58 @@
   unicode-range: U+1D1E-1D90;
 }
 
-/* [13] (108 glyphs, 5 ranges) */
+/* [13] (109 glyphs, 6 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_013.woff2) format('woff2');
-  unicode-range: U+1D91-1DCA, U+1DFE-1E0C, U+1E0E-1E24, U+1E26-1E2A, U+1E2C-1E32;
+  unicode-range: U+1D91-1DCA, U+1DFE-1E0C, U+1E0E-1E16, U+1E18-1E23, U+1E26-1E2A, U+1E2C-1E35;
 }
 
-/* [14] (108 glyphs, 5 ranges) */
+/* [14] (107 glyphs, 6 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_014.woff2) format('woff2');
-  unicode-range: U+1E33-1E52, U+1E54-1E62, U+1E64-1E6E, U+1E70-1E9B, U+1EA6-1EAB;
+  unicode-range: U+1E36-1E52, U+1E54-1E62, U+1E64-1E6E, U+1E70-1E9B, U+1EA0, U+1EA6-1EAC;
 }
 
-/* [15] (108 glyphs, 10 ranges) */
+/* [15] (107 glyphs, 8 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_015.woff2) format('woff2');
-  unicode-range: U+92D-92F, U+1EAC-1EF9, U+1F01-1F03, U+1F05-1F07, U+1F09-1F0B, U+1F0D-1F13, U+1F1A-1F1D, U+1F21-1F25, U+200F, U+2012;
+  unicode-range: U+1EAD-1EF9, U+1F01-1F03, U+1F09-1F0B, U+1F0D-1F13, U+1F1A-1F1D, U+1F28-1F2F, U+200C-200F, U+2021;
 }
 
-/* [16] (108 glyphs, 14 ranges) */
+/* [16] (110 glyphs, 14 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_016.woff2) format('woff2');
-  unicode-range: U+1F28-1F2F, U+1F35-1F40, U+1F42-1F45, U+1F48-1F4C, U+1F56-1F57, U+1F59, U+1F5B, U+1F5D, U+1F5F-1F60, U+1F62-1F71, U+1F77-1F7D, U+1F80-1FA6, U+1FDF-1FE3, U+1FE7-1FEB;
+  unicode-range: U+1F31-1F40, U+1F42-1F45, U+1F48-1F4C, U+1F52-1F54, U+1F59, U+1F5B, U+1F5D, U+1F5F-1F60, U+1F67-1F73, U+1F75, U+1F77-1F7D, U+1F80-1FAB, U+1FDD-1FE3, U+1FE7-1FEB;
 }
 
-/* [17] (128 glyphs, 51 ranges) */
+/* [17] (127 glyphs, 51 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_017.woff2) format('woff2');
-  unicode-range: U+21, U+2A, U+3D, U+4A-4B, U+51, U+56, U+5B, U+5D, U+A7, U+AD, U+BC-BD, U+C4, U+D3, U+D6, U+D8, U+DC, U+DF, U+E4, U+EC, U+F6, U+FC, U+FF, U+15F, U+251, U+28F, U+2C8, U+905, U+925-926, U+930, U+935, U+947, U+94D, U+1E25, U+1E9E, U+1EA0-1EA5, U+1F08, U+1F20, U+1F26-1F27, U+1F50-1F54, U+1FA7-1FB4, U+1FB6-1FC4, U+1FC6-1FD3, U+1FD6-1FDB, U+1FEC-1FEF, U+1FF2-1FF4, U+2009-200E, U+2016-201C, U+201E-2021, U+2026, U+251C, U+2524;
+  unicode-range: U+21, U+2A, U+3D, U+4A-4B, U+51, U+56, U+5B, U+5D, U+A7, U+AC-AD, U+BD, U+C3-C4, U+D3, U+D6, U+D8, U+DC-DF, U+E4, U+EC, U+F6-F7, U+FC, U+FF-100, U+15E-15F, U+251, U+28F, U+2C8, U+905, U+925-926, U+930, U+935, U+947, U+94D, U+1E17, U+1E24-1E25, U+1E9E, U+1EA1-1EA5, U+1F05-1F08, U+1F20-1F27, U+1F50-1F51, U+1FAC-1FB4, U+1FB6-1FC4, U+1FC6-1FD3, U+1FD6-1FDB, U+1FE4, U+1FEC, U+1FF3, U+2009-200B, U+2016-201C, U+201E-2020, U+2026, U+251C, U+2524;
 }
 
-/* [18] (109 glyphs, 50 ranges) */
+/* [18] (108 glyphs, 51 ranges) */
 @font-face {
   font-family: 'NotoSans-Regular Sliced';
   font-style: normal;
   font-weight: 400;
   src: url(NotoSans-Regular_slice_018.woff2) format('woff2');
-  unicode-range: U+1FF7-1FFB, U+1FFD-1FFE, U+2000-2008, U+202A-202E, U+2039-203A, U+203C, U+203E, U+2044, U+205E, U+206A-2070, U+2074-2079, U+207F, U+2090-2094, U+20A0-20A9, U+20AB, U+20AD-20B5, U+20B9-20BA, U+20F0, U+2105, U+2113, U+2117, U+2122, U+2126, U+212E, U+214D-214E, U+215B-215E, U+2184, U+2193-2195, U+21A8, U+2202, U+220F, U+2211, U+2215, U+221A, U+221E-221F, U+2229, U+222B, U+2260, U+2302, U+2310, U+2320-2321, U+2500, U+2502, U+250C, U+2510, U+2514, U+2518, U+252C, U+2534, U+253C;
+  unicode-range: U+1FED-1FEF, U+1FF2, U+1FF4, U+1FFD-1FFE, U+2000-2008, U+202A-202E, U+2039-203A, U+203C, U+203E, U+2044, U+205E, U+206A-2070, U+2074-2079, U+207F, U+2090-2094, U+20A0-20A9, U+20AB, U+20AD-20B5, U+20B9-20BA, U+20F0, U+2105, U+2113, U+2117, U+2122, U+2126, U+212E, U+214D-214E, U+215B-215E, U+2184, U+2193-2195, U+21A8, U+2202, U+220F, U+2211, U+2215, U+221A, U+221E-221F, U+2229, U+222B, U+2302, U+2310, U+2320-2321, U+2500, U+2502, U+250C, U+2510, U+2514, U+2518, U+252C, U+2534, U+253C;
 }
 
 /* [19] (112 glyphs, 33 ranges) */

@@ -29,9 +29,9 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 * **Target Font**: `NotoSansTC-Regular.otf` (20,637 Unicode codepoints)
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `zh`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `traditional_chinese`)
-* **Total Slices**: 82 slices (11,150 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 5.99 MB / 6129.8 KB (6,276,868 bytes) across 82 `.woff2` files (companion CSS: 121.7 KB)
-* **Training Wall-Time**: 62.0 seconds on CPU/GPU
+* **Total Slices**: 82 slices (8,743 total CSS `unicode-range` intervals)
+* **Physical WOFF2 Bundle Size**: 5.94 MB / 6085.5 KB (6,231,532 bytes) across 82 `.woff2` files (companion CSS: 104.1 KB)
+* **Training Wall-Time**: 55.6 seconds on CPU/GPU
 
 ## Model Files Included
 
@@ -57,7 +57,7 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 | `most_600_600_equal_bin_80` | 82 | 6672 | 0 / 0 | 92.66 / 446.08 | 24.90 / 119.91 | 4.46 / 21.47 | 9.83% |
 | `online_lda_topics80_greedy` | 82 | 11867 | 0 / 0 | 50.11 / 250.61 | 13.43 / 67.58 | 2.42 / 12.04 | 19.59% |
 | `dnntm_topics80_greedy` | 82 | 11410 | 0 / 0 | 51.65 / 226.65 | 13.84 / 60.72 | 2.49 / 10.93 | 19.30% |
-| **range_compact_most600_600_topics80 (This Model)** | 82 | 11150 | 0 / 0 | 56.02 / 267.26 | 14.99 / 71.75 | 2.70 / 12.87 | 16.93% |
+| **range_compact_most600_600_topics80 (This Model)** | 82 | 8743 | 0 / 0 | 56.19 / 265.70 | 15.07 / 71.62 | 2.71 / 12.79 | 17.37% |
 
 ## Usage
 

@@ -29,9 +29,9 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 * **Target Font**: `NotoSansKR-Regular.otf` (22,853 Unicode codepoints)
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `ko`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `korean`)
-* **Total Slices**: 52 slices (7,859 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 5.22 MB / 5343.5 KB (5,471,748 bytes) across 52 `.woff2` files (companion CSS: 86.7 KB)
-* **Training Wall-Time**: 46.6 seconds on CPU/GPU
+* **Total Slices**: 52 slices (6,769 total CSS `unicode-range` intervals)
+* **Physical WOFF2 Bundle Size**: 5.29 MB / 5419.9 KB (5,549,952 bytes) across 52 `.woff2` files (companion CSS: 78.0 KB)
+* **Training Wall-Time**: 84.5 seconds on CPU/GPU
 
 ## Model Files Included
 
@@ -58,7 +58,7 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 | `google_fonts_2017_kr` | 102 | 7229 | 47 / 5467 | 83.54 / 354.53 | 22.38 / 94.50 | 4.03 / 17.20 | 13.64% |
 | `online_lda_topics50_greedy` | 52 | 8327 | 0 / 0 | 66.59 / 348.80 | 17.48 / 91.73 | 3.25 / 16.99 | 12.03% |
 | `dnntm_topics50_greedy` | 52 | 8354 | 0 / 0 | 66.97 / 331.00 | 17.59 / 87.21 | 3.26 / 16.10 | 11.51% |
-| **range_compact_most300_300_topics50 (This Model)** | 52 | 7859 | 0 / 0 | 70.36 / 360.67 | 18.46 / 94.44 | 3.43 / 17.61 | 11.25% |
+| **range_compact_most300_300_topics50 (This Model)** | 52 | 6769 | 0 / 0 | 80.22 / 354.26 | 21.06 / 93.00 | 3.91 / 17.27 | 9.25% |
 
 ## Usage
 

@@ -209,7 +209,13 @@ def plot_fig2_ga_convergence(
     axes[1].set_xlabel("GA Generation (Iteration)")
     axes[1].set_ylabel("Topic Discrepancy Cost C_topic(t) (Lower is Better)")
     axes[1].grid(True, ls=":", alpha=0.5)
-    axes[1].legend(loc="upper right", ncol=2, frameon=True, fontsize=8.0)
+    axes[1].legend(
+        loc="lower right",
+        bbox_to_anchor=(0.98, 0.08),
+        ncol=2,
+        frameon=True,
+        fontsize=8.0,
+    )
 
     sc_hist_file = experiments_dir / "notosanssc" / "ga_history.json"
     if sc_hist_file.exists():

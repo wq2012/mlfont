@@ -61,7 +61,7 @@ def chinese_production_config() -> MLFontPreset:
             loss_type="ALL_COMBINED",
         ),
         range_compact_config=RangeCompactConfig(
-            range_cost_weight=0.012,
+            range_cost_weight=0.18,
             max_iteration=1200,
             n_survivals=20,
             n_mutations_per_iteration=40,
@@ -70,7 +70,7 @@ def chinese_production_config() -> MLFontPreset:
             init_from_topic_balanced_matrix=True,
             init_from_binning=True,
             decay_max_diff=DecayConfig(
-                min_val=30.0, max_val=50.0, decay_method="POWER", decay_power=3.0
+                min_val=30.0, max_val=50.0, decay_power=3.0, decay_method="POWER"
             ),
             mutation_probabilities=dict(DEFAULT_GA_MUTATION_PROBS),
             random_seed=42,
@@ -107,7 +107,7 @@ def traditional_chinese_production_config() -> MLFontPreset:
             loss_type="ALL_COMBINED",
         ),
         range_compact_config=RangeCompactConfig(
-            range_cost_weight=0.012,
+            range_cost_weight=0.18,
             max_iteration=1200,
             n_survivals=20,
             n_mutations_per_iteration=40,
@@ -116,7 +116,7 @@ def traditional_chinese_production_config() -> MLFontPreset:
             init_from_topic_balanced_matrix=True,
             init_from_binning=True,
             decay_max_diff=DecayConfig(
-                min_val=30.0, max_val=50.0, decay_method="POWER", decay_power=3.0
+                min_val=30.0, max_val=50.0, decay_power=3.0, decay_method="POWER"
             ),
             mutation_probabilities=dict(DEFAULT_GA_MUTATION_PROBS),
             random_seed=42,
@@ -153,7 +153,7 @@ def japanese_production_config() -> MLFontPreset:
             loss_type="ALL_COMBINED",
         ),
         range_compact_config=RangeCompactConfig(
-            range_cost_weight=0.012,
+            range_cost_weight=0.18,
             max_iteration=1200,
             n_survivals=20,
             n_mutations_per_iteration=40,
@@ -162,7 +162,7 @@ def japanese_production_config() -> MLFontPreset:
             init_from_topic_balanced_matrix=True,
             init_from_binning=True,
             decay_max_diff=DecayConfig(
-                min_val=30.0, max_val=50.0, decay_method="POWER", decay_power=3.0
+                min_val=30.0, max_val=50.0, decay_power=3.0, decay_method="POWER"
             ),
             mutation_probabilities=dict(DEFAULT_GA_MUTATION_PROBS),
             random_seed=42,
@@ -199,7 +199,7 @@ def korean_production_config() -> MLFontPreset:
             loss_type="ALL_COMBINED",
         ),
         range_compact_config=RangeCompactConfig(
-            range_cost_weight=0.012,
+            range_cost_weight=0.18,
             max_iteration=1200,
             n_survivals=20,
             n_mutations_per_iteration=40,
@@ -208,7 +208,7 @@ def korean_production_config() -> MLFontPreset:
             init_from_topic_balanced_matrix=True,
             init_from_binning=True,
             decay_max_diff=DecayConfig(
-                min_val=30.0, max_val=50.0, decay_method="POWER", decay_power=3.0
+                min_val=30.0, max_val=50.0, decay_power=3.0, decay_method="POWER"
             ),
             mutation_probabilities=dict(DEFAULT_GA_MUTATION_PROBS),
             random_seed=42,

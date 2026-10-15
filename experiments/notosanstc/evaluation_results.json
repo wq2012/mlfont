@@ -237,30 +237,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 236.54133530468815,
-      "p95": 1123.656926406925,
+      "mean": 236.1545631800239,
+      "p95": 1116.5813481465648,
       "minimal": 0.0,
-      "maximal": 3683.9024390243903,
-      "stddev": 497.1655687874526
+      "maximal": 4308.292682926829,
+      "stddev": 525.9224590150391
     },
     "rtt_per_glyph_ms": {
-      "mean": 15.832942540213052,
-      "p95": 74.53182461103232,
+      "mean": 16.291919768626787,
+      "p95": 79.19408897013996,
       "minimal": 0.0,
-      "maximal": 214.6341463414634,
-      "stddev": 30.208517666114002
+      "maximal": 273.1707317073171,
+      "stddev": 33.83406666255964
     },
     "download_per_glyph_ms": {
-      "mean": 220.7083927644751,
-      "p95": 1048.8430735930726,
+      "mean": 219.8626434113971,
+      "p95": 1040.162162162162,
       "minimal": 0.0,
-      "maximal": 3469.268292682927,
-      "stddev": 467.1222147022786
+      "maximal": 4035.121951219512,
+      "stddev": 492.2272442332063
     },
-    "upfront_utilization_pct": 6.996574827128947,
-    "session_utilization_pct": 16.932848845168888,
+    "upfront_utilization_pct": 7.06873712165663,
+    "session_utilization_pct": 17.37381842652895,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -501,30 +501,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 56.01638545805481,
-      "p95": 267.2618283187539,
+      "mean": 56.191468508749516,
+      "p95": 265.70322973796436,
       "minimal": 0.0,
-      "maximal": 854.829268292683,
-      "stddev": 115.97465750853189
+      "maximal": 1011.9024390243902,
+      "stddev": 123.73249074465124
     },
     "rtt_per_glyph_ms": {
-      "mean": 11.874706905159787,
-      "p95": 55.89886845827423,
+      "mean": 12.218939826470091,
+      "p95": 59.39556672760497,
       "minimal": 0.0,
-      "maximal": 160.97560975609755,
-      "stddev": 22.656388249585504
+      "maximal": 204.8780487804878,
+      "stddev": 25.375549996919734
     },
     "download_per_glyph_ms": {
-      "mean": 44.14167855289501,
-      "p95": 209.76861471861454,
+      "mean": 43.97252868227942,
+      "p95": 208.03243243243242,
       "minimal": 0.0,
-      "maximal": 693.8536585365854,
-      "stddev": 93.42444294045573
+      "maximal": 807.0243902439024,
+      "stddev": 98.44544884664126
     },
-    "upfront_utilization_pct": 6.996574827128947,
-    "session_utilization_pct": 16.932848845168888,
+    "upfront_utilization_pct": 7.06873712165663,
+    "session_utilization_pct": 17.37381842652895,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -765,30 +765,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 14.993655273277017,
-      "p95": 71.74900990099003,
+      "mean": 15.066112112726552,
+      "p95": 71.62052483241919,
       "minimal": 0.0,
-      "maximal": 227.1219512195122,
-      "stddev": 30.875008131860792
+      "maximal": 270.0487804878049,
+      "stddev": 33.04226104396429
     },
     "rtt_per_glyph_ms": {
-      "mean": 3.958235635053263,
-      "p95": 18.63295615275808,
+      "mean": 4.072979942156697,
+      "p95": 19.79852224253499,
       "minimal": 0.0,
-      "maximal": 53.65853658536585,
-      "stddev": 7.5521294165285004
+      "maximal": 68.29268292682927,
+      "stddev": 8.45851666563991
     },
     "download_per_glyph_ms": {
-      "mean": 11.035419638223752,
-      "p95": 52.442153679653636,
+      "mean": 10.993132170569854,
+      "p95": 52.008108108108104,
       "minimal": 0.0,
-      "maximal": 173.46341463414635,
-      "stddev": 23.356110735113933
+      "maximal": 201.7560975609756,
+      "stddev": 24.611362211660314
     },
-    "upfront_utilization_pct": 6.996574827128947,
-    "session_utilization_pct": 16.932848845168888,
+    "upfront_utilization_pct": 7.06873712165663,
+    "session_utilization_pct": 17.37381842652895,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1029,30 +1029,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 2.701863382026409,
-      "p95": 12.869736133807539,
+      "mean": 2.707748926883558,
+      "p95": 12.78972118363421,
       "minimal": 0.0,
-      "maximal": 41.400000000000006,
-      "stddev": 5.610665903713022
+      "maximal": 48.88780487804878,
+      "stddev": 5.975768916585159
     },
     "rtt_per_glyph_ms": {
-      "mean": 0.4947794543816579,
-      "p95": 2.32911951909476,
+      "mean": 0.5091224927695871,
+      "p95": 2.4748152803168737,
       "minimal": 0.0,
-      "maximal": 6.7073170731707314,
-      "stddev": 0.9440161770660626
+      "maximal": 8.536585365853659,
+      "stddev": 1.0573145832049888
     },
     "download_per_glyph_ms": {
-      "mean": 2.207083927644751,
-      "p95": 10.488430735930725,
+      "mean": 2.198626434113971,
+      "p95": 10.401621621621619,
       "minimal": 0.0,
-      "maximal": 34.69268292682927,
-      "stddev": 4.671222147022785
+      "maximal": 40.35121951219512,
+      "stddev": 4.922272442332062
     },
-    "upfront_utilization_pct": 6.996574827128947,
-    "session_utilization_pct": 16.932848845168888,
+    "upfront_utilization_pct": 7.06873712165663,
+    "session_utilization_pct": 17.37381842652895,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1293,30 +1293,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 0.7154878471461329,
-      "p95": 3.402692108045751,
+      "mean": 0.7289851361809842,
+      "p95": 3.539644271785493,
       "minimal": 0.0,
-      "maximal": 10.176585365853658,
-      "stddev": 1.4093184896962476
+      "maximal": 12.571707317073171,
+      "stddev": 1.5480682122651874
     },
     "rtt_per_glyph_ms": {
-      "mean": 0.4947794543816579,
-      "p95": 2.32911951909476,
+      "mean": 0.5091224927695871,
+      "p95": 2.4748152803168737,
       "minimal": 0.0,
-      "maximal": 6.7073170731707314,
-      "stddev": 0.9440161770660626
+      "maximal": 8.536585365853659,
+      "stddev": 1.0573145832049888
     },
     "download_per_glyph_ms": {
-      "mean": 0.22070839276447507,
-      "p95": 1.0488430735930727,
+      "mean": 0.21986264341139708,
+      "p95": 1.040162162162162,
       "minimal": 0.0,
-      "maximal": 3.4692682926829272,
-      "stddev": 0.4671222147022786
+      "maximal": 4.035121951219512,
+      "stddev": 0.4922272442332063
     },
-    "upfront_utilization_pct": 6.996574827128947,
-    "session_utilization_pct": 16.932848845168888,
+    "upfront_utilization_pct": 7.06873712165663,
+    "session_utilization_pct": 17.37381842652895,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1557,30 +1557,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 89.4467873260168,
-      "p95": 180.81996956262822,
-      "minimal": 47.599999999999994,
-      "maximal": 290.73417721518985,
-      "stddev": 41.90832358319654
+      "mean": 91.43512230137534,
+      "p95": 185.8218708438005,
+      "minimal": 48.46783625730994,
+      "maximal": 297.3164556962025,
+      "stddev": 45.69425321520478
     },
     "rtt_per_glyph_ms": {
-      "mean": 22.08237683070749,
-      "p95": 43.05274261603375,
-      "minimal": 11.666666666666666,
-      "maximal": 70.88607594936708,
-      "stddev": 9.565958620774408
+      "mean": 23.51161439020315,
+      "p95": 47.536574552977676,
+      "minimal": 12.590799031476998,
+      "maximal": 75.9493670886076,
+      "stddev": 11.030473680459494
     },
     "download_per_glyph_ms": {
-      "mean": 67.36441049530931,
-      "p95": 136.7453318335208,
-      "minimal": 35.93333333333333,
-      "maximal": 219.84810126582278,
-      "stddev": 32.46907944077109
+      "mean": 67.92350791117218,
+      "p95": 138.07249889167988,
+      "minimal": 35.60233918128655,
+      "maximal": 221.36708860759492,
+      "stddev": 34.79377602681111
     },
-    "upfront_utilization_pct": 6.978381078680001,
-    "session_utilization_pct": 6.978381078680001,
+    "upfront_utilization_pct": 7.055963645049758,
+    "session_utilization_pct": 7.055963645049758,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1821,30 +1821,30 @@
     "num_codepoints": 20637,
     "num_samples": 400,
     "num_missing_codepoints": 0,
-    "num_ranges": 11150,
+    "num_ranges": 8743,
     "total_per_glyph_ms": {
-      "mean": 39.837242160885395,
-      "p95": 136.8519519519516,
+      "mean": 39.61283795466441,
+      "p95": 139.97325480560775,
       "minimal": 0.0,
-      "maximal": 290.73417721518985,
-      "stddev": 48.36989391078781
+      "maximal": 297.3164556962025,
+      "stddev": 50.79880482233839
     },
     "rtt_per_glyph_ms": {
-      "mean": 10.146636488691966,
-      "p95": 34.00767926598179,
+      "mean": 10.435180934407358,
+      "p95": 35.19656019656014,
       "minimal": 0.0,
-      "maximal": 70.88607594936708,
-      "stddev": 11.550931877667713
+      "maximal": 75.9493670886076,
+      "stddev": 12.705984023436784
     },
     "download_per_glyph_ms": {
-      "mean": 29.69060567219343,
-      "p95": 108.67504456327985,
+      "mean": 29.177657020257048,
+      "p95": 104.95983483483472,
       "minimal": 0.0,
-      "maximal": 219.84810126582278,
-      "stddev": 36.89675550008947
+      "maximal": 221.36708860759492,
+      "stddev": 38.17293851322276
     },
-    "upfront_utilization_pct": 6.957598787275316,
-    "session_utilization_pct": 11.749376442522678,
+    "upfront_utilization_pct": 7.015706539180983,
+    "session_utilization_pct": 12.136178144880388,
     "num_unassigned_font_codepoints": 0
   }
 ]

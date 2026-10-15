@@ -39,8 +39,11 @@ class DnnTmConfig:
     init_learning_rate: float = 0.01
     learning_rate_decay: float = 0.95
     learning_rate_decay_steps: int = 100
-    loss_type: str = "ALL_COMBINED"  # REAL_FAKE_DIFF, REAL_FAKE_AND_REAL_AVERAGE_DIFF, ALL_COMBINED
+    loss_type: str = "ALL_COMBINED"  # REAL_FAKE_DIFF, REAL_FAKE_AND_REAL_AVERAGE_DIFF, ALL_COMBINED, AUTOENCODER, HYBRID_AUTOENCODER
     activation: str = "ELU"  # RELU, ELU, TANH, SIGMOID
+    l1_sparsity_weight: float = 0.05
+    l2_reg_weight: float = 1e-4
+    recon_weight: float = 0.5
     random_seed: int = 42
     max_iter: Optional[int] = None
     normalization: Optional[str] = None
@@ -75,7 +78,7 @@ def _shannon_entropy(probs: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
 
 
 class DnnTopicNetwork(nn.Module):
-    """Feedforward network mapping binary document vectors to topic distributions."""
+    """Feedforward topic encoder with optional nonnegative generative decoder."""
 
     def __init__(
         self,
@@ -84,6 +87,7 @@ class DnnTopicNetwork(nn.Module):
         n_layers: int = 2,
         layer_size: int = 128,
         activation: str = "ELU",
+        use_decoder: bool = False,
     ) -> None:
         super().__init__()
         if n_layers < 1:
@@ -97,13 +101,33 @@ class DnnTopicNetwork(nn.Module):
         layers.append(nn.Linear(in_dim, n_topics))
         layers.append(nn.Softmax(dim=-1))
         self.net = nn.Sequential(*layers)
+        self.use_decoder = bool(use_decoder)
+        if self.use_decoder:
+            self.decoder_weight = nn.Parameter(torch.empty(n_topics, n_words))
+            nn.init.uniform_(self.decoder_weight, 0.001, 0.05)
+        else:
+            self.register_parameter("decoder_weight", None)
 
     def forward(self, docs: torch.Tensor) -> torch.Tensor:
         return self.net(docs)
 
+    def decode(self, topics: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
+        """Reconstructs normalized document word distributions via nonnegative decoder."""
+        if self.decoder_weight is None:
+            raise ValueError("Decoder is not enabled on this DnnTopicNetwork")
+        w_pos = torch.clamp(self.decoder_weight, min=eps)
+        w_norm = w_pos / torch.sum(w_pos, dim=1, keepdim=True)
+        return torch.matmul(topics, w_norm)
+
+    def project_nonnegative(self) -> None:
+        """Projects the generative decoder weights onto R_+."""
+        if self.decoder_weight is not None:
+            with torch.no_grad():
+                self.decoder_weight.clamp_(min=0.0)
+
 
 class DnnTmLearner:
-    """Trains a Deep Neural Network Topic Model using non-negative Entropy Difference Loss."""
+    """Trains a Deep Neural Network Topic Model (Entropy-Difference and/or Nonnegative Autoencoder)."""
 
     def __init__(
         self,
@@ -171,12 +195,16 @@ class DnnTmLearner:
             torch.set_num_threads(4)
 
         loss_type = self.config.loss_type.upper()
-        if loss_type not in (
+        valid_losses = (
             "REAL_FAKE_DIFF",
             "REAL_FAKE_AND_REAL_AVERAGE_DIFF",
             "ALL_COMBINED",
-        ):
+            "AUTOENCODER",
+            "HYBRID_AUTOENCODER",
+        )
+        if loss_type not in valid_losses:
             raise ValueError(f"Unsupported loss_type: {self.config.loss_type!r}")
+        use_decoder = loss_type in ("AUTOENCODER", "HYBRID_AUTOENCODER")
 
         full_sparse = corpus.construct_batch_sparse_matrix(
             remaining_cps, n_samples=0
@@ -203,6 +231,7 @@ class DnnTmLearner:
             n_layers=self.config.n_layers,
             layer_size=self.config.layer_size,
             activation=self.config.activation,
+            use_decoder=use_decoder,
         ).to(device)
 
         optimizer = torch.optim.Adam(
@@ -226,24 +255,25 @@ class DnnTmLearner:
         for _ in range(self.config.training_steps):
             batch_idx = torch.randint(0, n_total_docs, (b_size,), device=device)
             real_docs = full_docs_tensor[batch_idx]
-            fake_docs = (
-                torch.rand((b_size, n_words), device=device) < density
-            ).float()
 
             optimizer.zero_grad()
             real_topics = model(real_docs)
-            fake_topics = model(fake_docs)
-
             loss_real = torch.mean(_shannon_entropy(real_topics))
-            loss_fake = torch.mean(_shannon_entropy(fake_topics))
+            avg_real_topic = torch.mean(real_topics, dim=0, keepdim=True)
+            loss_real_avg = torch.mean(_shannon_entropy(avg_real_topic))
 
-            if loss_type == "REAL_FAKE_DIFF":
-                loss = (loss_real - loss_fake) + log_k
-            else:
-                avg_real_topic = torch.mean(real_topics, dim=0, keepdim=True)
-                loss_real_avg = torch.mean(_shannon_entropy(avg_real_topic))
-                if loss_type == "REAL_FAKE_AND_REAL_AVERAGE_DIFF":
-                    loss = (loss_real - loss_fake + log_k) + (
+            loss_ent = torch.tensor(0.0, device=device)
+            if loss_type != "AUTOENCODER":
+                fake_docs = (
+                    torch.rand((b_size, n_words), device=device) < density
+                ).float()
+                fake_topics = model(fake_docs)
+                loss_fake = torch.mean(_shannon_entropy(fake_topics))
+
+                if loss_type == "REAL_FAKE_DIFF":
+                    loss_ent = (loss_real - loss_fake) + log_k
+                elif loss_type == "REAL_FAKE_AND_REAL_AVERAGE_DIFF":
+                    loss_ent = (loss_real - loss_fake + log_k) + (
                         loss_real - loss_real_avg + log_k
                     )
                 else:
@@ -257,16 +287,48 @@ class DnnTmLearner:
                     loss_word = torch.mean(_shannon_entropy(word_topics))
                     avg_word_topic = torch.mean(word_topics, dim=0, keepdim=True)
                     loss_word_avg = torch.mean(_shannon_entropy(avg_word_topic))
-                    loss = (
+                    loss_ent = (
                         (loss_real - loss_fake + log_k)
                         + (loss_real - loss_real_avg + log_k)
                         + (loss_word - loss_word_avg + log_k)
                     )
 
+            loss_ae = torch.tensor(0.0, device=device)
+            if use_decoder:
+                recon_probs = torch.clamp(model.decode(real_topics), min=1e-12, max=1.0)
+                doc_sums = torch.clamp(torch.sum(real_docs, dim=-1, keepdim=True), min=1.0)
+                target_probs = real_docs / doc_sums
+                kl_div = torch.sum(
+                    target_probs
+                    * (
+                        torch.log(torch.clamp(target_probs, min=1e-12))
+                        - torch.log(recon_probs)
+                    ),
+                    dim=-1,
+                )
+                loss_recon = torch.clamp(torch.mean(kl_div), min=0.0)
+                loss_sparse = self.config.l1_sparsity_weight * torch.clamp(
+                    loss_real + (log_k - loss_real_avg), min=0.0
+                )
+                assert model.decoder_weight is not None
+                loss_l2 = self.config.l2_reg_weight * torch.mean(
+                    model.decoder_weight ** 2
+                )
+                loss_ae = loss_recon + loss_sparse + loss_l2
+
+            if loss_type == "AUTOENCODER":
+                loss = loss_ae
+            elif loss_type == "HYBRID_AUTOENCODER":
+                loss = loss_ent + self.config.recon_weight * loss_ae
+            else:
+                loss = loss_ent
+
             loss.backward()
             optimizer.step()
+            if use_decoder:
+                model.project_nonnegative()
             scheduler.step()
-            self.loss_history_.append(float(loss.detach().cpu().item()))
+            self.loss_history_.append(float(max(0.0, loss.detach().cpu().item())))
 
         # Compute word-topic probability matrix for active columns in chunks
         model.eval()
@@ -283,9 +345,26 @@ class DnnTmLearner:
                 probs_chunk = model(eye_chunk).cpu().numpy().astype(np.float64)
                 word_probs_chunks.append(probs_chunk)
 
-        active_probs = np.vstack(word_probs_chunks)  # (n_words, n_topics)
+        enc_topic_word = np.vstack(word_probs_chunks).T  # (n_topics, n_words)
+        if use_decoder and model.decoder_weight is not None:
+            with torch.no_grad():
+                dec_w = (
+                    torch.clamp(model.decoder_weight, min=1e-12)
+                    .cpu()
+                    .numpy()
+                    .astype(np.float64)
+                )
+            dec_col = dec_w / np.maximum(1e-12, np.sum(dec_w, axis=0, keepdims=True))
+            enc_col = enc_topic_word / np.maximum(
+                1e-12, np.sum(enc_topic_word, axis=0, keepdims=True)
+            )
+            alpha_enc = 0.35 if loss_type == "AUTOENCODER" else 0.75
+            raw_topic_word = alpha_enc * enc_col + (1.0 - alpha_enc) * dec_col
+        else:
+            raw_topic_word = enc_topic_word
+
         self.lambda_matrix_ = align_and_smooth_topic_matrix(
-            active_probs.T, active_cols, col_sums, n_rem, n_topics
+            raw_topic_word, active_cols, col_sums, n_rem, n_topics
         )
         col_norm = self.lambda_matrix_ / np.maximum(
             1e-12, np.sum(self.lambda_matrix_, axis=0, keepdims=True)

@@ -27,6 +27,7 @@ from mlfont import (  # noqa: E402
     STANDARD_EVALUATION_PARAMS,
     SlicingStrategy,
     StrategyEvaluationResult,
+    DnnTmConfig,
     DnnTmLearner,
     export_pretrained_bundle,
     extract_codepoints_from_font,
@@ -663,11 +664,11 @@ def main() -> None:
             "results": [asdict(r) for r in all_results],
         }
 
-        # 7. Run Normalization & Slice Count Ablations on LGC
+        # 7. Run Normalization, DNNTM Loss, & Slice Count Ablations on LGC
         if key == "notosans_lgc":
-            print("  Running Lambda-Matrix Normalization & Slice Count K Ablations on LGC...")
+            print("  Running Lambda-Matrix Normalization, DNNTM Loss, & Slice Count K Ablations on LGC...")
             norm_ablation = []
-            for norm_method in ("topic_sum", "row_sum", "global_max", "spectral_norm"):
+            for norm_method in ("topic_sum", "row_sum", "global_max", "spectral_norm", "sinkhorn"):
                 s_norm = generate_greedy_topic_strategy(
                     codepoints,
                     olda_learner.lambda_matrix_,
@@ -688,6 +689,49 @@ def main() -> None:
                     }
                 )
             summary_report["ablations"]["normalization_lgc"] = norm_ablation
+
+            dnntm_loss_ablation = []
+            for loss_type in (
+                "REAL_FAKE_DIFF",
+                "REAL_FAKE_AND_REAL_AVERAGE_DIFF",
+                "ALL_COMBINED",
+                "AUTOENCODER",
+                "HYBRID_AUTOENCODER",
+            ):
+                if loss_type == preset.dnntm_config.loss_type:
+                    s_loss = s_dnntm
+                else:
+                    l_cfg = DnnTmConfig(
+                        n_topics=preset.dnntm_config.n_topics,
+                        most_sizes=list(preset.dnntm_config.most_sizes),
+                        topic_balancing=preset.dnntm_config.topic_balancing,
+                        normalization_method=preset.dnntm_config.normalization_method,
+                        batch_size=preset.dnntm_config.batch_size,
+                        n_layers=preset.dnntm_config.n_layers,
+                        layer_size=preset.dnntm_config.layer_size,
+                        training_steps=preset.dnntm_config.training_steps,
+                        loss_type=loss_type,
+                        random_seed=42,
+                    )
+                    l_learner = DnnTmLearner(train_proc, codepoints, l_cfg)
+                    s_loss = l_learner.fit()
+                res_l3g = evaluator.evaluate_strategy(s_loss, STANDARD_EVALUATION_PARAMS[2])
+                res_l2g = evaluator.evaluate_strategy(s_loss, STANDARD_EVALUATION_PARAMS[1])
+                res_ldsl = evaluator.evaluate_strategy(s_loss, STANDARD_EVALUATION_PARAMS[3])
+                dnntm_loss_ablation.append(
+                    {
+                        "loss_type": loss_type,
+                        "num_ranges": res_l3g.num_ranges,
+                        "gin_2g_mean_ms": res_l2g.total_per_glyph_ms.mean,
+                        "gin_2g_p95_ms": res_l2g.total_per_glyph_ms.p95,
+                        "gin_3g_mean_ms": res_l3g.total_per_glyph_ms.mean,
+                        "gin_3g_p95_ms": res_l3g.total_per_glyph_ms.p95,
+                        "dsl_mean_ms": res_ldsl.total_per_glyph_ms.mean,
+                        "dsl_p95_ms": res_ldsl.total_per_glyph_ms.p95,
+                        "session_util_pct": res_l3g.session_utilization_pct,
+                    }
+                )
+            summary_report["ablations"]["dnntm_loss_lgc"] = dnntm_loss_ablation
 
             k_ablation = []
             for k_val in (5, 10, 20, 40, 60):

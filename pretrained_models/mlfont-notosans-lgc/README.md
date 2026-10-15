@@ -30,8 +30,8 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `en, de, fr, pl, ru, el`), 1,500 training articles and 300 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `lgc`)
 * **Total Slices**: 20 slices (384 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 432.6 KB (442,984 bytes) across 20 `.woff2` files (companion CSS: 7.8 KB)
-* **Training Wall-Time**: 16.1 seconds on CPU/GPU
+* **Physical WOFF2 Bundle Size**: 434.1 KB (444,484 bytes) across 20 `.woff2` files (companion CSS: 7.8 KB)
+* **Training Wall-Time**: 24.0 seconds on CPU/GPU
 
 ## Model Files Included
 
@@ -56,7 +56,7 @@ Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice
 | `language_slice` | 8 | 92 | 6 / 300 | 40.17 / 258.54 | 10.62 / 66.28 | 1.95 / 12.76 | 15.08% |
 | `online_lda_topics20_greedy` | 20 | 537 | 0 / 0 | 25.15 / 144.76 | 7.11 / 40.95 | 1.17 / 6.76 | 31.26% |
 | `dnntm_topics20_greedy` | 20 | 549 | 0 / 0 | 23.29 / 112.70 | 6.59 / 31.88 | 1.09 / 5.26 | 32.56% |
-| **range_compact_topics20 (This Model)** | 20 | 384 | 0 / 0 | 25.64 / 149.59 | 7.22 / 42.16 | 1.20 / 7.00 | 29.76% |
+| **range_compact_topics20 (This Model)** | 20 | 384 | 0 / 0 | 25.05 / 142.01 | 7.06 / 40.06 | 1.17 / 6.64 | 30.31% |
 
 ## Usage
 

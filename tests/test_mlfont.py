@@ -154,6 +154,11 @@ def test_normalize_and_topic_balancing() -> None:
     spec_norm = normalize_lambda_matrix(mat, "spectral_norm")
     assert np.isclose(np.linalg.norm(spec_norm, ord=2), 1.0)
 
+    sink_norm = normalize_lambda_matrix(mat, "sinkhorn")
+    assert sink_norm.shape == (2, 4)
+    np.testing.assert_allclose(np.sum(sink_norm, axis=0), np.ones(4), atol=1e-2)
+    np.testing.assert_allclose(np.sum(sink_norm, axis=1), np.array([2.0, 2.0]), atol=1e-2)
+
     greedy = balance_topics_greedy(mat, "topic_sum")
     assert greedy.shape == (2, 4)
     np.testing.assert_array_equal(np.sum(greedy, axis=0), np.ones(4, dtype=np.uint8))
@@ -229,6 +234,8 @@ def test_online_lda_and_dnntm() -> None:
         "REAL_FAKE_DIFF",
         "REAL_FAKE_AND_REAL_AVERAGE_DIFF",
         "ALL_COMBINED",
+        "AUTOENCODER",
+        "HYBRID_AUTOENCODER",
     ):
         dnntm = DnnTmLearner(
             proc,
@@ -301,6 +308,23 @@ def test_range_compact_ga_and_all_mutations() -> None:
     assert ga_strat.all_codepoints() == set(cps)
     assert len(learner.history_) >= 3
     assert learner.history_[-1].best_final_cost <= learner.history_[0].best_final_cost + 1e-9
+
+    from mlfont.range_compact import build_island_bridged_topics, potts_viterbi_smooth_topics
+
+    t_potts = potts_viterbi_smooth_topics(cps, norm_weights, range_cost_weight=0.05)
+    assert len(t_potts) == len(cps)
+    assert set(t_potts.tolist()).issubset({0, 1, 2, 3})
+
+    sparse_cps = list(range(0x4E00, 0x4E00 + 5200))
+    sparse_mat = np_rng.uniform(0.0, 0.01, size=(10, 5200))
+    rem_freq = np.zeros(5200, dtype=np.float64)
+    for idx in range(0, 600, 2):
+        rem_freq[idx] = 10.0
+        sparse_mat[idx % 4, idx] = 1.0
+    t_isl = build_island_bridged_topics(sparse_cps, sparse_mat, rem_frequency_array=rem_freq)
+    assert t_isl is not None
+    assert len(t_isl) == 5200
+    assert np.all((t_isl >= 0) & (t_isl < 10))
 
 
 def test_baselines_subsetter_and_evaluator(tmp_path: Path) -> None:
