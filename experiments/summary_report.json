@@ -1929,39 +1929,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "GIN-2g-poor",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 352.1042754331648,
-            "p95": 1652.962091962085,
-            "minimal": 0.0,
-            "maximal": 5535.238095238095,
-            "stddev": 761.2833807080962
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 23.85840742008033,
-            "p95": 105.78313253012,
-            "minimal": 0.0,
-            "maximal": 253.96825396825398,
-            "stddev": 38.297891412864445
-          },
-          "download_per_glyph_ms": {
-            "mean": 328.2458680130844,
-            "p95": 1620.6735125339715,
-            "minimal": 0.0,
-            "maximal": 5281.269841269841,
-            "stddev": 728.8963175554736
-          },
-          "upfront_utilization_pct": 7.452304256526354,
-          "session_utilization_pct": 13.640447111880599,
-          "num_unassigned_font_codepoints": 5467
-        },
-        {
           "strategy_name": "online_lda_topics50_greedy",
           "params_name": "GIN-2g-poor",
           "num_slices": 52,
@@ -2224,39 +2191,6 @@
           "upfront_utilization_pct": 3.0190540981958924,
           "session_utilization_pct": 3.8075261293535023,
           "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "GIN-2g",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 83.54297916767713,
-            "p95": 354.53308080807955,
-            "minimal": 0.0,
-            "maximal": 1246.7301587301586,
-            "stddev": 170.5754987389805
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 17.893805565060248,
-            "p95": 79.33734939759,
-            "minimal": 0.0,
-            "maximal": 190.47619047619048,
-            "stddev": 28.723418559648326
-          },
-          "download_per_glyph_ms": {
-            "mean": 65.64917360261688,
-            "p95": 324.1347025067943,
-            "minimal": 0.0,
-            "maximal": 1056.2539682539682,
-            "stddev": 145.7792635110947
-          },
-          "upfront_utilization_pct": 7.452304256526354,
-          "session_utilization_pct": 13.640447111880599,
-          "num_unassigned_font_codepoints": 5467
         },
         {
           "strategy_name": "online_lda_topics50_greedy",
@@ -2523,39 +2457,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "GIN-3g",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 22.37689525567431,
-            "p95": 94.4950126262625,
-            "minimal": 0.0,
-            "maximal": 327.55555555555554,
-            "stddev": 44.775471283434086
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 5.964601855020082,
-            "p95": 26.44578313253,
-            "minimal": 0.0,
-            "maximal": 63.492063492063494,
-            "stddev": 9.574472853216111
-          },
-          "download_per_glyph_ms": {
-            "mean": 16.41229340065422,
-            "p95": 81.03367562669858,
-            "minimal": 0.0,
-            "maximal": 264.06349206349205,
-            "stddev": 36.44481587777368
-          },
-          "upfront_utilization_pct": 7.452304256526354,
-          "session_utilization_pct": 13.640447111880599,
-          "num_unassigned_font_codepoints": 5467
-        },
-        {
           "strategy_name": "online_lda_topics50_greedy",
           "params_name": "GIN-3g",
           "num_slices": 52,
@@ -2818,39 +2719,6 @@
           "upfront_utilization_pct": 3.0190540981958924,
           "session_utilization_pct": 3.8075261293535023,
           "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "residential-DSL",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 4.028033912008355,
-            "p95": 17.20107142857135,
-            "minimal": 0.0,
-            "maximal": 60.74920634920635,
-            "stddev": 8.317753816936037
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 0.7455752318775103,
-            "p95": 3.30572289156625,
-            "minimal": 0.0,
-            "maximal": 7.936507936507937,
-            "stddev": 1.196809106652014
-          },
-          "download_per_glyph_ms": {
-            "mean": 3.2824586801308446,
-            "p95": 16.206735125339716,
-            "minimal": 0.0,
-            "maximal": 52.81269841269841,
-            "stddev": 7.288963175554736
-          },
-          "upfront_utilization_pct": 7.452304256526354,
-          "session_utilization_pct": 13.640447111880599,
-          "num_unassigned_font_codepoints": 5467
         },
         {
           "strategy_name": "online_lda_topics50_greedy",
@@ -3117,39 +2985,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "residential-ADSL2+",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 1.0738210998905948,
-            "p95": 4.88629965156794,
-            "minimal": 0.0,
-            "maximal": 13.217777777777778,
-            "stddev": 1.8509487065261168
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 0.7455752318775103,
-            "p95": 3.30572289156625,
-            "minimal": 0.0,
-            "maximal": 7.936507936507937,
-            "stddev": 1.196809106652014
-          },
-          "download_per_glyph_ms": {
-            "mean": 0.3282458680130844,
-            "p95": 1.6206735125339717,
-            "minimal": 0.0,
-            "maximal": 5.281269841269841,
-            "stddev": 0.7288963175554737
-          },
-          "upfront_utilization_pct": 7.452304256526354,
-          "session_utilization_pct": 13.640447111880599,
-          "num_unassigned_font_codepoints": 5467
-        },
-        {
           "strategy_name": "online_lda_topics50_greedy",
           "params_name": "residential-ADSL2+",
           "num_slices": 52,
@@ -3414,39 +3249,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "GIN-3g_no_session",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 97.06573932713168,
-            "p95": 263.3661448853294,
-            "minimal": 24.994652406417114,
-            "maximal": 327.55555555555554,
-            "stddev": 81.04184543801063
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 14.930641425192134,
-            "p95": 46.670995670995666,
-            "minimal": 2.1390374331550803,
-            "maximal": 64.36781609195403,
-            "stddev": 15.73094217814029
-          },
-          "download_per_glyph_ms": {
-            "mean": 82.13509790193956,
-            "p95": 218.8421052631579,
-            "minimal": 22.855614973262032,
-            "maximal": 266.14285714285717,
-            "stddev": 65.94760267694613
-          },
-          "upfront_utilization_pct": 8.074183352462596,
-          "session_utilization_pct": 8.074183352462596,
-          "num_unassigned_font_codepoints": 5467
-        },
-        {
           "strategy_name": "online_lda_topics50_greedy",
           "params_name": "GIN-3g_no_session",
           "num_slices": 52,
@@ -3709,39 +3511,6 @@
           "upfront_utilization_pct": 3.296912860560451,
           "session_utilization_pct": 3.193926455927671,
           "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_2017_kr",
-          "params_name": "GIN-3g_short_session",
-          "num_slices": 102,
-          "num_codepoints": 22853,
-          "num_samples": 400,
-          "num_missing_codepoints": 47,
-          "num_ranges": 7229,
-          "total_per_glyph_ms": {
-            "mean": 45.65889172008772,
-            "p95": 213.8028695652173,
-            "minimal": 0.0,
-            "maximal": 327.55555555555554,
-            "stddev": 64.52979907332941
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 9.504273671376547,
-            "p95": 41.388266905508274,
-            "minimal": 0.0,
-            "maximal": 63.492063492063494,
-            "stddev": 12.968502840859529
-          },
-          "download_per_glyph_ms": {
-            "mean": 36.15461804871117,
-            "p95": 171.9762608695651,
-            "minimal": 0.0,
-            "maximal": 264.06349206349205,
-            "stddev": 52.8985194695784
-          },
-          "upfront_utilization_pct": 8.263152298057536,
-          "session_utilization_pct": 11.337570090893518,
-          "num_unassigned_font_codepoints": 5467
         },
         {
           "strategy_name": "online_lda_topics50_greedy",
@@ -8064,39 +7833,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "GIN-2g-poor",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 522.3909097129286,
-            "p95": 2713.9909827346332,
-            "minimal": 0.0,
-            "maximal": 8692.0,
-            "stddev": 1082.8407032344624
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 20.87700063545924,
-            "p95": 106.68121873578899,
-            "minimal": 0.0,
-            "maximal": 280.0,
-            "stddev": 39.31124729869518
-          },
-          "download_per_glyph_ms": {
-            "mean": 501.5139090774695,
-            "p95": 2653.9606385128304,
-            "minimal": 0.0,
-            "maximal": 8412.0,
-            "stddev": 1044.6549482649934
-          },
-          "upfront_utilization_pct": 3.24729292156305,
-          "session_utilization_pct": 7.744276317259595,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
           "strategy_name": "online_lda_topics100_greedy",
           "params_name": "GIN-2g-poor",
           "num_slices": 102,
@@ -8358,39 +8094,6 @@
           },
           "upfront_utilization_pct": 4.252304994749163,
           "session_utilization_pct": 7.824380028590861,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "GIN-2g",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 115.96053229208832,
-            "p95": 609.0099449944989,
-            "minimal": 0.0,
-            "maximal": 1892.4,
-            "stddev": 237.64601706555206
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 15.657750476594428,
-            "p95": 80.01091405184174,
-            "minimal": 0.0,
-            "maximal": 210.0,
-            "stddev": 29.48343547402138
-          },
-          "download_per_glyph_ms": {
-            "mean": 100.30278181549392,
-            "p95": 530.792127702566,
-            "minimal": 0.0,
-            "maximal": 1682.4,
-            "stddev": 208.9309896529987
-          },
-          "upfront_utilization_pct": 3.24729292156305,
-          "session_utilization_pct": 7.744276317259595,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -8658,39 +8361,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "GIN-3g",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 30.294945612738285,
-            "p95": 160.0512870754571,
-            "minimal": 0.0,
-            "maximal": 490.6,
-            "stddev": 61.81447206059361
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 5.21925015886481,
-            "p95": 26.670304683947247,
-            "minimal": 0.0,
-            "maximal": 70.0,
-            "stddev": 9.827811824673795
-          },
-          "download_per_glyph_ms": {
-            "mean": 25.07569545387348,
-            "p95": 132.6980319256415,
-            "minimal": 0.0,
-            "maximal": 420.6,
-            "stddev": 52.232747413249676
-          },
-          "upfront_utilization_pct": 3.24729292156305,
-          "session_utilization_pct": 7.744276317259595,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
           "strategy_name": "online_lda_topics100_greedy",
           "params_name": "GIN-3g",
           "num_slices": 102,
@@ -8952,39 +8622,6 @@
           },
           "upfront_utilization_pct": 4.252304994749163,
           "session_utilization_pct": 7.824380028590861,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "residential-DSL",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 5.667545360632796,
-            "p95": 29.667168500183323,
-            "minimal": 0.0,
-            "maximal": 92.87,
-            "stddev": 11.642342108182918
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 0.6524062698581012,
-            "p95": 3.333788085493406,
-            "minimal": 0.0,
-            "maximal": 8.75,
-            "stddev": 1.2284764780842243
-          },
-          "download_per_glyph_ms": {
-            "mean": 5.015139090774695,
-            "p95": 26.5396063851283,
-            "minimal": 0.0,
-            "maximal": 84.12,
-            "stddev": 10.446549482649933
-          },
-          "upfront_utilization_pct": 3.24729292156305,
-          "session_utilization_pct": 7.744276317259595,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9252,39 +8889,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "residential-ADSL2+",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 1.1539201789355706,
-            "p95": 5.850089160179684,
-            "minimal": 0.0,
-            "maximal": 17.162,
-            "stddev": 2.256305905561495
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 0.6524062698581012,
-            "p95": 3.333788085493406,
-            "minimal": 0.0,
-            "maximal": 8.75,
-            "stddev": 1.2284764780842243
-          },
-          "download_per_glyph_ms": {
-            "mean": 0.5015139090774695,
-            "p95": 2.65396063851283,
-            "minimal": 0.0,
-            "maximal": 8.412,
-            "stddev": 1.0446549482649936
-          },
-          "upfront_utilization_pct": 3.24729292156305,
-          "session_utilization_pct": 7.744276317259595,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
           "strategy_name": "online_lda_topics100_greedy",
           "params_name": "residential-ADSL2+",
           "num_slices": 102,
@@ -9549,39 +9153,6 @@
           "num_unassigned_font_codepoints": 0
         },
         {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "GIN-3g_no_session",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 148.93624946348243,
-            "p95": 285.1238461538457,
-            "minimal": 29.42528735632184,
-            "maximal": 490.6,
-            "stddev": 68.40691756772131
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 24.001396290532757,
-            "p95": 42.969178273759546,
-            "minimal": 1.839080459770115,
-            "maximal": 71.57894736842105,
-            "stddev": 11.090663971107228
-          },
-          "download_per_glyph_ms": {
-            "mean": 124.93485317294966,
-            "p95": 244.49299455888038,
-            "minimal": 27.586206896551722,
-            "maximal": 420.6,
-            "stddev": 57.918919953739035
-          },
-          "upfront_utilization_pct": 3.895738347606614,
-          "session_utilization_pct": 3.895738347606614,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
           "strategy_name": "online_lda_topics100_greedy",
           "params_name": "GIN-3g_no_session",
           "num_slices": 102,
@@ -9843,39 +9414,6 @@
           },
           "upfront_utilization_pct": 4.306182906258908,
           "session_utilization_pct": 5.225714478817269,
-          "num_unassigned_font_codepoints": 0
-        },
-        {
-          "strategy_name": "google_fonts_ea_2017",
-          "params_name": "GIN-3g_short_session",
-          "num_slices": 102,
-          "num_codepoints": 30759,
-          "num_samples": 400,
-          "num_missing_codepoints": 0,
-          "num_ranges": 6063,
-          "total_per_glyph_ms": {
-            "mean": 77.4692657818809,
-            "p95": 210.06426229508176,
-            "minimal": 0.0,
-            "maximal": 423.01754385964915,
-            "stddev": 73.04389954142684
-          },
-          "rtt_per_glyph_ms": {
-            "mean": 13.322389812858548,
-            "p95": 35.90811965811965,
-            "minimal": 0.0,
-            "maximal": 62.06896551724138,
-            "stddev": 11.525224904080533
-          },
-          "download_per_glyph_ms": {
-            "mean": 64.14687596902235,
-            "p95": 181.73579161579124,
-            "minimal": 0.0,
-            "maximal": 366.87719298245617,
-            "stddev": 61.85594533362696
-          },
-          "upfront_utilization_pct": 3.6966434550114715,
-          "session_utilization_pct": 4.912208930777533,
           "num_unassigned_font_codepoints": 0
         },
         {

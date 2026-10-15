@@ -8,8 +8,8 @@ Provides frontend developers with tools to:
    and Broadband Fiber 20 Mbps), modeling gzipped CSS transfer, Blink @font-face
    unicode-range parsing, parallel HTTP slice requests, cold vs. warm session
    browser caching, and exact physical WOFF2 byte transfers.
-3. Run live Headless Google Chrome benchmarks against an instrumented local
-   throttled HTTP server using the HTML5 Resource Timing and FontFaceSet APIs.
+3. Run live Headless Chrome benchmarks against physical WOFF2 font slices
+   using the HTML5 Resource Timing and W3C FontFaceSet APIs.
 """
 
 from __future__ import annotations
@@ -120,14 +120,14 @@ STANDARD_BROWSER_NETWORK_PROFILES: List[BrowserNetworkProfile] = [
         rtt_ms=28.0,
         bandwidth_bytes_per_ms=625.0,  # 5.0 Mbps
         max_parallel_requests=6,
-        description="WebPageTest Desktop Cable (5.0 Mbps, 28 ms RTT)",
+        description="Desktop Cable (5.0 Mbps, 28 ms RTT)",
     ),
     BrowserNetworkProfile(
         name="Mobile-4G-LTE",
         rtt_ms=70.0,
         bandwidth_bytes_per_ms=1500.0,  # 12.0 Mbps
         max_parallel_requests=6,
-        description="WebPageTest Mobile 4G LTE (12.0 Mbps, 70 ms RTT)",
+        description="Mobile 4G LTE (12.0 Mbps, 70 ms RTT)",
     ),
     BrowserNetworkProfile(
         name="Broadband-Fiber",
@@ -337,22 +337,21 @@ def _wrap_html_page(title: str, nav_items: Sequence[str], body_paragraphs: Seque
 def get_real_website_benchmark_pages(font_key: Optional[str] = None) -> List[WebPageSample]:
     """Returns the built-in benchmark suite of 20 realistic websites across all 5 Noto fonts.
 
-    Includes the 8 Simplified Chinese real-website archetypes from the original
-    2017 `go/mlfont-demo` (NBA Sports, World Politics, AI Technology, Lunar New Year
-    Entertainment, Beef Cooking Recipe, Tangqi Fiction Novel) and WebPageTest report
-    (`developers.google.com/china` Developer Portal and `shenzhenware` Hardware Review),
-    plus 3 websites each for Traditional Chinese, Japanese, Korean, and Pan-European LGC.
+    Includes 8 Simplified Chinese real-website archetypes (Developer Portal, NBA Sports,
+    World Politics, AI Technology, Lunar New Year Entertainment, Beef Cooking Recipe,
+    Tangqi Fiction Novel, and Smart Hardware Review), plus 3 websites each for
+    Traditional Chinese, Japanese, Korean, and Pan-European LGC.
     """
     pages: List[WebPageSample] = [
         # --- 1. Simplified Chinese (Noto Sans SC) ---
         WebPageSample(
             page_id="dev_china_portal",
-            title="Google Developers China (developers.google.com/china/?hl=zh-cn)",
-            url="https://developers.google.com/china/?hl=zh-cn",
+            title="Cloud-Native & Open-Source Developer Portal (dev.example.cn)",
+            url="https://dev.example.cn/web-performance/",
             category="Developer Portal",
             font_key="notosanssc",
             html_content=_wrap_html_page(
-                "面向中国开发者的 Google 技术资源与开源生态平台",
+                "面向现代开发者的云原生技术资源与开源生态平台",
                 ["首页", "Android 开发", "TensorFlow 机器学习", "Web 性能与字体", "Firebase", "技术社区"],
                 [
                     "构建面向全球用户的现代化 Web 与移动应用。通过最新的 WebAssembly、"
@@ -1066,12 +1065,6 @@ class WebsiteFontSimulator:
                     )
                     strategies.append(s_lang)
 
-            # Archival 2017 Google Fonts EA strategy if available
-            if font_key == "notosanssc":
-                ea_path = bdir.parent.parent / "resources" / "google_fonts_ea_2017_notosanssc.json"
-                if ea_path.exists():
-                    strategies.append(SlicingStrategy.load_json(ea_path))
-
             olda_path = bdir / "olda_strategy.json"
             if olda_path.exists():
                 strategies.append(SlicingStrategy.load_json(olda_path))
@@ -1125,8 +1118,6 @@ class WebsiteFontSimulator:
             return {0} if strat.num_slices == 1 else set()
         if strategy_name.startswith(("equal_bin", "random_slice", "language_slice")):
             return set()
-        if strategy_name == "google_fonts_ea_2017":
-            return {i for i in (86, 100, 101) if i < strat.num_slices}
         return set(range(min(max(0, self.high_freq_slice_count), strat.num_slices)))
 
     def simulate_page_load(
@@ -1480,7 +1471,7 @@ FULL_WOFF2_FILENAMES: Dict[str, str] = {
 
 @dataclass
 class ChromeBrowserPageResult:
-    """Real Headless Google Chrome measurement for a webpage under a font slicing strategy."""
+    """Real Headless Chrome measurement for a webpage under a font slicing strategy."""
 
     page_id: str
     page_title: str
@@ -1511,14 +1502,13 @@ def run_headless_chrome_benchmark(
     chrome_binary: Optional[str] = None,
     full_woff2_dir: Optional[str | Path] = None,
 ) -> List[ChromeBrowserPageResult]:
-    """Runs real Headless Google Chrome (`--headless=new --dump-dom`) on physical `.woff2` files.
+    """Runs real Headless Chrome (`--headless=new --dump-dom`) on physical `.woff2` files.
 
-    For each webpage and strategy (`single_slice`, `equal_bin`, `google_fonts_ea_2017` if
-    available, and `range_compact` MLFont):
+    For each webpage and strategy (`single_slice`, `equal_bin`, and `range_compact` MLFont):
       1. Generates a self-contained HTML page with `@font-face` `unicode-range` rules
          pointing to physical `.woff2` files on disk (`bundle_dir/woff2/` for sliced
          strategies and the full unsliced `.woff2` font for `single_slice`).
-      2. Launches an isolated Headless Google Chrome process (`--headless=new --dump-dom`,
+      2. Launches an isolated Headless Chrome process (`--headless=new --dump-dom`,
          without virtual time so `performance.now()` on `window.onload` measures true
          wall-clock milliseconds of Blink CSS `@font-face` parsing, `unicode-range`
          DOM intersection, WOFF2 Brotli decompression, and OpenType table instantiation).
@@ -1563,8 +1553,6 @@ def run_headless_chrome_benchmark(
     strategies_to_test = ["single_slice"]
     if eq_name:
         strategies_to_test.append(eq_name)
-    if "google_fonts_ea_2017" in sim.strategies:
-        strategies_to_test.append("google_fonts_ea_2017")
     strategies_to_test.append(ga_name)
 
     browser_results: List[ChromeBrowserPageResult] = []

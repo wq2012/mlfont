@@ -336,12 +336,12 @@ def _build_website_sim_section(
                 lines.extend(
                     [
                         (
-                            "#### Real Headless Google Chrome (`v155.0.8059.79`) "
+                            "#### Real Headless Chrome (`v155.0.8059.79`) "
                             "Verification (`Cable-5Mbps`)"
                         ),
                         "",
                         (
-                            "Verified against physical `.woff2` files in Headless Google Chrome "
+                            "Verified against physical `.woff2` files in Headless Chrome "
                             "(`--headless=new --dump-dom`) via the W3C `document.fonts` "
                             f"(`FontFaceSet`) API (`{n_exact}/{len(chrome_rows)} = 100%` exact "
                             "slice-set match between Chromium Blink's `unicode-range` engine and "
@@ -400,7 +400,7 @@ def _build_website_sim_section(
                 "--html_file path/to/index.html --network_profile all"
             ),
             "",
-            "# Simulate a live URL and verify in real Headless Google Chrome:",
+            "# Simulate a live URL and verify in real Headless Chrome:",
             (
                 f"mlfont-simulate --font_key {key} --url https://example.com "
                 "--network_profile Cable-5Mbps --headless_chrome"
@@ -510,8 +510,6 @@ def write_hf_model_card(
         "",
         f"# {hf_name}: Range-Compact MLFont Slicing for {title}",
         "",
-        "**This is not an officially supported Google product.**",
-        "",
         "## Overview",
         "",
         (
@@ -525,6 +523,12 @@ def write_hf_model_card(
             "* **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and "
             "Optimal Unicode-Range Slicing for Low-Latency Web Typography* "
             "(Quan Wang and Yiran Mao)"
+        ),
+        (
+            "* **Background & References**: Open-source reproduction of "
+            "Google's machine learning font slicing technology "
+            "([Official Post](https://x.com/googlefonts/status/900019727732531200), "
+            "[Defensive Publication](https://www.tdcommons.org/dpubs_series/906/))"
         ),
         "* **Open-Source Repository**: https://github.com/wq2012/mlfont",
         "* **PyPI Package**: https://pypi.org/project/mlfont/",
@@ -616,9 +620,8 @@ def write_hf_model_card(
         "### 4. Latency Metrics & Browser Telemetry (Recommended — `mlfont.js`)",
         "",
         (
-            "Included in this bundle (`mlfont.js`, an open-source reproduction and "
-            "extension of Google Fonts' `//fonts.gstatic.com/ea/timing/v1/mlfont.js`) "
-            "is a small, zero-dependency JS library that accesses the HTML5 "
+            "Included in this bundle (`mlfont.js`) is a small, zero-dependency "
+            "JS library that accesses the HTML5 "
             "[Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) "
             "to measure webfont slice performance. **No user-specific data is collected.** "
             "The JS library collects:"
@@ -684,13 +687,13 @@ def write_hf_model_card(
         ),
         (
             "* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API "
-            "slice latency telemetry library (`MLFont.getMetrics` / `window.GoogleFonts`)"
+            "slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)"
         ),
         (
             f"* `woff2/*.woff2`: {strategy.num_slices} physical WOFF2 font "
             "slices generated via `fontTools.subset`"
         ),
-        f"* `nam/*.nam`: {strategy.num_slices} Google Fonts `.nam` codepoint subset files",
+        f"* `nam/*.nam`: {strategy.num_slices} `.nam` codepoint subset files",
         (
             "* `model.safetensors`: Learned topic-codepoint weight matrices "
             "(`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, "
@@ -891,23 +894,6 @@ def main() -> None:
                 num_bins=preset.olda_config.n_topics,
             )
             strategies.append(s_most_eq)
-
-        # Include archival 2017 Google Fonts production slicing strategies where available
-        if key == "notosanssc":
-            ea_path = REPO_ROOT / "resources" / "google_fonts_ea_2017_notosanssc.json"
-            if ea_path.exists():
-                s_ea = SlicingStrategy.load_json(ea_path)
-                strategies.append(s_ea)
-        elif key == "notosanskr":
-            kr_path = REPO_ROOT / "resources" / "google_fonts_2017_notosanskr.json"
-            if kr_path.exists():
-                s_kr_raw = SlicingStrategy.load_json(kr_path)
-                s_kr = SlicingStrategy(
-                    subsets=[sorted(set(sub) & cp_set) for sub in s_kr_raw.subsets],
-                    name="google_fonts_2017_kr",
-                    metadata=s_kr_raw.metadata,
-                )
-                strategies.append(s_kr)
 
         # 2. Online LDA
         print("  Training Online LDA...")

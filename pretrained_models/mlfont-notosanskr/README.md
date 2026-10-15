@@ -14,13 +14,12 @@ datasets:
 
 # mlfont-notosanskr: Range-Compact MLFont Slicing for Noto Sans KR (Korean)
 
-**This is not an officially supported Google product.**
-
 ## Overview
 
 Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans KR (Korean)** (`NotoSansKR-Regular.otf`, 22,853 Unicode codepoints partitioned into 52 range-compact slices).
 
 * **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography* (Quan Wang and Yiran Mao)
+* **Background & References**: Open-source reproduction of Google's machine learning font slicing technology ([Official Post](https://x.com/googlefonts/status/900019727732531200), [Defensive Publication](https://www.tdcommons.org/dpubs_series/906/))
 * **Open-Source Repository**: https://github.com/wq2012/mlfont
 * **PyPI Package**: https://pypi.org/project/mlfont/
 
@@ -75,7 +74,7 @@ MLFont.load('notosanskr');
 
 ### 4. Latency Metrics & Browser Telemetry (Recommended — `mlfont.js`)
 
-Included in this bundle (`mlfont.js`, an open-source reproduction and extension of Google Fonts' `//fonts.gstatic.com/ea/timing/v1/mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
+Included in this bundle (`mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
 
 1. **Download time metrics of individual font slices** (slice index, TTFB, download duration, transfer bytes, cache hit status)
 2. **Download time of the sliced `@font-face` CSS file**
@@ -103,21 +102,21 @@ Across **3 real-world sample websites** for **Noto Sans KR (Korean)** (full unsl
 | `dnntm_topics50_greedy` | 4.00 / 52 | 347.3 KB | 88.6% | 296 ms | **642 ms** | 0 ms | 7,929 ms | **7.88x / 7.98x** |
 | **range_compact_most300_300_topics50 (This Model)** | 5.67 / 52 | 461.2 KB | 84.9% | 287 ms | **836 ms** | 97 ms | 10,394 ms | **6.06x / 6.09x** |
 
-#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+#### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `kr_cloud_engineering` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 254.4 ms | **5,305 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_cloud_engineering` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 195.0 ms | **4,458 ms** | 1.30x | **1.19x** (17.4%) |
-| `kr_cloud_engineering` | **range_compact_most300_300_topics50 (This Model)** | 6 | **Yes** | 481.9 KB | 42.4 ms | **888 ms** | 6.00x | **5.98x** (84.2%) |
-| `kr_kpop_entertainment` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 154.8 ms | **5,206 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_kpop_entertainment` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 70.6 ms | **4,334 ms** | 2.19x | **1.20x** (17.4%) |
-| `kr_kpop_entertainment` | **range_compact_most300_300_topics50 (This Model)** | 7 | **Yes** | 582.9 KB | 49.7 ms | **1,089 ms** | 3.11x | **4.78x** (80.9%) |
-| `kr_economy_finance` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 187.4 ms | **5,238 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_economy_finance` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 84.6 ms | **4,348 ms** | 2.22x | **1.20x** (17.4%) |
-| `kr_economy_finance` | **range_compact_most300_300_topics50 (This Model)** | 4 | **Yes** | 318.9 KB | 45.2 ms | **624 ms** | 4.15x | **8.40x** (89.5%) |
+| `kr_cloud_engineering` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 147.0 ms | **5,198 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_cloud_engineering` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 77.6 ms | **4,341 ms** | 1.89x | **1.20x** (17.4%) |
+| `kr_cloud_engineering` | **range_compact_most300_300_topics50 (This Model)** | 6 | **Yes** | 481.9 KB | 41.4 ms | **887 ms** | 3.55x | **5.86x** (84.2%) |
+| `kr_kpop_entertainment` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 146.2 ms | **5,197 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_kpop_entertainment` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 74.8 ms | **4,338 ms** | 1.95x | **1.20x** (17.4%) |
+| `kr_kpop_entertainment` | **range_compact_most300_300_topics50 (This Model)** | 7 | **Yes** | 582.9 KB | 42.6 ms | **1,082 ms** | 3.43x | **4.81x** (80.9%) |
+| `kr_economy_finance` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 141.5 ms | **5,192 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_economy_finance` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 75.0 ms | **4,338 ms** | 1.89x | **1.20x** (17.4%) |
+| `kr_economy_finance` | **range_compact_most300_300_topics50 (This Model)** | 4 | **Yes** | 318.9 KB | 38.2 ms | **617 ms** | 3.70x | **8.42x** (89.5%) |
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosanskr` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -125,7 +124,7 @@ You can test your own HTML files, live URLs, or text snippets against `mlfont-no
 # Simulate a local HTML file with mlfont-notosanskr across all 7 network profiles:
 mlfont-simulate --font_key notosanskr --html_file path/to/index.html --network_profile all
 
-# Simulate a live URL and verify in real Headless Google Chrome:
+# Simulate a live URL and verify in real Headless Chrome:
 mlfont-simulate --font_key notosanskr --url https://example.com --network_profile Cable-5Mbps --headless_chrome
 ```
 
@@ -136,15 +135,15 @@ mlfont-simulate --font_key notosanskr --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `korean`)
 * **Total Slices**: 52 slices (6,769 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 5.29 MB / 5419.9 KB (5,549,952 bytes) across 52 `.woff2` files (companion CSS: 78.0 KB)
-* **Training Wall-Time**: 84.5 seconds on CPU/GPU
+* **Training Wall-Time**: 25.0 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans KR Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
 * `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansKR-Regular Sliced'`) with compact `unicode-range` descriptors
-* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `window.GoogleFonts`)
+* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
 * `woff2/*.woff2`: 52 physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: 52 Google Fonts `.nam` codepoint subset files
+* `nam/*.nam`: 52 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
 * `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition
@@ -162,7 +161,6 @@ mlfont-simulate --font_key notosanskr --url https://example.com --network_profil
 | `random_slice_52` | 52 | 22493 | 0 / 0 | 270.86 / 2029.63 | 71.01 / 532.06 | 13.21 / 99.02 | 3.31% |
 | `language_slice` | 10 | 4579 | 34 / 4322 | 203.56 / 1514.81 | 51.20 / 380.39 | 10.15 / 75.57 | 4.22% |
 | `most_300_300_equal_bin_50` | 52 | 5608 | 0 / 0 | 197.85 / 715.15 | 51.88 / 187.72 | 9.65 / 34.86 | 3.81% |
-| `google_fonts_2017_kr` | 102 | 7229 | 47 / 5467 | 83.54 / 354.53 | 22.38 / 94.50 | 4.03 / 17.20 | 13.64% |
 | `online_lda_topics50_greedy` | 52 | 8327 | 0 / 0 | 66.59 / 348.80 | 17.48 / 91.73 | 3.25 / 16.99 | 12.03% |
 | `dnntm_topics50_greedy` | 52 | 8354 | 0 / 0 | 66.97 / 331.00 | 17.59 / 87.21 | 3.26 / 16.10 | 11.51% |
 | **range_compact_most300_300_topics50 (This Model)** | 52 | 6769 | 0 / 0 | 80.22 / 354.26 | 21.06 / 93.00 | 3.91 / 17.27 | 9.25% |

@@ -83,11 +83,10 @@ def generate_language_slice_strategy(
     include_unassigned: bool = False,
     name: str = "language_slice",
 ) -> SlicingStrategy:
-    """Partitions codepoints using Google Fonts language/script .nam files.
+    """Partitions codepoints using Unicode script/language .nam subset files.
 
-    Matches the C++ GenerateLanguageSliceStrategy implementation: iterates
-    through the provided .nam files in order, assigning each codepoint in the
-    target font to the first .nam file that contains it.
+    Iterates through the provided .nam files in order, assigning each codepoint
+    in the target font to the first .nam file that contains it.
 
     Args:
         codepoints: Target font codepoints.

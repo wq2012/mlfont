@@ -33,7 +33,7 @@ class MLFontPreset:
 
 
 def chinese_production_config() -> MLFontPreset:
-    """Preset matching Google Fonts Early Access 'Noto Sans SC Sliced' (102 slices)."""
+    """Preset for Simplified Chinese (Noto Sans SC, 102 slices)."""
     return MLFontPreset(
         name="chinese_production",
         description=(
@@ -171,7 +171,7 @@ def japanese_production_config() -> MLFontPreset:
 
 
 def korean_production_config() -> MLFontPreset:
-    """Preset matching Korean (Noto Sans KR, 20170619)."""
+    """Preset for Korean (Noto Sans KR, 52 slices)."""
     return MLFontPreset(
         name="korean_production",
         description=(
@@ -217,7 +217,7 @@ def korean_production_config() -> MLFontPreset:
 
 
 def lgc_production_config() -> MLFontPreset:
-    """Preset matching Pan-European Latin/Greek/Cyrillic (LGC, 20161017 / 20161104)."""
+    """Preset for Pan-European Latin/Greek/Cyrillic (Noto Sans LGC, 20 slices)."""
     return MLFontPreset(
         name="lgc_production",
         description="Pan-European LGC (Noto Sans): 20 Online LDA / DNNTM topics + Range-Compact GA",

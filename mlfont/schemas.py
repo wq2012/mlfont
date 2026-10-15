@@ -138,7 +138,7 @@ class SlicingStrategy:
         )
 
     def save_nam_dir(self, directory: str | Path, prefix: str = "slice") -> List[Path]:
-        """Saves each slice as a Google Fonts .nam codepoint file."""
+        """Saves each slice as a .nam codepoint subset file."""
         out_dir = Path(directory)
         out_dir.mkdir(parents=True, exist_ok=True)
         paths: List[Path] = []

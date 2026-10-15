@@ -14,13 +14,12 @@ datasets:
 
 # mlfont-notosans-lgc: Range-Compact MLFont Slicing for Noto Sans (Pan-European LGC)
 
-**This is not an officially supported Google product.**
-
 ## Overview
 
 Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans (Pan-European LGC)** (`NotoSans-Regular.ttf`, 2,297 Unicode codepoints partitioned into 20 range-compact slices).
 
 * **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography* (Quan Wang and Yiran Mao)
+* **Background & References**: Open-source reproduction of Google's machine learning font slicing technology ([Official Post](https://x.com/googlefonts/status/900019727732531200), [Defensive Publication](https://www.tdcommons.org/dpubs_series/906/))
 * **Open-Source Repository**: https://github.com/wq2012/mlfont
 * **PyPI Package**: https://pypi.org/project/mlfont/
 
@@ -75,7 +74,7 @@ MLFont.load('notosans-lgc');
 
 ### 4. Latency Metrics & Browser Telemetry (Recommended — `mlfont.js`)
 
-Included in this bundle (`mlfont.js`, an open-source reproduction and extension of Google Fonts' `//fonts.gstatic.com/ea/timing/v1/mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
+Included in this bundle (`mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
 
 1. **Download time metrics of individual font slices** (slice index, TTFB, download duration, transfer bytes, cache hit status)
 2. **Download time of the sliced `@font-face` CSS file**
@@ -102,21 +101,21 @@ Across **3 real-world sample websites** for **Noto Sans (Pan-European LGC)** (fu
 | `dnntm_topics20_greedy` | 3.33 / 20 | 74.7 KB | 52.8% | 97 ms | **180 ms** | 32 ms | 2,333 ms | **1.75x / 1.73x** |
 | **range_compact_topics20 (This Model)** | 4.00 / 20 | 87.6 KB | 44.7% | 94 ms | **201 ms** | 0 ms | 2,596 ms | **1.57x / 1.56x** |
 
-#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+#### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `lgc_multilingual_eu_news` | `single_slice` | 1 | **Yes** | 158.4 KB | 38.8 ms | **354 ms** | 1.00x | **1.00x** (0.0%) |
-| `lgc_multilingual_eu_news` | `equal_bin_20` | 6 | **Yes** | 131.2 KB | 41.7 ms | **313 ms** | 0.93x | **1.13x** (17.2%) |
-| `lgc_multilingual_eu_news` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 24.0 ms | **261 ms** | 1.62x | **1.36x** (30.2%) |
-| `lgc_slavic_hellenic_encyclopedia` | `single_slice` | 1 | **Yes** | 158.4 KB | 60.6 ms | **376 ms** | 1.00x | **1.00x** (0.0%) |
-| `lgc_slavic_hellenic_encyclopedia` | `equal_bin_20` | 5 | **Yes** | 109.4 KB | 28.7 ms | **264 ms** | 2.11x | **1.42x** (30.9%) |
-| `lgc_slavic_hellenic_encyclopedia` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 30.5 ms | **268 ms** | 1.99x | **1.41x** (30.2%) |
-| `lgc_scientific_typography` | `single_slice` | 1 | **Yes** | 158.4 KB | 23.9 ms | **339 ms** | 1.00x | **1.00x** (0.0%) |
-| `lgc_scientific_typography` | `equal_bin_20` | 1 | **Yes** | 22.7 KB | 23.0 ms | **116 ms** | 1.04x | **2.92x** (85.7%) |
-| `lgc_scientific_typography` | **range_compact_topics20 (This Model)** | 2 | **Yes** | 41.7 KB | 17.0 ms | **141 ms** | 1.41x | **2.40x** (73.7%) |
+| `lgc_multilingual_eu_news` | `single_slice` | 1 | **Yes** | 158.4 KB | 33.2 ms | **349 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_multilingual_eu_news` | `equal_bin_20` | 6 | **Yes** | 131.2 KB | 29.8 ms | **301 ms** | 1.11x | **1.16x** (17.2%) |
+| `lgc_multilingual_eu_news` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 27.9 ms | **265 ms** | 1.19x | **1.32x** (30.2%) |
+| `lgc_slavic_hellenic_encyclopedia` | `single_slice` | 1 | **Yes** | 158.4 KB | 32.7 ms | **348 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_slavic_hellenic_encyclopedia` | `equal_bin_20` | 5 | **Yes** | 109.4 KB | 30.1 ms | **265 ms** | 1.09x | **1.31x** (30.9%) |
+| `lgc_slavic_hellenic_encyclopedia` | **range_compact_topics20 (This Model)** | 5 | **Yes** | 110.5 KB | 32.6 ms | **270 ms** | 1.00x | **1.29x** (30.2%) |
+| `lgc_scientific_typography` | `single_slice` | 1 | **Yes** | 158.4 KB | 24.2 ms | **340 ms** | 1.00x | **1.00x** (0.0%) |
+| `lgc_scientific_typography` | `equal_bin_20` | 1 | **Yes** | 22.7 KB | 19.6 ms | **113 ms** | 1.23x | **3.01x** (85.7%) |
+| `lgc_scientific_typography` | **range_compact_topics20 (This Model)** | 2 | **Yes** | 41.7 KB | 20.7 ms | **145 ms** | 1.17x | **2.34x** (73.7%) |
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosans-lgc` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -124,7 +123,7 @@ You can test your own HTML files, live URLs, or text snippets against `mlfont-no
 # Simulate a local HTML file with mlfont-notosans-lgc across all 7 network profiles:
 mlfont-simulate --font_key notosans_lgc --html_file path/to/index.html --network_profile all
 
-# Simulate a live URL and verify in real Headless Google Chrome:
+# Simulate a live URL and verify in real Headless Chrome:
 mlfont-simulate --font_key notosans_lgc --url https://example.com --network_profile Cable-5Mbps --headless_chrome
 ```
 
@@ -135,15 +134,15 @@ mlfont-simulate --font_key notosans_lgc --url https://example.com --network_prof
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `lgc`)
 * **Total Slices**: 20 slices (384 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 434.1 KB (444,484 bytes) across 20 `.woff2` files (companion CSS: 7.8 KB)
-* **Training Wall-Time**: 24.0 seconds on CPU/GPU
+* **Training Wall-Time**: 25.0 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
 * `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSans-Regular Sliced'`) with compact `unicode-range` descriptors
-* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `window.GoogleFonts`)
+* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
 * `woff2/*.woff2`: 20 physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: 20 Google Fonts `.nam` codepoint subset files
+* `nam/*.nam`: 20 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
 * `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition

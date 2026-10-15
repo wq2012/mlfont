@@ -1197,7 +1197,9 @@ def test_hf_model_card_website_simulation_section(tmp_path: Path) -> None:
         )
         assert f"mlfont-simulate --font_key {key} --html_file" in content
         assert "web/demo.html" in content
-        assert "Real Headless Google Chrome" in content
+        assert "Real Headless Chrome" in content
+        assert "https://x.com/googlefonts/status/900019727732531200" in content
+        assert "https://www.tdcommons.org/dpubs_series/906/" in content
         assert "$" not in content
 
     # 2. Test write_hf_model_card in a temporary bundle directory

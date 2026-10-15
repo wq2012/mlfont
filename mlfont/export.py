@@ -115,7 +115,7 @@ def export_pretrained_bundle(
         - olda_strategy.json: Online LDA + Greedy SlicingStrategy (if provided).
         - dnntm_strategy.json: DNNTM + Greedy SlicingStrategy (if provided).
         - config.json: Model hyperparameters and statistics.
-        - nam/slice_XXX.nam: Google Fonts .nam files for each slice.
+        - nam/slice_XXX.nam: .nam codepoint subset files for each slice.
         - font_sliced.css: Ready-to-serve @font-face CSS with unicode-range.
         - woff2/*.woff2: Physical WOFF2 font slices (if font_path is provided and slice_font=True).
         - evaluation_metrics.json: Benchmark latency and utilization metrics (if provided).

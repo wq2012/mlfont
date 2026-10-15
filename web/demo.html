@@ -268,9 +268,9 @@
     <div class="card" id="simulator-card">
       <h2>1. Interactive Website Font Loading Simulator (Side-by-Side Comparison)</h2>
       <p style="color: var(--muted); margin-top: -0.25rem; font-size: 0.92rem;">
-        Select a real website archetype (including the 2017 <code>go/mlfont-demo</code> and
-        WebPageTest benchmark sites) or edit the page text directly, choose a network profile,
-        and click <strong>Replay Visual Loading</strong> to watch side-by-side progressive rendering.
+        Select a real website archetype across 5 languages/scripts or edit the page text
+        directly, choose a network profile, and click <strong>Replay Visual Loading</strong>
+        to watch side-by-side progressive rendering.
       </p>
 
       <div class="controls">
@@ -436,24 +436,20 @@
         singleCssGzipBytes: 1737,
         eqCssGzipBytes: 3290,
         mlCssGzipBytes: 26874,
-        eaCssGzipBytes: 24512,
-        eaHfSliceBytes: 971048,
         hfSliceBytes: 398151,
         avgTopicSliceBytes: 90893,
         pages: [
           {
             id: 'dev_china_portal',
-            title: '面向中国开发者的 Google 技术资源与开源生态平台',
-            category: 'Developer Portal (developers.google.com/china)',
+            title: '面向现代开发者的云原生技术资源与开源生态平台',
+            category: 'Developer Portal (dev.example.cn)',
             nav: ['首页', 'Android 开发', 'TensorFlow 机器学习', 'Web 性能与字体', 'Firebase', '技术社区'],
             body: '构建面向全球用户的现代化 Web 与移动应用。通过最新的 WebAssembly、Progressive Web Apps (PWA) 以及智能中文字体切片技术，显著降低首屏渲染延迟，提升核心网页指标（Core Web Vitals：LCP、FID、CLS）。借助机器学习共现主题模型与区间紧凑化遗传算法，浏览器仅需下载当前文档所需的少量 WOFF2 字体分片即可完成高质量排版渲染。',
             mlSlices: [0, 1, 33, 36, 37, 45, 57, 71, 73, 86, 91],
             mlBytes: 1178642,
             eqSlicesCount: 56,
             eqBytes: 5122158,
-            eaSlices: [86, 100, 101],
-            eaBytes: 995566,
-            hfCov: 96.8
+            hfCov: 96.7
           },
           {
             id: 'sina_sports_nba',
@@ -465,8 +461,6 @@
             mlBytes: 1618198,
             eqSlicesCount: 52,
             eqBytes: 4756184,
-            eaSlices: [86, 100, 101],
-            eaBytes: 995566,
             hfCov: 91.7
           },
           {
@@ -479,8 +473,6 @@
             mlBytes: 1561518,
             eqSlicesCount: 56,
             eqBytes: 5122158,
-            eaSlices: [86, 93, 97, 100, 101],
-            eaBytes: 1258615,
             hfCov: 94.1
           },
           {
@@ -493,8 +485,6 @@
             mlBytes: 1386554,
             eqSlicesCount: 54,
             eqBytes: 4939916,
-            eaSlices: [32, 86, 100, 101],
-            eaBytes: 1121000,
             hfCov: 94.1
           },
           {
@@ -507,8 +497,6 @@
             mlBytes: 1353210,
             eqSlicesCount: 57,
             eqBytes: 5214024,
-            eaSlices: [86, 100, 101],
-            eaBytes: 995566,
             hfCov: 91.8
           },
           {
@@ -521,8 +509,6 @@
             mlBytes: 2618090,
             eqSlicesCount: 52,
             eqBytes: 4756184,
-            eaSlices: [17, 86, 93, 97, 99, 100, 101],
-            eaBytes: 1509483,
             hfCov: 68.3
           },
           {
@@ -535,8 +521,6 @@
             mlBytes: 2536618,
             eqSlicesCount: 57,
             eqBytes: 5213428,
-            eaSlices: [45, 61, 71, 85, 86, 97, 98, 100, 101],
-            eaBytes: 1758272,
             hfCov: 74.5
           },
           {
@@ -549,8 +533,6 @@
             mlBytes: 1458506,
             eqSlicesCount: 57,
             eqBytes: 5213428,
-            eaSlices: [86, 100, 101],
-            eaBytes: 995566,
             hfCov: 92.1
           }
         ]
@@ -934,20 +916,6 @@
           color: '#64748b'
         }
       ];
-      if (page.eaBytes && !isWarm) {
-        var eaTiming = computeStrategyTiming(
-          net, meta.eaCssGzipBytes, page.eaBytes - meta.eaCssGzipBytes,
-          page.eaSlices.length, meta.eaHfSliceBytes || (meta.hfSliceBytes * 1.4), false
-        );
-        rows.splice(1, 0, {
-          name: 'Google Fonts Early Access (2017 Archival)',
-          slices: page.eaSlices.length + ' / 102',
-          kb: (eaTiming.transferBytes / 1024).toFixed(1) + ' KB',
-          fp: eaTiming.firstPaintMs + ' ms',
-          tot: eaTiming.totalMs,
-          color: '#0d9488'
-        });
-      }
 
       var maxMs = Math.max(1, fullTiming.totalMs, eqTiming.totalMs, mlTiming.totalMs);
       document.getElementById('sim-table-tbody').innerHTML = rows.map(function(r) {

@@ -4,14 +4,12 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 import json
 from pathlib import Path
 import struct
 from typing import Dict, List
 
 import matplotlib
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -135,7 +133,6 @@ def plot_fig1_pareto_and_zipf(
         "random": ("v", COLORS["random"], "Random Slice"),
         "language": ("D", COLORS["language"], "Language Slice (.nam)"),
         "most_": ("P", COLORS["most_eq"], "Most + Equal-Bin"),
-        "google_fonts_ea": ("p", "#16a085", "Google Fonts EA (2017)"),
         "online_lda": ("o", COLORS["olda"], "Online LDA (Greedy)"),
         "dnntm": ("X", COLORS["dnntm"], "DNNTM (Greedy)"),
         "range_compact": ("*", COLORS["ga"], "MLFont Range-Compact GA"),
@@ -311,78 +308,6 @@ def plot_fig3_benchmark_latency(
     _save_both(fig, "fig3_benchmark_latency", png_dir, pdf_dir)
 
 
-def plot_fig4_production_traffic(
-    csv_path: Path,
-    png_dir: Path,
-    pdf_dir: Path | None,
-) -> None:
-    """Fig 4: 2017-2021 Google Fonts Early Access Noto Sans SC Sliced production traffic."""
-    daily_max: Dict[str, int] = {}
-    for line in csv_path.read_text(encoding="utf-8").splitlines():
-        parts = line.strip().split(",")
-        if len(parts) != 3:
-            continue
-        date_str, _, count_str = parts
-        try:
-            cnt = int(count_str)
-        except ValueError:
-            continue
-        if date_str not in daily_max or cnt > daily_max[date_str]:
-            daily_max[date_str] = cnt
-
-    sorted_dates = sorted(daily_max.keys())
-    dates = [datetime.strptime(d, "%Y%m%d") for d in sorted_dates]
-    counts = np.array([daily_max[d] for d in sorted_dates], dtype=np.float64) / 1e6
-
-    window = 30
-    rolling = np.convolve(counts, np.ones(window) / window, mode="valid")
-    w_off = window - 1
-    rolling_dates = dates[w_off:]
-
-    fig, ax = plt.subplots(figsize=(8.8, 4.0))
-    ax.plot(
-        dates,
-        counts,
-        color="#3498db",
-        alpha=0.35,
-        lw=0.9,
-        label="Daily Primary URL CSS Requests (Millions)",
-    )
-    ax.plot(
-        rolling_dates,
-        rolling,
-        color="#c0392b",
-        lw=2.2,
-        label="30-Day Moving Average",
-    )
-    ax.set_title(
-        "Google Fonts Early Access: Noto Sans SC Sliced Production Traffic (2017-2021)"
-    )
-    ax.set_xlabel("Date (June 2017 - November 2021)")
-    ax.set_ylabel("Daily CSS Stylesheet Requests (Millions)")
-    ax.xaxis.set_major_locator(mdates.YearLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-    ax.grid(True, ls=":", alpha=0.5)
-    ax.annotate(
-        "Launch: June 1, 2017\n(63 requests/day)",
-        xy=(mdates.date2num(dates[0]), counts[0]),
-        xytext=(mdates.date2num(dates[120]), 0.35),
-        arrowprops={"arrowstyle": "->", "color": "#2c3e50", "lw": 1.1},
-        fontsize=8.5,
-    )
-    peak_idx = int(np.argmax(counts))
-    ax.annotate(
-        f"Peak: {counts[peak_idx]:.2f}M requests/day\n({sorted_dates[peak_idx]})",
-        xy=(mdates.date2num(dates[peak_idx]), counts[peak_idx]),
-        xytext=(mdates.date2num(dates[max(0, peak_idx - 420)]), counts[peak_idx] * 0.88),
-        arrowprops={"arrowstyle": "->", "color": "#c0392b", "lw": 1.1},
-        fontsize=8.5,
-    )
-    ax.legend(loc="upper left", frameon=True)
-    fig.tight_layout()
-    _save_both(fig, "fig4_production_traffic", png_dir, pdf_dir)
-
-
 def plot_fig5_website_simulation(
     web_report: Dict[str, object],
     png_dir: Path,
@@ -408,11 +333,10 @@ def plot_fig5_website_simulation(
         ("equal_bin_102", "Equal-Bin (102 Slices)", COLORS["equal_bin"]),
         ("most_1000_500_equal_bin_100", "Most + Equal-Bin", COLORS["most_eq"]),
         ("range_compact_most1000_500_topics100", "MLFont Range-Compact GA", COLORS["ga"]),
-        ("google_fonts_ea_2017", "Google Fonts EA (2017)", "#16a085"),
     ]
 
     x1 = np.arange(len(page_order))
-    w1 = 0.155
+    w1 = 0.19
     for idx, (sname, label, col) in enumerate(strat_specs):
         vals: List[float] = []
         for pid, _ in page_order:
@@ -552,10 +476,6 @@ def main() -> None:
     plot_fig1_pareto_and_zipf(summary, args.pretrained_dir, args.png_dir, args.pdf_dir)
     plot_fig2_ga_convergence(args.experiments_dir, args.png_dir, args.pdf_dir)
     plot_fig3_benchmark_latency(summary, args.png_dir, args.pdf_dir)
-
-    traffic_csv = args.experiments_dir / "production_traffic_2017_2021.csv"
-    if traffic_csv.exists():
-        plot_fig4_production_traffic(traffic_csv, args.png_dir, args.pdf_dir)
 
     web_sim_path = args.experiments_dir / "website_simulation_report.json"
     if web_sim_path.exists():

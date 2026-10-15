@@ -171,7 +171,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--run_chrome",
         dest="headless_chrome",
         action="store_true",
-        help="Also run real Headless Google Chrome benchmark against local throttled server.",
+        help="Also run real Headless Chrome benchmark against physical WOFF2 slices.",
     )
     parser.add_argument(
         "--output_json",

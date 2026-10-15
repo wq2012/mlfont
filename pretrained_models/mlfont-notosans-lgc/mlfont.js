@@ -1,9 +1,9 @@
 /**
  * MLFont Web Loader & HTML5 Performance API Latency Telemetry Library (mlfont.js)
  *
- * Open-source reproduction and modern extension of the Google Fonts Early Access
- * MLFont timing & loader script (`//fonts.gstatic.com/ea/timing/v1/mlfont.js`,
- * originally `timing-mlfont.js`, cl/159145411).
+ * Open-source reproduction of Google's machine learning-driven font slicing
+ * technology (https://x.com/googlefonts/status/900019727732531200,
+ * https://www.tdcommons.org/dpubs_series/906/).
  *
  * Features:
  * 1. Drop-in Sliced Webfont Loader (`MLFont.load` / `data-mlfont` attribute):
@@ -11,7 +11,7 @@
  *    Hugging Face / jsDelivr / self-hosted CDNs so the browser only downloads
  *    the `.woff2` font slices required by the characters on the current page.
  *
- * 2. HTML5 Performance API Latency Metrics (`MLFont.getMetrics` / `window.GoogleFonts`):
+ * 2. HTML5 Performance API Latency Metrics (`MLFont.getMetrics` / `MLFont.printReport`):
  *    Accesses the browser Resource Timing & Navigation Timing APIs to measure:
  *      - Download time metrics of individual `.woff2` font slices (slice index,
  *        duration, TTFB, DNS/TCP connect time, transfer size, cache hit status)
@@ -164,8 +164,8 @@
   };
 
   var FontResourceTypes = {
-    EARLY_ACCESS_STATIC_CONTENT: 'ef',
-    EARLY_ACCESS_CSS_API: 'ec'
+    SLICE_STATIC_CONTENT: 'ef',
+    SLICE_CSS_API: 'ec'
   };
 
   function generateUUID() {
@@ -190,11 +190,10 @@
     LOAD_TIMES: {'t': 'lt', 'uuid': requestUUID}
   };
 
-  // Preserve the historical 2017 `window.GoogleFonts` telemetry structure
-  var LEGACY_NAMESPACE = 'GoogleFonts';
-  global[LEGACY_NAMESPACE] = global[LEGACY_NAMESPACE] || {};
-  global[LEGACY_NAMESPACE].images = global[LEGACY_NAMESPACE].images || {};
-  global[LEGACY_NAMESPACE].records = global[LEGACY_NAMESPACE].records || [];
+  var telemetryStore = {
+    images: {},
+    records: []
+  };
 
   function runOnce(name, fn) {
     if (!seenEntries[name]) {
@@ -234,25 +233,25 @@
     var id = String(Date.now()) + '_' + Math.random().toString(36).slice(2);
     var img = document.createElement('img');
     img.src = targetUrl;
-    global[LEGACY_NAMESPACE].images[id] = img;
+    telemetryStore.images[id] = img;
     img.onload = img.onerror = function() {
-      delete global[LEGACY_NAMESPACE].images[id];
+      delete telemetryStore.images[id];
     };
   }
 
   function createReport(timings, host) {
-    if (timings['t'] === FontResourceTypes.EARLY_ACCESS_STATIC_CONTENT ||
-        timings['t'] === FontResourceTypes.EARLY_ACCESS_CSS_API) {
+    if (timings['t'] === FontResourceTypes.SLICE_STATIC_CONTENT ||
+        timings['t'] === FontResourceTypes.SLICE_CSS_API) {
       reportsSent++;
     }
-    global[LEGACY_NAMESPACE].records.push({
+    telemetryStore.records.push({
       'timings': timings,
       'host': host || null
     });
   }
 
   function sendOutReports() {
-    var records = global[LEGACY_NAMESPACE].records;
+    var records = telemetryStore.records;
     for (var i = 0; i < records.length; i++) {
       var record = records[i];
       if (record['host'] && !record['sent']) {
@@ -264,8 +263,6 @@
 
   /**
    * Parses a Resource Timing entry for a font slice or sliced CSS file.
-   * Supports both 2017 Google Fonts Early Access URLs (`NotoSansSCSliced-Regular.0.woff2`)
-   * and open-source MLFont slice URLs (`NotoSansSC-Regular_slice_000.woff2`).
    */
   function parseFontResourceEntry(type, entry, interval) {
     var timings = {};
@@ -273,13 +270,13 @@
     var parts = cleanUrl.split('/');
     var fileName = parts[parts.length - 1] || '';
 
-    if (type === FontResourceTypes.EARLY_ACCESS_CSS_API) {
+    if (type === FontResourceTypes.SLICE_CSS_API) {
       timings['n'] = fileName.replace(/\.css$/i, '');
-    } else if (type === FontResourceTypes.EARLY_ACCESS_STATIC_CONTENT) {
-      // Match open-source `<Stem>_slice_<NNN>.<ext>`
+    } else if (type === FontResourceTypes.SLICE_STATIC_CONTENT) {
+      // Match `<Stem>_slice_<NNN>.<ext>`
       var osMatch = fileName.match(/^(.+?)_slice_(\d+)\.(woff2|woff|otf|ttf)$/i);
-      // Match 2017 Early Access `<Family>-<Weight>.<N>.<ext>`
-      var eaMatch = fileName.match(/^(.+?)-([A-Za-z]+)\.(\d+)\.(woff2|woff|otf|ttf)$/i);
+      // Match `<Family>-<Weight>.<N>.<ext>`
+      var altMatch = fileName.match(/^(.+?)-([A-Za-z]+)\.(\d+)\.(woff2|woff|otf|ttf)$/i);
 
       if (osMatch) {
         timings['n'] = osMatch[1];
@@ -287,11 +284,11 @@
         timings['w'] = osMatch[1].indexOf('-') !== -1 ?
             osMatch[1].split('-').pop().toLowerCase() : 'regular';
         timings['sn'] = String(parseInt(osMatch[2], 10));
-      } else if (eaMatch) {
-        timings['n'] = parts.length >= 3 ? parts[parts.length - 3] : eaMatch[1];
+      } else if (altMatch) {
+        timings['n'] = parts.length >= 3 ? parts[parts.length - 3] : altMatch[1];
         timings['v'] = parts.length >= 2 ? parts[parts.length - 2] : 'v2';
-        timings['w'] = eaMatch[2].toLowerCase();
-        timings['sn'] = eaMatch[3];
+        timings['w'] = altMatch[2].toLowerCase();
+        timings['sn'] = altMatch[3];
       } else {
         timings['n'] = fileName;
         timings['sn'] = '-1';
@@ -321,7 +318,6 @@
     var name = entry.name || '';
     var clean = name.split('?')[0];
     return (
-      name.indexOf('fonts.gstatic.com/ea') !== -1 ||
       /_slice_\d+\.(woff2|woff|otf|ttf)$/i.test(clean) ||
       /\.\d+\.(woff2|woff|otf|ttf)$/i.test(clean) ||
       (name.indexOf('mlfont-') !== -1 && /\.(woff2|woff|otf|ttf)/i.test(name))
@@ -332,7 +328,6 @@
     var name = entry.name || '';
     var clean = name.split('?')[0];
     return (
-      name.indexOf('fonts.googleapis.com/earlyaccess') !== -1 ||
       /font_sliced(_cdn)?\.css$/i.test(clean) ||
       /_sliced\.css$/i.test(clean)
     );
@@ -353,7 +348,7 @@
           runOnce('slice:' + e.name, function() {
             createReport(
               parseFontResourceEntry(
-                FontResourceTypes.EARLY_ACCESS_STATIC_CONTENT, e, interval
+                FontResourceTypes.SLICE_STATIC_CONTENT, e, interval
               ),
               host
             );
@@ -365,7 +360,7 @@
           runOnce('css:' + e.name, function() {
             createReport(
               parseFontResourceEntry(
-                FontResourceTypes.EARLY_ACCESS_CSS_API, e, interval
+                FontResourceTypes.SLICE_CSS_API, e, interval
               ),
               host
             );
@@ -442,10 +437,10 @@
     var maxSliceResponseEnd = 0;
     var minSliceStartTime = Infinity;
 
-    var records = global[LEGACY_NAMESPACE].records;
+    var records = telemetryStore.records;
     for (var i = 0; i < records.length; i++) {
       var rec = records[i]['timings'];
-      if (rec['t'] === FontResourceTypes.EARLY_ACCESS_STATIC_CONTENT) {
+      if (rec['t'] === FontResourceTypes.SLICE_STATIC_CONTENT) {
         var sliceInfo = {
           font: rec['n'],
           sliceIndex: parseInt(rec['sn'], 10),
@@ -471,7 +466,7 @@
         if (sliceInfo.startTimeMs < minSliceStartTime) {
           minSliceStartTime = sliceInfo.startTimeMs;
         }
-      } else if (rec['t'] === FontResourceTypes.EARLY_ACCESS_CSS_API) {
+      } else if (rec['t'] === FontResourceTypes.SLICE_CSS_API) {
         stylesheets.push({
           stylesheet: rec['n'],
           startTimeMs: Number(rec['s']),
@@ -610,8 +605,7 @@
   }
 
   /**
-   * Initializes the periodic HTML5 Performance API resource timing collector
-   * (compatible with the 2017 `window.GoogleFonts.setup(host)` API).
+   * Initializes the periodic HTML5 Performance API resource timing collector.
    */
   function setupTelemetry(hostOrOptions) {
     var host = typeof hostOrOptions === 'string' ?
@@ -647,8 +641,6 @@
     }
   }
 
-  global[LEGACY_NAMESPACE]['setup'] = setupTelemetry;
-
   var MLFontAPI = {
     version: '0.1.0',
     PRETRAINED_FONTS: PRETRAINED_FONTS,
@@ -656,7 +648,7 @@
     setup: setupTelemetry,
     getMetrics: getMetrics,
     printReport: printReport,
-    records: global[LEGACY_NAMESPACE].records
+    records: telemetryStore.records
   };
 
   global['MLFont'] = MLFontAPI;

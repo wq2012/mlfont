@@ -14,13 +14,12 @@ datasets:
 
 # mlfont-notosansjp: Range-Compact MLFont Slicing for Noto Sans JP (Japanese)
 
-**This is not an officially supported Google product.**
-
 ## Overview
 
 Pretrained **MLFont** machine-learning-guided font slicing model and WOFF2 slice bundle for **Noto Sans JP (Japanese)** (`NotoSansJP-Regular.otf`, 16,663 Unicode codepoints partitioned into 62 range-compact slices).
 
 * **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography* (Quan Wang and Yiran Mao)
+* **Background & References**: Open-source reproduction of Google's machine learning font slicing technology ([Official Post](https://x.com/googlefonts/status/900019727732531200), [Defensive Publication](https://www.tdcommons.org/dpubs_series/906/))
 * **Open-Source Repository**: https://github.com/wq2012/mlfont
 * **PyPI Package**: https://pypi.org/project/mlfont/
 
@@ -75,7 +74,7 @@ MLFont.load('notosansjp');
 
 ### 4. Latency Metrics & Browser Telemetry (Recommended — `mlfont.js`)
 
-Included in this bundle (`mlfont.js`, an open-source reproduction and extension of Google Fonts' `//fonts.gstatic.com/ea/timing/v1/mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
+Included in this bundle (`mlfont.js`) is a small, zero-dependency JS library that accesses the HTML5 [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to measure webfont slice performance. **No user-specific data is collected.** The JS library collects:
 
 1. **Download time metrics of individual font slices** (slice index, TTFB, download duration, transfer bytes, cache hit status)
 2. **Download time of the sliced `@font-face` CSS file**
@@ -103,21 +102,21 @@ Across **3 real-world sample websites** for **Noto Sans JP (Japanese)** (full un
 | `dnntm_topics60_greedy` | 7.67 / 62 | 805.1 KB | 75.5% | 695 ms | **1,412 ms** | 644 ms | 17,573 ms | **3.85x / 3.87x** |
 | **range_compact_most500_500_topics60 (This Model)** | 10.33 / 62 | 1,062.9 KB | 67.6% | 689 ms | **1,851 ms** | 568 ms | 23,117 ms | **2.94x / 2.94x** |
 
-#### Real Headless Google Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
+#### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Google Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `jp_web_dev_docs` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 165.7 ms | **5,594 ms** | 1.00x | **1.00x** (0.0%) |
-| `jp_web_dev_docs` | `equal_bin_62` | 34 | **Yes** | 2,642.4 KB | 91.7 ms | **4,617 ms** | 1.81x | **1.21x** (19.4%) |
-| `jp_web_dev_docs` | **range_compact_most500_500_topics60 (This Model)** | 7 | **Yes** | 773.6 KB | 79.1 ms | **1,431 ms** | 2.09x | **3.91x** (76.4%) |
-| `jp_sports_baseball` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 164.7 ms | **5,593 ms** | 1.00x | **1.00x** (0.0%) |
-| `jp_sports_baseball` | `equal_bin_62` | 35 | **Yes** | 2,718.8 KB | 93.5 ms | **4,744 ms** | 1.76x | **1.18x** (17.1%) |
-| `jp_sports_baseball` | **range_compact_most500_500_topics60 (This Model)** | 10 | **Yes** | 1,054.6 KB | 63.6 ms | **1,875 ms** | 2.59x | **2.98x** (67.8%) |
-| `jp_literature_essay` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 250.8 ms | **5,679 ms** | 1.00x | **1.00x** (0.0%) |
-| `jp_literature_essay` | `equal_bin_62` | 42 | **Yes** | 3,258.6 KB | 264.9 ms | **5,828 ms** | 0.95x | **0.97x** (0.6%) |
-| `jp_literature_essay` | **range_compact_most500_500_topics60 (This Model)** | 14 | **Yes** | 1,360.4 KB | 198.7 ms | **2,540 ms** | 1.26x | **2.24x** (58.5%) |
+| `jp_web_dev_docs` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 170.2 ms | **5,599 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_web_dev_docs` | `equal_bin_62` | 34 | **Yes** | 2,642.4 KB | 91.0 ms | **4,616 ms** | 1.87x | **1.21x** (19.4%) |
+| `jp_web_dev_docs` | **range_compact_most500_500_topics60 (This Model)** | 7 | **Yes** | 773.6 KB | 54.3 ms | **1,406 ms** | 3.13x | **3.98x** (76.4%) |
+| `jp_sports_baseball` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 148.9 ms | **5,577 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_sports_baseball` | `equal_bin_62` | 35 | **Yes** | 2,718.8 KB | 104.3 ms | **4,755 ms** | 1.43x | **1.17x** (17.1%) |
+| `jp_sports_baseball` | **range_compact_most500_500_topics60 (This Model)** | 10 | **Yes** | 1,054.6 KB | 60.0 ms | **1,872 ms** | 2.48x | **2.98x** (67.8%) |
+| `jp_literature_essay` | `single_slice` | 1 | **Yes** | 3,279.1 KB | 147.5 ms | **5,576 ms** | 1.00x | **1.00x** (0.0%) |
+| `jp_literature_essay` | `equal_bin_62` | 42 | **Yes** | 3,258.6 KB | 141.2 ms | **5,704 ms** | 1.04x | **0.98x** (0.6%) |
+| `jp_literature_essay` | **range_compact_most500_500_topics60 (This Model)** | 14 | **Yes** | 1,360.4 KB | 61.5 ms | **2,402 ms** | 2.40x | **2.32x** (58.5%) |
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosansjp` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -125,7 +124,7 @@ You can test your own HTML files, live URLs, or text snippets against `mlfont-no
 # Simulate a local HTML file with mlfont-notosansjp across all 7 network profiles:
 mlfont-simulate --font_key notosansjp --html_file path/to/index.html --network_profile all
 
-# Simulate a live URL and verify in real Headless Google Chrome:
+# Simulate a live URL and verify in real Headless Chrome:
 mlfont-simulate --font_key notosansjp --url https://example.com --network_profile Cable-5Mbps --headless_chrome
 ```
 
@@ -136,15 +135,15 @@ mlfont-simulate --font_key notosansjp --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `japanese`)
 * **Total Slices**: 62 slices (7,298 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 4.67 MB / 4779.7 KB (4,894,460 bytes) across 62 `.woff2` files (companion CSS: 85.3 KB)
-* **Training Wall-Time**: 46.0 seconds on CPU/GPU
+* **Training Wall-Time**: 25.0 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans JP Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
 * `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansJP-Regular Sliced'`) with compact `unicode-range` descriptors
-* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `window.GoogleFonts`)
+* `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
 * `woff2/*.woff2`: 62 physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: 62 Google Fonts `.nam` codepoint subset files
+* `nam/*.nam`: 62 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
 * `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition
