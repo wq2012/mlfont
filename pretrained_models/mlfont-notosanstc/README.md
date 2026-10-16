@@ -135,7 +135,7 @@ mlfont-simulate --font_key notosanstc --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `traditional_chinese`)
 * **Total Slices**: 82 slices (8,743 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 5.94 MB / 6085.5 KB (6,231,532 bytes) across 82 `.woff2` files (companion CSS: 104.1 KB)
-* **Training Wall-Time**: 25.0 seconds on CPU/GPU
+* **Training Wall-Time**: 55.5 seconds on CPU/GPU
 
 ## Model Files Included
 

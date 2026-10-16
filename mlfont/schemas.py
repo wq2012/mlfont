@@ -98,8 +98,10 @@ class SlicingStrategy:
     def count_dna_compactness_ranges(self) -> int:
         """Counts range breaks across the sorted global DNA sequence.
 
-        Matches Gene._ComputeCostRangeCompactness in the original GA:
-        a new range starts whenever (cp != prev_cp + 1) or (topic != prev_topic).
+        Matches the Range-Compact GA cost ``C_range(s)``: a new range starts
+        whenever (cp != prev_cp + 1) or (topic != prev_topic). This equals
+        ``count_unicode_ranges()`` whenever every codepoint belongs to exactly
+        one slice.
         """
         dna = self.to_dna()
         if not dna:

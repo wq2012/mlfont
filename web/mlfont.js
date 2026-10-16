@@ -677,14 +677,15 @@
     if (fontAttr) {
       var fontList = fontAttr.split(',');
       for (var j = 0; j < fontList.length; j++) {
-        var fontName = fontList[j].trim();
-        if (fontName) {
-          loadSlicedFont(fontName).catch(function(err) {
-            if (typeof console !== 'undefined' && console.warn) {
-              console.warn('[MLFont] Failed to auto-load ' + fontName + ':', err);
-            }
-          });
-        }
+        (function(fontName) {
+          if (fontName) {
+            loadSlicedFont(fontName).catch(function(err) {
+              if (typeof console !== 'undefined' && console.warn) {
+                console.warn('[MLFont] Failed to auto-load ' + fontName + ':', err);
+              }
+            });
+          }
+        })(fontList[j].trim());
       }
     }
 

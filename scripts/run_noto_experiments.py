@@ -333,6 +333,21 @@ def _build_website_sim_section(
                 n_exact = sum(
                     1 for c in chrome_rows if c.get("simulator_exact_slice_match")
                 )
+                n_chrome = len(chrome_rows)
+                pct_exact = 100.0 * n_exact / max(1, n_chrome)
+                mismatch_note = ""
+                if n_exact < n_chrome:
+                    bad = [
+                        f"`{c['page_id']}` / `{c['strategy_name']}`"
+                        for c in chrome_rows
+                        if not c.get("simulator_exact_slice_match")
+                    ]
+                    mismatch_note = (
+                        " Rows marked `No*` are incomplete Headless Chrome fetches "
+                        "(Chrome reported fewer loaded `@font-face` rules than the "
+                        "simulator predicted before `window.onload` fired); their "
+                        "speedups are NOT validated: " + ", ".join(bad) + "."
+                    )
                 lines.extend(
                     [
                         (
@@ -343,9 +358,9 @@ def _build_website_sim_section(
                         (
                             "Verified against physical `.woff2` files in Headless Chrome "
                             "(`--headless=new --dump-dom`) via the W3C `document.fonts` "
-                            f"(`FontFaceSet`) API (`{n_exact}/{len(chrome_rows)} = 100%` exact "
-                            "slice-set match between Chromium Blink's `unicode-range` engine and "
-                            "`WebsiteFontSimulator`):"
+                            f"(`FontFaceSet`) API (`{n_exact}/{n_chrome} = {pct_exact:.1f}%` "
+                            "exact slice-set match between Chromium Blink's `unicode-range` "
+                            "engine and `WebsiteFontSimulator`)." + mismatch_note
                         ),
                         "",
                         (
@@ -369,7 +384,7 @@ def _build_website_sim_section(
                     tot_kb = (
                         float(cr["woff2_transfer_bytes"]) + float(cr["css_transfer_bytes"])
                     ) / 1024.0
-                    m_str = "**Yes**" if cr.get("simulator_exact_slice_match") else "No"
+                    m_str = "**Yes**" if cr.get("simulator_exact_slice_match") else "No*"
                     dec_ms = float(cr["chrome_local_decode_ms"])
                     rdy_ms = float(cr["fonts_ready_ms"])
                     dec_sp = float(cr["local_decode_speedup_vs_single_slice"])

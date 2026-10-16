@@ -328,8 +328,9 @@ def plot_fig5_website_simulation(
         ("novel_tangqi_fiction", "Tangqi\nNovel"),
         ("cooking_recipe_beef", "Cooking\nRecipe"),
     ]
+    full_font_kib = float(web_report["fonts"]["notosanssc"]["full_font_woff2_bytes"]) / 1024.0
     strat_specs = [
-        ("single_slice", "Full Unsliced WOFF2 (5.99 MB)", COLORS["single"]),
+        ("single_slice", f"Full Unsliced WOFF2 ({full_font_kib:,.0f} KB)", COLORS["single"]),
         ("equal_bin_102", "Equal-Bin (102 Slices)", COLORS["equal_bin"]),
         ("most_1000_500_equal_bin_100", "Most + Equal-Bin", COLORS["most_eq"]),
         ("range_compact_most1000_500_topics100", "MLFont Range-Compact GA", COLORS["ga"]),
@@ -373,6 +374,17 @@ def plot_fig5_website_simulation(
 
     # Panel (b): Headless Chrome End-to-End document.fonts.ready Latency Across 5 Noto Fonts
     chrome_list = web_report.get("headless_chrome_benchmark", [])
+    # Exclude (font, page) pairs where Chrome reported an incomplete fetch (its
+    # loaded slice set did not match the simulator), so that every bar averages
+    # the same validated pages for all strategies.
+    incomplete_pages = {
+        (c["font_key"], c["page_id"])
+        for c in chrome_list
+        if not c.get("simulator_exact_slice_match", True)
+    }
+    chrome_list = [
+        c for c in chrome_list if (c["font_key"], c["page_id"]) not in incomplete_pages
+    ]
     font_order = [
         ("notosanssc", "Noto Sans\nSC"),
         ("notosanstc", "Noto Sans\nTC"),

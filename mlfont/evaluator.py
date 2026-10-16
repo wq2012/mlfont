@@ -1,10 +1,21 @@
 """Multi-session web font loading simulator and strategy evaluator.
 
-Implements the exact simulation model of MLFont's EvaluationSimple:
-documents are grouped sequentially into browsing sessions of length L,
-a browser slice cache is maintained within each session, and per-glyph
-RTT latency, download latency, total latency, CSS range count, and
+Simulation model: documents are grouped sequentially into browsing sessions
+of length L, a browser slice cache is maintained within each session, and
+per-glyph RTT latency, download latency, total latency, CSS range count, and
 upfront/session glyph utilization are computed across network profiles.
+
+Latency model (per page):
+  * Every slice whose ``unicode-range`` intersects the page's codepoints and
+    that is not already in the session cache is fetched exactly once.
+  * ``rtt_per_glyph_ms = (num_new_slices * rtt_ms) / num_covered_glyphs``.
+    This is a conservative *serial-request* model: each new slice is charged
+    one full RTT, as if the browser issued the slice requests one after
+    another (no HTTP/2 multiplexing or parallel connections). The parallel,
+    wave-based model lives in :mod:`mlfont.simulator`.
+  * ``download_per_glyph_ms = (bytes_of_new_slices / bandwidth) / num_covered_glyphs``.
+  * Codepoints that the strategy does not cover are counted as missing and do
+    not contribute to the per-glyph denominator.
 """
 
 from __future__ import annotations

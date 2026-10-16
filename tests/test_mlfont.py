@@ -532,7 +532,10 @@ def test_readme_quickstart_api_and_edge_cases(tmp_path: Path) -> None:
         set(font_codepoints[30:50]),
     ] * 10
 
-    freq_solver = FrequencySolver(font_codepoints)
+    # README quickstart form (explicit keyword); the positional form is kept as a
+    # backward-compatible heuristic for long codepoint lists.
+    freq_solver = FrequencySolver(codepoints=font_codepoints)
+    assert FrequencySolver(font_codepoints).codepoints_ == freq_solver.codepoints_
     freq_solver.fit(train_docs)
     most_slices, remaining_codepoints = freq_solver.partition_most_frequent(
         most_counts=[12]
@@ -824,8 +827,10 @@ def test_website_simulator_html_extraction_and_profiles(tmp_path):
     assert p_3g.bandwidth_kbps == 400.0
     assert p_3g.rtt_ms == 400.0
 
-    # Verify documented network profile aliases resolve properly
-    assert get_network_profile("GIN-2g-poor").bandwidth_kbps == 32.0
+    # Verify documented network profile aliases resolve properly (GIN-2g-poor must
+    # match schemas.STANDARD_EVALUATION_PARAMS: 20 kbps / 1600 ms RTT)
+    assert get_network_profile("GIN-2g-poor").bandwidth_kbps == 20.0
+    assert get_network_profile("GIN-2g-poor").rtt_ms == 1600.0
     assert get_network_profile("Broadband-20Mbps").bandwidth_kbps == 20000.0
     assert get_network_profile("residential-ADSL2+").bandwidth_kbps == 20000.0
 
@@ -1239,3 +1244,226 @@ def test_hf_model_card_website_simulation_section(tmp_path: Path) -> None:
         in fallback_text
     )
     assert "mlfont-simulate --font_key notosans_lgc" in fallback_text
+
+
+def test_k_eff_report_matches_alignment_rule() -> None:
+    """Regression: OnlineLdaLearner.k_eff_ / num_core_codepoints_ must use the
+    exact same core rule as align_and_smooth_topic_matrix (previously fit() used
+    a different min_df rule and under-reported K_eff on small repertoires)."""
+    from mlfont.olda import compute_core_mask_and_k_eff
+
+    # 60 tail codepoints, K=3 -> row_cap = 20. 45 active codepoints: 5 with DF=10
+    # and 40 singletons (DF=1). The old reporting rule (min_df=2 whenever
+    # n_active > row_cap) gave n_core=5 -> K_eff=1, while the alignment code
+    # (min_df=1 for n_rem <= 5000) uses n_core=45 -> K_eff=3.
+    cps = list(range(0x100, 0x100 + 60))
+    docs = []
+    for _ in range(10):
+        docs.append("".join(chr(c) for c in cps[:5]))
+    for j in range(40):
+        docs.append(chr(cps[5 + j]) + chr(cps[0]))
+    proc = DocumentCorpusProcessor(docs)
+    freq = proc.count_frequency_array(cps, deduplicate_within_doc=True)
+    active_df = freq[freq > 0]
+    core_mask, n_core, k_eff = compute_core_mask_and_k_eff(active_df, 60, 3)
+    assert int(np.sum(core_mask)) == n_core == 45
+    assert k_eff == 3
+
+    learner = OnlineLdaLearner(
+        proc, cps, OnlineLdaConfig(n_topics=3, batch_size=16, n_batches=5, random_state=0)
+    )
+    learner.fit()
+    assert learner.num_active_codepoints_ == 45
+    assert learner.num_core_codepoints_ == n_core
+    assert learner.k_eff_ == k_eff
+    # Tier-B tail rows are bounded by prior(0.0045) + 0.0018 + 0.0035 < 0.0105,
+    # so the number of rows carrying Tier-A mass must equal the reported K_eff.
+    assert learner.lambda_matrix_ is not None
+    tier_a_rows = int(np.sum(np.max(learner.lambda_matrix_, axis=1) > 0.0105))
+    assert tier_a_rows == learner.k_eff_
+
+    # Large sparse repertoire (n_rem > 5000, max DF >= 10) switches to min_df = 2.
+    big_df = np.ones(300, dtype=np.float64)
+    big_df[:20] = 12.0
+    mask_big, n_core_big, k_eff_big = compute_core_mask_and_k_eff(big_df, 6000, 10)
+    assert n_core_big == 20 and int(np.sum(mask_big)) == 20
+    assert k_eff_big == 2  # floor of min(2, K)
+    empty_mask, empty_core, empty_k = compute_core_mask_and_k_eff(np.zeros(0), 100, 4)
+    assert len(empty_mask) == 0 and empty_core == 0 and empty_k == 0
+
+
+def test_network_profiles_consistent_between_evaluator_and_simulator() -> None:
+    """Regression: GIN-2g-poor (and all shared profile names) must carry identical
+    RTT / bandwidth numbers in schemas.STANDARD_EVALUATION_PARAMS and in
+    simulator.get_network_profile (they previously disagreed for GIN-2g-poor)."""
+    from mlfont import STANDARD_EVALUATION_PARAMS, get_network_profile
+
+    by_name = {p.name: p for p in STANDARD_EVALUATION_PARAMS}
+    for name in ("GIN-2g-poor", "GIN-2g", "GIN-3g", "residential-DSL", "residential-ADSL2+"):
+        ev = by_name[name]
+        bp = get_network_profile(name)
+        assert bp.rtt_ms == ev.rtt_ms, name
+        assert bp.bandwidth_bytes_per_ms == ev.bandwidth_bytes_per_ms, name
+    # README numbers: bytes/ms * 8 = kbps
+    assert by_name["GIN-2g"].bandwidth_bytes_per_ms * 8 == 100.0
+    assert by_name["GIN-3g"].bandwidth_bytes_per_ms * 8 == 400.0
+    assert by_name["residential-DSL"].bandwidth_bytes_per_ms * 8 == 2000.0
+    assert by_name["residential-ADSL2+"].bandwidth_bytes_per_ms * 8 == 20000.0
+
+
+def test_evaluator_serial_rtt_latency_model_hand_computed() -> None:
+    """Pins the documented per-page latency model of FontLoadingEvaluator."""
+    cps = list(range(0x41, 0x41 + 8))  # A..H
+    strat = SlicingStrategy(subsets=[cps[:4], cps[4:6], cps[6:]], name="s3")
+    # Page 1 touches slices 0 and 1 (3 covered glyphs); page 2 touches slice 1
+    # (cached) and slice 2 (2 covered glyphs); page 3 has a codepoint outside the
+    # strategy (missing) plus one in cached slice 0.
+    strat_missing = SlicingStrategy(subsets=[cps[:4], cps[4:6]], name="s2_missing")
+    samples = [{0x41, 0x42, 0x45}, {0x45, 0x47}, {0x41, 0x47}]
+    ev = FontLoadingEvaluator(cps, samples)
+    params = EvaluationParams(
+        name="t", rtt_ms=100.0, bandwidth_bytes_per_ms=10.0,
+        average_glyph_size_bytes=50.0, session_length=10,
+    )
+    res = ev.evaluate_strategy(strat, params)
+    # page1: 2 new slices -> 200 ms RTT / 3 glyphs ; bytes = (4+2)*50 = 300 -> 30 ms / 3
+    # page2: 1 new slice (2) -> 100 / 2 ; bytes = 2*50 = 100 -> 10 ms / 2
+    # page3: everything cached -> 0
+    assert np.isclose(res.rtt_per_glyph_ms.mean, (200 / 3 + 100 / 2 + 0.0) / 3)
+    assert np.isclose(res.download_per_glyph_ms.mean, (30 / 3 + 10 / 2 + 0.0) / 3)
+    assert np.isclose(
+        res.total_per_glyph_ms.mean, res.rtt_per_glyph_ms.mean + res.download_per_glyph_ms.mean
+    )
+    assert res.num_missing_codepoints == 0
+
+    res_m = ev.evaluate_strategy(strat_missing, params)
+    # G (0x47) is not covered: counted as missing, excluded from the denominator.
+    assert res_m.num_missing_codepoints == 1
+    assert res_m.num_unassigned_font_codepoints == 2
+    # page2: slice 1 cached, G missing -> 1 covered glyph, nothing new -> 0 ms
+    assert np.isclose(res_m.rtt_per_glyph_ms.mean, (200 / 3 + 0.0 + 0.0) / 3)
+
+
+def test_headless_chrome_fallback_never_fabricates_exact_match(tmp_path: Path, monkeypatch):
+    """Regression: when Chrome emits no report, the benchmark must not report
+    simulator_exact_slice_match=True (it previously copied the simulator's own
+    prediction and compared it against itself)."""
+    import json
+    import shutil
+    import subprocess
+    import types
+
+    from mlfont import SlicingStrategy
+    from mlfont.simulator import ChromeBrowserPageResult, run_headless_chrome_benchmark
+
+    cps = list(range(0x4E00, 0x4E00 + 40))
+    strat = SlicingStrategy(
+        subsets=[cps[:10], cps[10:20], cps[20:30], cps[30:]],
+        name="range_compact_topics4",
+    )
+    bdir = tmp_path / "mlfont-notosanssc"
+    (bdir / "woff2").mkdir(parents=True)
+    strat.save_json(bdir / "strategy.json")
+    (bdir / "config.json").write_text(
+        json.dumps({"preset": "unknown_preset", "font_family": "Tiny Sliced", "n_topics": 4}),
+        encoding="utf-8",
+    )
+    for i in range(4):
+        (bdir / "woff2" / f"NotoSansSC-Regular_slice_{i:03d}.woff2").write_bytes(b"\0" * 10)
+
+    from mlfont.simulator import WebPageSample
+
+    page = WebPageSample(
+        page_id="p", title="P", url="u", category="c", font_key="notosanssc",
+        html_content="<p>" + "".join(chr(c) for c in cps[:12]) + "</p>",
+    )
+
+    monkeypatch.setattr(shutil, "which", lambda name: "/fake/chrome")
+
+    def _fake_run(cmd, **kwargs):  # Chrome crashed / produced no DOM dump
+        return types.SimpleNamespace(stdout="", stderr="boom", returncode=1)
+
+    monkeypatch.setattr(subprocess, "run", _fake_run)
+    results = run_headless_chrome_benchmark(bdir, pages=[page], full_woff2_dir=tmp_path)
+    assert results and all(isinstance(r, ChromeBrowserPageResult) for r in results)
+    assert all(r.chrome_report_available is False for r in results)
+    assert not any(r.simulator_exact_slice_match for r in results)
+
+    # A genuine Chrome report that loads exactly the predicted rules -> exact match True
+    def _good_run(cmd, **kwargs):
+        html_file = [a for a in cmd if a.startswith("file://")][0][len("file://"):]
+        n_rules = Path(html_file).read_text(encoding="utf-8").count("@font-face")
+        # Only count the rules the simulator predicts for this strategy
+        pred = {"single_slice": [0], "equal_bin_4": [0, 1], "range_compact_topics4": [0, 1]}
+        sname = [k for k in pred if f"?s={k}&" in Path(html_file).read_text(encoding="utf-8")]
+        idx = pred[sname[0]] if sname else list(range(min(1, n_rules)))
+        rep = json.dumps({"local_decode_ms": 5.0, "requested_slice_indices": idx})
+        return types.SimpleNamespace(
+            stdout=f'<pre id="mlfont-chrome-report">{rep}</pre>', stderr="", returncode=0
+        )
+
+    monkeypatch.setattr(subprocess, "run", _good_run)
+    results_ok = run_headless_chrome_benchmark(bdir, pages=[page], full_woff2_dir=tmp_path)
+    assert all(r.chrome_report_available for r in results_ok)
+    assert all(r.simulator_exact_slice_match for r in results_ok)
+
+
+def test_model_card_chrome_section_reports_actual_match_count(tmp_path: Path) -> None:
+    """Regression: the model-card Chrome section must print the computed exact-match
+    ratio (not a hard-coded 100%) and flag incomplete fetches."""
+    import json
+
+    from scripts.run_noto_experiments import _build_website_sim_section
+
+    def _row(page, strat, match, n_req):
+        return {
+            "page_id": page, "page_title": page, "font_key": "notosanssc",
+            "strategy_name": strat, "profile_name": "Cable-5Mbps",
+            "chrome_local_decode_ms": 10.0, "network_transfer_ms": 100.0,
+            "fonts_ready_ms": 110.0, "load_event_end_ms": 110.0,
+            "css_transfer_bytes": 1000, "css_duration_ms": 30.0,
+            "num_slices_requested_by_chrome": n_req, "requested_slice_indices": list(range(n_req)),
+            "simulator_exact_slice_match": match, "woff2_transfer_bytes": 5000,
+            "max_slice_duration_ms": 50.0, "wall_clock_font_window_ms": 60.0,
+            "local_decode_speedup_vs_single_slice": 1.0, "speedup_vs_single_slice": 1.0,
+            "bytes_saved_vs_single_slice_pct": 0.0,
+        }
+
+    report = {
+        "fonts": {"notosanssc": {"summaries": [], "full_font_woff2_bytes": 1, "page_results": []}},
+        "headless_chrome_benchmark": [
+            _row("p1", "single_slice", True, 1),
+            _row("p1", "range_compact_x", True, 3),
+            _row("p2", "range_compact_x", False, 1),
+        ],
+    }
+    rp = tmp_path / "sim.json"
+    rp.write_text(json.dumps(report), encoding="utf-8")
+    text = "\n".join(
+        _build_website_sim_section(
+            key="notosanssc", hf_name="mlfont-notosanssc", title="SC",
+            strategy_name="range_compact_x", sim_report_path=rp,
+        )
+    )
+    assert "2/3 = 66.7%" in text
+    assert "100%" not in text
+    assert "No*" in text
+    assert "`p2` / `range_compact_x`" in text
+
+
+def test_mlfont_js_syntax_and_documented_api() -> None:
+    """Sanity-check the documented web/mlfont.js API surface and (when a JS parser
+    is installed) that the file is syntactically valid ES5."""
+    from scripts.run_noto_experiments import REPO_ROOT
+
+    js = (REPO_ROOT / "web" / "mlfont.js").read_text(encoding="utf-8")
+    for api in ("load: loadSlicedFont", "getMetrics: getMetrics", "printReport: printReport"):
+        assert api in js
+    assert "https://huggingface.co/wq2012" in js
+    # Full syntax check when a JS parser is available (optional dependency).
+    try:
+        import pyjsparser  # type: ignore
+    except ImportError:
+        pyjsparser = None
+    if pyjsparser is not None:
+        pyjsparser.parse(js)

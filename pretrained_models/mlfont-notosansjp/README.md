@@ -135,7 +135,7 @@ mlfont-simulate --font_key notosansjp --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `japanese`)
 * **Total Slices**: 62 slices (7,298 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 4.67 MB / 4779.7 KB (4,894,460 bytes) across 62 `.woff2` files (companion CSS: 85.3 KB)
-* **Training Wall-Time**: 25.0 seconds on CPU/GPU
+* **Training Wall-Time**: 46.0 seconds on CPU/GPU
 
 ## Model Files Included
 

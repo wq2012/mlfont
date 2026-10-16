@@ -134,7 +134,7 @@ mlfont-simulate --font_key notosans_lgc --url https://example.com --network_prof
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `lgc`)
 * **Total Slices**: 20 slices (384 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 434.1 KB (444,484 bytes) across 20 `.woff2` files (companion CSS: 7.8 KB)
-* **Training Wall-Time**: 25.0 seconds on CPU/GPU
+* **Training Wall-Time**: 24.0 seconds on CPU/GPU
 
 ## Model Files Included
 

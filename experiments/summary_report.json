@@ -6,8 +6,8 @@
       "num_codepoints": 2297,
       "num_remaining_codepoints": 2297,
       "num_active_codepoints": 491,
-      "num_core_codepoints": 374,
-      "k_eff": 4,
+      "num_core_codepoints": 491,
+      "k_eff": 5,
       "n_topics": 20,
       "num_train_docs": 1500,
       "num_test_samples": 300,
@@ -9626,7 +9626,7 @@
     "slice_count_lgc": [
       {
         "n_topics": 5,
-        "k_eff": 1,
+        "k_eff": 2,
         "num_ranges": 397,
         "gin_2g_mean_ms": 29.650001197469475,
         "gin_2g_p95_ms": 182.29953746530992,
@@ -9638,7 +9638,7 @@
       },
       {
         "n_topics": 10,
-        "k_eff": 2,
+        "k_eff": 3,
         "num_ranges": 460,
         "gin_2g_mean_ms": 25.565686395456158,
         "gin_2g_p95_ms": 137.56297786720324,
@@ -9650,7 +9650,7 @@
       },
       {
         "n_topics": 20,
-        "k_eff": 4,
+        "k_eff": 5,
         "num_ranges": 537,
         "gin_2g_mean_ms": 25.145859085283238,
         "gin_2g_p95_ms": 144.76190476190476,
@@ -9662,7 +9662,7 @@
       },
       {
         "n_topics": 40,
-        "k_eff": 8,
+        "k_eff": 10,
         "num_ranges": 589,
         "gin_2g_mean_ms": 29.75115286234085,
         "gin_2g_p95_ms": 135.1470449172577,
@@ -9674,7 +9674,7 @@
       },
       {
         "n_topics": 60,
-        "k_eff": 12,
+        "k_eff": 15,
         "num_ranges": 645,
         "gin_2g_mean_ms": 34.198532946933504,
         "gin_2g_p95_ms": 154.19550494456098,

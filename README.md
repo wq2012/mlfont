@@ -119,13 +119,13 @@ We first compute the document frequency `DF(c_v) = sum_{d=1}^D x_{d,v}` for ever
 ### 2. Online LDA, Two-Tier Hungarian Alignment, and Affinity Matrix Normalization (`mlfont.olda` & `mlfont.maths`)
 
 `OnlineLdaLearner` (`OnlineLDASolver`) models each document's active tail codepoints as a bag-of-characters generated from `K` latent topics using online variational Bayes (`LatentDirichletAllocation` with `learning_method="online"`), followed by `align_and_smooth_topic_matrix` which performs a two-tier bijective Hungarian assignment (`linear_sum_assignment`):
-- **Tier-A (`K_eff` core slices)**: Bijectively aligns the `K_eff = min(K, ceil(1.15 * |C_core| / ceil(V_rem / K)))` dominant topics to the `K_eff` most core-populated contiguous Unicode bins, concentrating core active characters (`DF >= min_df`) into dense slices rather than diluting them with `DF = 0` characters.
-- **Tier-B (`K - K_eff` tail slices)**: Bijectively aligns the remaining `K - K_eff` tail topics to the sparse/unobserved Unicode bins with a smooth distance-decaying Dirichlet prior (`>= 0.0020`) plus `0.0020 * P(k | v)` and singleton (`DF = 1`) boosts, ensuring every row `k in {0, ..., K-1}` carries distinct learned posterior variation across active characters while keeping `DF = 0` Unicode blocks contiguous.
+- **Tier-A (`K_eff` core slices)**: Bijectively aligns the `K_eff = max(min(2, K), min(K, ceil(1.15 * |C_core| / ceil(V_rem / K))))` dominant topics to the `K_eff` most core-populated contiguous Unicode bins, concentrating core active characters (`DF >= min_df`, where `min_df = 2` for large sparse repertoires with `V_rem > 5,000` and `min_df = 1` otherwise; see `compute_core_mask_and_k_eff`) into dense slices rather than diluting them with `DF = 0` characters.
+- **Tier-B (`K - K_eff` tail slices)**: Bijectively aligns the remaining `K - K_eff` tail topics to the sparse/unobserved Unicode bins with a smooth distance-decaying Dirichlet prior (`>= 0.0020`) plus small max-normalized topic-profile boosts (`0.0018 * P_hat(v | k)`, and an additional `0.0035 * P_hat(v | k)` for codepoints inside the aligned bin), ensuring every row `k in {0, ..., K-1}` carries distinct learned posterior variation across active characters while keeping `DF = 0` Unicode blocks contiguous.
 
-Before assigning codepoints to slices, `mlfont.maths.normalize_lambda_matrix` (`normalize_topic_matrix`) applies one of five normalization schemes:
+Before assigning codepoints to slices, `mlfont.maths.normalize_lambda_matrix` (`normalize_topic_matrix`) applies one of five normalization schemes (the library-level default argument is `topic_sum`; all shipped Noto presets in `mlfont.configs` and the benchmarks below use `global_max`):
 - **`topic_sum`**: Column-normalizes each codepoint across topics so that `sum_k Phi_{k,v} = 1`.
 - **`row_sum`**: Row-normalizes each topic across codepoints so that `sum_v Phi_{k,v} = 1`.
-- **`global_max`** *(Default)*: Scales the matrix by its global maximum `max_{k,v} |Lambda_{k,v}|` so entries lie in `[0, 1]`.
+- **`global_max`** *(Preset default)*: Scales the matrix by its global maximum `max_{k,v} |Lambda_{k,v}|` so entries lie in `[0, 1]`.
 - **`spectral_norm`**: Scales the matrix by its spectral norm (largest singular value `sigma_max(Lambda)`).
 - **`sinkhorn` (`bistochastic`)**: Applies Sinkhorn-Knopp iterative alternating row and column scaling (`sinkhorn_knopp_normalize`) so that topic rows simultaneously have uniform slice capacity `(V_rem / K)` and codepoint columns have unit marginal mass `1.0`.
 
@@ -177,6 +177,10 @@ with `p = 3.0` (`decay_power`), ensuring `max_k |S_k| - min_k |S_k| <= max_diff(
 | **`residential-ADSL2+`** | `50 ms` | `2,500 bytes/ms` (`20.0 Mbps`) | `10 pages` | High-speed ADSL2+ broadband connection |
 | **`GIN-3g_no_session`** | `400 ms` | `50 bytes/ms` (`400 kbps`) | `1 page` | Cold-cache single-page bounce (`L = 1`) |
 | **`GIN-3g_short_session`** | `400 ms` | `50 bytes/ms` (`400 kbps`) | `3 pages` | Short browsing session (`L = 3`) |
+
+For each page, `FontLoadingEvaluator` fetches every slice whose `unicode-range` intersects the page's codepoints and that is not yet in the session cache, then normalizes by the number of page glyphs covered by the strategy: `rtt_per_glyph = (#new slices * RTT) / #covered glyphs` and `download_per_glyph = (bytes of new slices / bandwidth) / #covered glyphs`. The RTT term is a deliberately conservative **serial-request** model (one full RTT per new slice, no HTTP/2 multiplexing); the website-level `WebsiteFontSimulator` instead uses a parallel wave model with `max_parallel_requests = 6`. Codepoints not covered by a strategy are reported as *Missing* and are excluded from the per-glyph denominator.
+
+The `bytes/ms` figures convert as `1 byte/ms = 8 kbps` (e.g. `50 bytes/ms = 400 kbps`).
 
 ---
 
@@ -303,13 +307,13 @@ To automatically beacon the JSON payload to your own telemetry server on `load` 
 Frontend developers often ask: *"How fast will MLFont sliced webfonts actually load on my website compared to a standard unsliced WOFF2 font or a naive equal-bin font, and how can I test my own HTML pages before deploying?"*
 
 To answer this directly, **MLFont** includes three complementary simulation and real-browser benchmarking tools:
-1. **Interactive Side-by-Side Browser Simulator ([`web/demo.html`](web/demo.html))**: `web/demo.html` includes a side-by-side **Website Font Loading Simulator** across all 5 Noto fonts, 20 realistic multi-domain websites, 7 network profiles (`GIN-2g-poor` through `Broadband-20Mbps`), and Cold-Cache vs. Warm-Session modes. It animates progressive text rendering (`First Text Paint` when the high-frequency `most` slices arrive in Wave 1 vs. full render-blocking `Single Slice` FOIT) and displays a real-time waterfall comparison table.
+1. **Interactive Side-by-Side Browser Simulator ([`web/demo.html`](web/demo.html))**: `web/demo.html` includes a side-by-side **Website Font Loading Simulator** across all 5 Noto fonts, 20 realistic multi-domain websites, 7 network profiles (`GIN-2g` through `Broadband-Fiber`), and Cold-Cache vs. Warm-Session modes. It animates progressive text rendering (`First Text Paint` when the high-frequency `most` slices arrive in Wave 1 vs. full render-blocking `Single Slice` FOIT) and displays a real-time waterfall comparison table.
 2. **Python Website Simulator API (`mlfont.simulator.WebsiteFontSimulator`)**: Parses any live URL, local `.html` file, or inline HTML/text string (`extract_visible_text_from_html`, stripping non-visible `<script>`, `<style>`, `<head>`, `<noscript>`, `<template>`, and `<svg>` blocks while preserving collapsed `U+0020` whitespace), intersects the DOM codepoints against each strategy's `@font-face` `unicode-range` subsets, and computes gzipped CSS transfer + browser `Parse Stylesheet` overhead, multi-wave parallel HTTP RTTs (`max_parallel_requests = 6`), physical `.woff2` slice transfer bytes, **First Text Paint (`ms`)**, **Total Font Load Time (`ms`)**, and **Warm-Session Cache Latency (`ms`)**.
-3. **Real Headless Chrome Benchmark (`run_headless_chrome_benchmark` & `mlfont-simulate --headless_chrome`)**: Generates self-contained HTML pages with `@font-face` `unicode-range` rules pointing to physical `.woff2` files and executes them in real Headless Chrome (`v155.0.8059.79`, `--headless=new --dump-dom`). Using the W3C `document.fonts` (`FontFaceSet`) and `window.performance` APIs, it verifies **45 / 45 (`100.0%`) exact slice-set parity** between `WebsiteFontSimulator` and Chromium Blink's `unicode-range` engine while measuring real wall-clock WOFF2 Brotli decompression and OpenType table instantiation times.
+3. **Real Headless Chrome Benchmark (`run_headless_chrome_benchmark` & `mlfont-simulate --headless_chrome`)**: Generates self-contained HTML pages with `@font-face` `unicode-range` rules pointing to physical `.woff2` files and executes them in real Headless Chrome (`v155.0.8059.79`, `--headless=new --dump-dom`). Using the W3C `document.fonts` (`FontFaceSet`) and `window.performance` APIs, it verifies **44 / 45 (`97.8%`) exact slice-set parity** between `WebsiteFontSimulator` and Chromium Blink's `unicode-range` engine (the single exception, `notosanssc` / `sina_sports_nba` / `range_compact_most1000_500_topics100`, is an incomplete Chrome fetch where only 1 of the 16 predicted slices had finished loading when `window.onload` fired; it is excluded from all aggregate speedups below) while measuring real wall-clock WOFF2 Brotli decompression and OpenType table instantiation times.
 
 ![Real-Website Font Loading Simulation and Headless Chrome Benchmark](resources/fig5_website_simulation.png)
 
-*Figure 3: Real-website font loading simulation and Headless Chrome (`v155.0.8059.79`) verification across all 5 Noto fonts (`experiments/website_simulation_report.json`): (a) Per-website cold-cache font load latency on `Noto Sans SC` across 8 Simplified Chinese websites (`Cable 5 Mbps, 28 ms RTT`) showing `2.26x` to `4.97x` speedup (`2,880 ms` mean vs. `9,869 ms` unsliced, with First Text Paint at `748 ms`), and (b) Real Headless Chrome end-to-end `document.fonts.ready` latency across all 5 Noto fonts (`1.6x` to `5.9x` speedup over `single_slice`, with `45/45 = 100%` exact slice-set match).*
+*Figure 3: Real-website font loading simulation and Headless Chrome (`v155.0.8059.79`) verification across all 5 Noto fonts (`experiments/website_simulation_report.json`): (a) Per-website cold-cache font load latency on `Noto Sans SC` across 8 Simplified Chinese websites (`Cable 5 Mbps, 28 ms RTT`) showing `2.26x` to `4.97x` speedup (`2,880 ms` mean vs. `9,869 ms` unsliced, with First Text Paint at `748 ms`), and (b) Real Headless Chrome end-to-end `document.fonts.ready` latency across all 5 Noto fonts (ratio of per-font mean latencies, `single_slice` / MLFont: `1.5x` LGC, `2.8x` TC, `3.0x` JP, `4.3x` SC, `6.0x` KR, computed over the `44/45` exactly-matched `(font, page, strategy)` cases).*
 
 ### 1. Simulating Your Own Website via CLI (`mlfont-simulate`) or Python
 
@@ -385,7 +389,7 @@ All numbers below are produced by `mlfont-simulate --font_key all --headless_chr
 
 ### 4. Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Running `mlfont-simulate --font_key all --headless_chrome` launches real Headless Chrome against the physical `.woff2` files on disk and inspects `document.fonts` (`FontFaceSet`). Across all **45 / 45 (`100.0%`)** `(font, page, strategy)` test cases, Chromium Blink's `unicode-range` selector requested the **exact same set of `.woff2` slice indices** as `WebsiteFontSimulator` (`simulator_exact_slice_match = True`), while demonstrating **1.17x to 4.60x faster local WOFF2 Brotli decompression & OpenType instantiation** in Chrome:
+Running `mlfont-simulate --font_key all --headless_chrome` launches real Headless Chrome against the physical `.woff2` files on disk and inspects `document.fonts` (`FontFaceSet`). Across **44 / 45 (`97.8%`)** `(font, page, strategy)` test cases, Chromium Blink's `unicode-range` selector requested the **exact same set of `.woff2` slice indices** as `WebsiteFontSimulator` (`simulator_exact_slice_match = True`), while demonstrating **1.17x to 4.60x faster local WOFF2 Brotli decompression & OpenType instantiation** in Chrome on the representative pages below. The one mismatch (`notosanssc` / `sina_sports_nba` / `range_compact_most1000_500_topics100`: Chrome reported 1 loaded slice vs. 16 predicted) is an incomplete fetch at `window.onload`, is flagged `simulator_exact_slice_match = false` in the JSON, and is not used in any speedup figure in this README:
 
 | Font Family | Website Page ID | Strategy | Chrome Loaded Slices | Simulator Exact Match | Total Transfer (`KB`) | Chrome Local Decode (`ms`) | E2E Font Ready (`ms`) | Chrome Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -461,7 +465,7 @@ train_docs = [
 ]
 
 # 3. Tier-1: Isolate top high-frequency codepoints into deterministic slices
-freq_solver = FrequencySolver(font_codepoints)
+freq_solver = FrequencySolver(codepoints=font_codepoints)
 freq_solver.fit(train_docs)
 most_slices, remaining_codepoints = freq_solver.partition_most_frequent(most_counts=[200])
 
@@ -530,7 +534,7 @@ All 5 pretrained models—complete with `model.safetensors` weights (`lambda_mat
 
 | Hugging Face Model Repo | Local Directory | Target Font | Script Coverage | Valid Codepoints (Tail Active / Core) | Tier-1 (`most`) | Tier-2 `K` (`K_eff`) | Total Slices | Physical WOFF2 Size (CSS) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| [`wq2012/mlfont-notosans-lgc`](https://huggingface.co/wq2012/mlfont-notosans-lgc) | [`mlfont-notosans-lgc`](pretrained_models/mlfont-notosans-lgc/) | `NotoSans-Regular.ttf` | Latin, Greek, Cyrillic (`en, de, fr, pl, ru, el`) | `2,297` (`491` / `374`) | None | `20` (`4`) | `20` | `434.1 KB` (`7.8 KB`) |
+| [`wq2012/mlfont-notosans-lgc`](https://huggingface.co/wq2012/mlfont-notosans-lgc) | [`mlfont-notosans-lgc`](pretrained_models/mlfont-notosans-lgc/) | `NotoSans-Regular.ttf` | Latin, Greek, Cyrillic (`en, de, fr, pl, ru, el`) | `2,297` (`491` / `491`) | None | `20` (`5`) | `20` | `434.1 KB` (`7.8 KB`) |
 | [`wq2012/mlfont-notosanskr`](https://huggingface.co/wq2012/mlfont-notosanskr) | [`mlfont-notosanskr`](pretrained_models/mlfont-notosanskr/) | `NotoSansKR-Regular.otf` | Korean Hangul + Hanja (`ko`) | `22,853` (`3,198` / `2,085`) | `[300, 300]` | `50` (`6`) | `52` | `5.29 MB` (`78.0 KB`) |
 | [`wq2012/mlfont-notosansjp`](https://huggingface.co/wq2012/mlfont-notosansjp) | [`mlfont-notosansjp`](pretrained_models/mlfont-notosansjp/) | `NotoSansJP-Regular.otf` | Japanese Kanji + Kana (`ja`) | `16,663` (`3,238` / `2,512`) | `[500, 500]` | `60` (`12`) | `62` | `4.67 MB` (`85.3 KB`) |
 | [`wq2012/mlfont-notosanstc`](https://huggingface.co/wq2012/mlfont-notosanstc) | [`mlfont-notosanstc`](pretrained_models/mlfont-notosanstc/) | `NotoSansTC-Regular.otf` | Traditional Chinese (`zh-Hant`) | `20,637` (`5,325` / `4,078`) | `[600, 600]` | `80` (`20`) | `82` | `5.94 MB` (`104.1 KB`) |
@@ -638,11 +642,11 @@ All benchmarks below were executed using `scripts/run_noto_experiments.py` on un
 
 | Number of Topic Slices (`K` / `K_eff`) | CSS Ranges | `GIN-2g` Mean `ms` | `GIN-3g` Mean `ms` | `DSL` Mean `ms` | Session Utilization `%` |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| `K = 5` (`K_eff = 1`) | **397** | 29.65 | 7.76 | 1.45 | 19.24% |
-| **`K = 10` (`K_eff = 2`)** | 460 | 25.57 | **6.92** | 1.23 | 24.44% |
-| **`K = 20` (`K_eff = 4`, Default)** | 537 | **25.15** | 7.11 | **1.17** | 31.26% |
-| `K = 40` (`K_eff = 8`) | 589 | 29.75 | 8.84 | 1.35 | 35.79% |
-| `K = 60` (`K_eff = 12`) | 645 | 34.20 | 10.42 | 1.52 | **39.39%** |
+| `K = 5` (`K_eff = 2`) | **397** | 29.65 | 7.76 | 1.45 | 19.24% |
+| **`K = 10` (`K_eff = 3`)** | 460 | 25.57 | **6.92** | 1.23 | 24.44% |
+| **`K = 20` (`K_eff = 5`, Default)** | 537 | **25.15** | 7.11 | **1.17** | 31.26% |
+| `K = 40` (`K_eff = 10`) | 589 | 29.75 | 8.84 | 1.35 | 35.79% |
+| `K = 60` (`K_eff = 15`) | 645 | 34.20 | 10.42 | 1.52 | **39.39%** |
 
 ### 4. Effect of Browsing Session Length `L` (`Noto Sans SC`, `GIN-3g`)
 

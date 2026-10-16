@@ -104,7 +104,7 @@ Across **8 real-world sample websites** for **Noto Sans SC (Simplified Chinese)*
 
 #### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`8/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`8/9 = 89%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`; see the footnote on the one mismatched run):
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -113,10 +113,12 @@ Verified against physical `.woff2` files in Headless Chrome (`--headless=new --d
 | `dev_china_portal` | **range_compact_most1000_500_topics100 (This Model)** | 11 | **Yes** | 1,151.0 KB | 51.9 ms | **2,022 ms** | 4.60x | **5.00x** (80.8%) |
 | `sina_sports_nba` | `single_slice` | 1 | **Yes** | 5,988.7 KB | 242.7 ms | **10,111 ms** | 1.00x | **1.00x** (0.0%) |
 | `sina_sports_nba` | `equal_bin_102` | 52 | **Yes** | 4,644.7 KB | 116.4 ms | **8,006 ms** | 2.09x | **1.26x** (22.4%) |
-| `sina_sports_nba` | **range_compact_most1000_500_topics100 (This Model)** | 1 | No | 278.2 KB | 9.7 ms | **521 ms** | 25.02x | **19.39x** (95.4%) |
+| `sina_sports_nba` | **range_compact_most1000_500_topics100 (This Model)** | 1 | No* | 278.2 KB | 9.7 ms | **521 ms** | 25.02x | **19.39x** (95.4%) |
 | `tech_ai_maluuba` | `single_slice` | 1 | **Yes** | 5,988.7 KB | 235.0 ms | **10,103 ms** | 1.00x | **1.00x** (0.0%) |
 | `tech_ai_maluuba` | `equal_bin_102` | 56 | **Yes** | 5,002.1 KB | 119.7 ms | **8,623 ms** | 1.96x | **1.17x** (16.5%) |
 | `tech_ai_maluuba` | **range_compact_most1000_500_topics100 (This Model)** | 15 | **Yes** | 1,524.9 KB | 57.5 ms | **2,668 ms** | 4.09x | **3.79x** (74.5%) |
+
+\* In this one run Headless Chrome requested only slice `0`, whereas `WebsiteFontSimulator` predicted 16 required slices (`1,580.3 KB` transferred, `2,716 ms` cold load on `Cable-5Mbps`) for the same page. The `19.39x` / `95.4%` figures for this row therefore reflect an incomplete Chrome font fetch and should not be read as a validated speedup.
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosanssc` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -135,7 +137,7 @@ mlfont-simulate --font_key notosanssc --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `chinese`)
 * **Total Slices**: 102 slices (5,935 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 8.89 MB / 9107.9 KB (9,326,524 bytes) across 102 `.woff2` files (companion CSS: 83.9 KB)
-* **Training Wall-Time**: 25.0 seconds on CPU/GPU
+* **Training Wall-Time**: 87.6 seconds on CPU/GPU
 
 ## Model Files Included
 

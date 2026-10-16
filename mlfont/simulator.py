@@ -143,10 +143,10 @@ NETWORK_PROFILE_MAP: Dict[str, BrowserNetworkProfile] = {
 }
 NETWORK_PROFILE_MAP["gin-2g-poor"] = BrowserNetworkProfile(
     name="GIN-2g-poor",
-    rtt_ms=2000.0,
-    bandwidth_bytes_per_ms=4.0,  # 32 Kbps
+    rtt_ms=1600.0,
+    bandwidth_bytes_per_ms=2.5,  # 20 Kbps (matches schemas.STANDARD_EVALUATION_PARAMS)
     max_parallel_requests=6,
-    description="Mobile 2G Poor (32 Kbps, 2000 ms RTT)",
+    description="Mobile 2G Poor (20 Kbps, 1600 ms RTT)",
 )
 NETWORK_PROFILE_MAP["broadband-20mbps"] = NETWORK_PROFILE_MAP["broadband-fiber"]
 NETWORK_PROFILE_MAP["residential-adsl2+"] = BrowserNetworkProfile(
@@ -907,8 +907,9 @@ class WebsiteFontSimulator:
     4. Maintaining a persistent browser slice & CSS cache across multi-page sessions.
     """
 
-    # Calibrated from Chrome DevTools Timeline measurements in testing_report_notosanssc_v2.md:
-    # Parsing 102 @font-face rules with ~6,000 unicode-range intervals takes ~11-16 ms.
+    # Calibrated from Chrome DevTools Performance panel measurements on the
+    # Noto Sans SC bundle: parsing 102 @font-face rules with ~6,000
+    # unicode-range intervals takes ~11-16 ms.
     CSS_PARSE_PER_RULE_MS = 0.045
     CSS_PARSE_PER_RANGE_MS = 0.0018
     WOFF2_TABLE_OVERHEAD_BYTES = 1850
@@ -1493,6 +1494,7 @@ class ChromeBrowserPageResult:
     local_decode_speedup_vs_single_slice: float = 1.0
     speedup_vs_single_slice: float = 1.0
     bytes_saved_vs_single_slice_pct: float = 0.0
+    chrome_report_available: bool = True
 
 
 def run_headless_chrome_benchmark(
@@ -1662,7 +1664,8 @@ def run_headless_chrome_benchmark(
                 )
 
             m_rep = report_regex.search(proc.stdout or "")
-            if m_rep and m_rep.group(1).strip() != "pending":
+            chrome_report_ok = bool(m_rep and m_rep.group(1).strip() != "pending")
+            if chrome_report_ok:
                 rep = json.loads(m_rep.group(1))
                 raw_rule_indices = [
                     int(i) for i in rep.get("requested_slice_indices", [])
@@ -1674,6 +1677,9 @@ def run_headless_chrome_benchmark(
                 ]
                 local_decode_ms = float(rep.get("local_decode_ms", 0.0))
             else:
+                # Chrome produced no report (crash/timeout). Fall back to the
+                # simulator's prediction for the network model, but never claim
+                # an "exact match" that was not actually observed in Chrome.
                 req_indices = list(sim_res.required_slice_indices)
                 local_decode_ms = sim_res.css_parse_ms
 
@@ -1705,7 +1711,9 @@ def run_headless_chrome_benchmark(
 
             net_transfer_ms = css_net_ms + font_net_ms
             end_to_end_ready_ms = local_decode_ms + net_transfer_ms
-            exact_match = set(req_indices) == set(sim_res.required_slice_indices)
+            exact_match = chrome_report_ok and (
+                set(req_indices) == set(sim_res.required_slice_indices)
+            )
 
             res = ChromeBrowserPageResult(
                 page_id=page_obj.page_id,
@@ -1725,6 +1733,7 @@ def run_headless_chrome_benchmark(
                 woff2_transfer_bytes=logical_woff2_bytes,
                 max_slice_duration_ms=round(max_slice_dur_ms, 2),
                 wall_clock_font_window_ms=round(font_net_ms + local_decode_ms, 2),
+                chrome_report_available=chrome_report_ok,
             )
             page_strat_results.append(res)
 

@@ -51,8 +51,8 @@
   "n_test_docs": 300,
   "num_remaining_codepoints": 2297,
   "num_active_codepoints": 491,
-  "num_core_codepoints": 374,
-  "k_eff": 4,
+  "num_core_codepoints": 491,
+  "k_eff": 5,
   "n_topics": 20,
   "training_wall_time_sec": 24.02
 }

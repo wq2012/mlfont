@@ -1,0 +1,13 @@
+[flake8]
+# Mirrors the CI invocation in .github/workflows/pythonapp.yml
+# (`flake8 --max-line-length 100 mlfont scripts tests`).
+max-line-length = 100
+exclude =
+    .git,
+    __pycache__,
+    .pytest_cache,
+    build,
+    dist,
+    *.egg-info,
+    .venv,
+    venv

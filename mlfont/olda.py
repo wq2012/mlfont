@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -17,6 +17,43 @@ from mlfont.maths import (
     balance_topics_unbalanced,
 )
 from mlfont.schemas import SlicingStrategy
+
+
+def compute_core_mask_and_k_eff(
+    active_df: np.ndarray,
+    n_rem: int,
+    n_topics: int,
+) -> Tuple[np.ndarray, int, int]:
+    """Computes the core-codepoint mask and effective core topic count ``K_eff``.
+
+    This is the single source of truth shared by :func:`align_and_smooth_topic_matrix`
+    (which uses it to decide how many topics receive Tier-A alignment) and by the
+    learners' reported ``num_core_codepoints_`` / ``k_eff_`` attributes.
+
+    Args:
+        active_df: 1D array of document frequencies (> 0) of the active codepoints.
+        n_rem: Total number of remaining (tail) codepoints.
+        n_topics: Number of topic slices K.
+
+    Returns:
+        Tuple ``(core_mask, n_core, k_eff)`` where ``core_mask`` marks active
+        codepoints with ``DF >= min_df``, ``min_df = 2`` for large sparse
+        repertoires (``n_rem > 5000`` with ``max(DF) >= 10``) and ``1`` otherwise,
+        and ``k_eff = max(min(2, K), min(K, ceil(1.15 * n_core / ceil(n_rem / K))))``.
+    """
+    active_df = np.asarray(active_df, dtype=np.float64)
+    if active_df.size == 0:
+        return np.zeros(0, dtype=bool), 0, 0
+    max_df = max(1.0, float(np.max(active_df)))
+    min_df = 2.0 if (n_rem > 5000 and max_df >= 10.0) else 1.0
+    core_mask = active_df >= min_df
+    n_core = max(1, int(np.sum(core_mask)))
+    row_capacity = max(1, (n_rem - 1) // n_topics + 1)
+    k_eff = max(
+        min(2, n_topics),
+        min(n_topics, int(np.ceil(n_core * 1.15 / row_capacity))),
+    )
+    return core_mask, n_core, k_eff
 
 
 def align_and_smooth_topic_matrix(
@@ -59,15 +96,9 @@ def align_and_smooth_topic_matrix(
 
     active_df = col_sums[active_cols].astype(np.float64)
     max_df = max(1.0, float(np.max(active_df)))
+    core_mask, _, k_eff = compute_core_mask_and_k_eff(active_df, n_rem, n_topics)
+    # Same min_df rule as compute_core_mask_and_k_eff (used for the confidence ramp).
     min_df = 2.0 if (n_rem > 5000 and max_df >= 10.0) else 1.0
-    core_mask = active_df >= min_df
-    n_core = max(1, int(np.sum(core_mask)))
-
-    row_capacity = max(1, (n_rem - 1) // n_topics + 1)
-    k_eff = max(
-        min(2, n_topics),
-        min(n_topics, int(np.ceil(n_core * 1.15 / row_capacity))),
-    )
 
     log_df = np.log1p(active_df)
     rel_df = active_df / max_df
@@ -226,17 +257,13 @@ class OnlineLdaLearner:
         )
         col_sums = np.asarray(full_sparse.sum(axis=0)).ravel()
         active_cols = np.flatnonzero(col_sums > 0)
-        row_cap = max(1, (n_rem + n_topics - 1) // n_topics)
-        min_df = 2 if len(active_cols) > row_cap else 1
-        core_mask = col_sums[active_cols] >= min_df
-        n_core = int(np.sum(core_mask)) if np.any(core_mask) else len(active_cols)
+        # Report exactly the core set / K_eff that align_and_smooth_topic_matrix uses.
+        _, n_core, k_eff = compute_core_mask_and_k_eff(
+            col_sums[active_cols], n_rem, n_topics
+        )
         self.num_active_codepoints_ = int(len(active_cols))
         self.num_core_codepoints_ = int(n_core)
-        self.k_eff_ = (
-            max(1, min(n_topics, int(np.ceil(n_core * 1.15 / row_cap))))
-            if len(active_cols) > 0
-            else 0
-        )
+        self.k_eff_ = int(k_eff)
 
         if len(active_cols) == 0:
             self.lambda_matrix_ = align_and_smooth_topic_matrix(
