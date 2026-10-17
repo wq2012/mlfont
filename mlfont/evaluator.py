@@ -159,7 +159,7 @@ class FontLoadingEvaluator:
                         / float(session_downloaded_glyph_count)
                     )
 
-            if (i + 1) % session_len == 0:
+            if (i + 1) % session_len == 0 or (i + 1) == len(self.samples):
                 if session_downloaded_glyph_count > 0:
                     session_utilization_list.append(
                         100.0

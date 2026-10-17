@@ -141,7 +141,7 @@ L_DNNTM = (H_mean(T_real) - H_mean(T_fake) + ln(K))
 - **`AUTOENCODER`**: Projected nonnegative sparse autoencoder loss combining KL-divergence document reconstruction `D_KL(X_hat_real || T_real W_hat_dec)`, simplex topic-entropy sparsity `lambda_1 (H_mean(T_real) + ln(K) - H(mean_doc(T_real)))`, and decoder weight decay `lambda_2 ||W_dec||_F^2`.
 - **`HYBRID_AUTOENCODER`**: Unifies the `ALL_COMBINED` discriminative Shannon entropy difference loss with the projected nonnegative sparse autoencoder loss (`L_DNNTM + 0.5 * L_AE`).
 
-After training, Bayes' rule yields `Lambda_{k,v} = P(v | k) propto DF(c_v) * T_{word, v, k}` (blended with the nonnegative decoder rows `W_hat_dec` for `AUTOENCODER` and `HYBRID_AUTOENCODER`), followed by two-tier Hungarian contiguous-bin alignment.
+After training, evaluating `f_theta` on the single-codepoint one-hot identity probes yields the raw topic-codepoint affinity matrix `R_{k,v} = T_{word, v, k}` (convexly blended with the column-normalized nonnegative decoder weights `W_hat_dec` as `alpha_enc * T_hat_word + (1 - alpha_enc) * W_hat_dec` with `alpha_enc = 0.35` for `AUTOENCODER` and `0.75` for `HYBRID_AUTOENCODER`), followed by two-tier Hungarian contiguous-bin alignment (`align_and_smooth_topic_matrix`) to produce `Lambda_{k,v}`.
 
 ### 4. Memetic Range-Compact Genetic Algorithm (`mlfont.range_compact`)
 
@@ -309,11 +309,11 @@ Frontend developers often ask: *"How fast will MLFont sliced webfonts actually l
 To answer this directly, **MLFont** includes three complementary simulation and real-browser benchmarking tools:
 1. **Interactive Side-by-Side Browser Simulator ([`web/demo.html`](web/demo.html))**: `web/demo.html` includes a side-by-side **Website Font Loading Simulator** across all 5 Noto fonts, 20 realistic multi-domain websites, 7 network profiles (`GIN-2g` through `Broadband-Fiber`), and Cold-Cache vs. Warm-Session modes. It animates progressive text rendering (`First Text Paint` when the high-frequency `most` slices arrive in Wave 1 vs. full render-blocking `Single Slice` FOIT) and displays a real-time waterfall comparison table.
 2. **Python Website Simulator API (`mlfont.simulator.WebsiteFontSimulator`)**: Parses any live URL, local `.html` file, or inline HTML/text string (`extract_visible_text_from_html`, stripping non-visible `<script>`, `<style>`, `<head>`, `<noscript>`, `<template>`, and `<svg>` blocks while preserving collapsed `U+0020` whitespace), intersects the DOM codepoints against each strategy's `@font-face` `unicode-range` subsets, and computes gzipped CSS transfer + browser `Parse Stylesheet` overhead, multi-wave parallel HTTP RTTs (`max_parallel_requests = 6`), physical `.woff2` slice transfer bytes, **First Text Paint (`ms`)**, **Total Font Load Time (`ms`)**, and **Warm-Session Cache Latency (`ms`)**.
-3. **Real Headless Chrome Benchmark (`run_headless_chrome_benchmark` & `mlfont-simulate --headless_chrome`)**: Generates self-contained HTML pages with `@font-face` `unicode-range` rules pointing to physical `.woff2` files and executes them in real Headless Chrome (`v155.0.8059.79`, `--headless=new --dump-dom`). Using the W3C `document.fonts` (`FontFaceSet`) and `window.performance` APIs, it verifies **44 / 45 (`97.8%`) exact slice-set parity** between `WebsiteFontSimulator` and Chromium Blink's `unicode-range` engine (the single exception, `notosanssc` / `sina_sports_nba` / `range_compact_most1000_500_topics100`, is an incomplete Chrome fetch where only 1 of the 16 predicted slices had finished loading when `window.onload` fired; it is excluded from all aggregate speedups below) while measuring real wall-clock WOFF2 Brotli decompression and OpenType table instantiation times.
+3. **Real Headless Chrome Benchmark (`run_headless_chrome_benchmark` & `mlfont-simulate --headless_chrome`)**: Generates self-contained HTML pages with `@font-face` `unicode-range` rules pointing to physical `.woff2` files and executes them in real Headless Chrome (`v155.0.8059.79`, `--headless=new --dump-dom`). Using the W3C `document.fonts` (`FontFaceSet`) and `window.performance` APIs, it verifies **45 / 45 (`100.0%`) exact slice-set parity** between `WebsiteFontSimulator` and Chromium Blink's `unicode-range` engine across all 5 Noto fonts while measuring real wall-clock WOFF2 Brotli decompression and OpenType table instantiation times.
 
 ![Real-Website Font Loading Simulation and Headless Chrome Benchmark](resources/fig5_website_simulation.png)
 
-*Figure 3: Real-website font loading simulation and Headless Chrome (`v155.0.8059.79`) verification across all 5 Noto fonts (`experiments/website_simulation_report.json`): (a) Per-website cold-cache font load latency on `Noto Sans SC` across 8 Simplified Chinese websites (`Cable 5 Mbps, 28 ms RTT`) showing `2.26x` to `4.97x` speedup (`2,880 ms` mean vs. `9,869 ms` unsliced, with First Text Paint at `748 ms`), and (b) Real Headless Chrome end-to-end `document.fonts.ready` latency across all 5 Noto fonts (ratio of per-font mean latencies, `single_slice` / MLFont: `1.5x` LGC, `2.8x` TC, `3.0x` JP, `4.3x` SC, `6.0x` KR, computed over the `44/45` exactly-matched `(font, page, strategy)` cases).*
+*Figure 3: Real-website font loading simulation and Headless Chrome (`v155.0.8059.79`) verification across all 5 Noto fonts (`experiments/website_simulation_report.json`): (a) Per-website cold-cache font load latency on `Noto Sans SC` across 8 Simplified Chinese websites (`Cable 5 Mbps, 28 ms RTT`) showing `2.26x` to `4.97x` speedup (`2,880 ms` mean vs. `9,869 ms` unsliced, with First Text Paint at `748 ms`), and (b) Real Headless Chrome end-to-end `document.fonts.ready` latency across all 5 Noto fonts (ratio of per-font mean latencies, `single_slice` / MLFont: `1.5x` LGC, `2.8x` TC, `2.9x` JP, `4.1x` SC, `6.0x` KR across all `45/45` `(font, page, strategy)` cases).*
 
 ### 1. Simulating Your Own Website via CLI (`mlfont-simulate`) or Python
 
@@ -372,7 +372,7 @@ All numbers below are produced by `mlfont-simulate --font_key all --headless_chr
 | | **`range_compact_most300_300_topics50` (MLFont)** | **`5.67 / 52`** | **`461.2 KB`** | **`84.9%`** | **`10,394 ms`** | **`836 ms`** | **`287 ms`** | **`97 ms`** | **`6.09x / 6.06x`** |
 | **`Noto Sans LGC`** (`157.7 KB`, 3 pages) | `single_slice` (Full Font) | `1.00 / 1` | `158.4 KB` | `0.0%` | `4,043 ms` | `316 ms` | `316 ms` | `0 ms` (cached) | `1.00x / 1.00x` |
 | | `equal_bin_20` | `4.00 / 20` | `87.8 KB` | `44.6%` | `2,599 ms` | `201 ms` | `201 ms` | `32 ms` | `1.56x / 1.57x` |
-| | **`range_compact_topics20` (MLFont)** | **`4.00 / 20`** | **`87.6 KB`** | **`44.7%`** | **`2,596 ms`** | **`201 ms`** | **`94 ms`** | **`0 ms`** | **`1.56x / 1.57x`** |
+| | **`range_compact_topics20` (MLFont)** | **`4.00 / 20`** | **`87.6 KB`** | **`44.7%`** | **`2,596 ms`** | **`201 ms`** | **`201 ms`** | **`0 ms`** | **`1.56x / 1.57x`** |
 
 ### 3. Per-Website Breakdown on `Noto Sans SC` (`GIN-3g` & `Cable-5Mbps`, Cold Cache)
 
@@ -389,25 +389,31 @@ All numbers below are produced by `mlfont-simulate --font_key all --headless_chr
 
 ### 4. Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Running `mlfont-simulate --font_key all --headless_chrome` launches real Headless Chrome against the physical `.woff2` files on disk and inspects `document.fonts` (`FontFaceSet`). Across **44 / 45 (`97.8%`)** `(font, page, strategy)` test cases, Chromium Blink's `unicode-range` selector requested the **exact same set of `.woff2` slice indices** as `WebsiteFontSimulator` (`simulator_exact_slice_match = True`), while demonstrating **1.17x to 4.60x faster local WOFF2 Brotli decompression & OpenType instantiation** in Chrome on the representative pages below. The one mismatch (`notosanssc` / `sina_sports_nba` / `range_compact_most1000_500_topics100`: Chrome reported 1 loaded slice vs. 16 predicted) is an incomplete fetch at `window.onload`, is flagged `simulator_exact_slice_match = false` in the JSON, and is not used in any speedup figure in this README:
+Running `mlfont-simulate --font_key all --headless_chrome` launches real Headless Chrome against the physical `.woff2` files on disk and inspects `document.fonts` (`FontFaceSet`). Across **45 / 45 (`100.0%`)** `(font, page, strategy)` test cases, Chromium Blink's `unicode-range` selector requested the **exact same set of `.woff2` slice indices** as `WebsiteFontSimulator` (`simulator_exact_slice_match = True`), while demonstrating **1.20x to 4.15x faster local WOFF2 Brotli decompression & OpenType instantiation** in Chrome on the representative pages below:
 
 | Font Family | Website Page ID | Strategy | Chrome Loaded Slices | Simulator Exact Match | Total Transfer (`KB`) | Chrome Local Decode (`ms`) | E2E Font Ready (`ms`) | Chrome Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`notosanssc`** | `dev_china_portal` | `single_slice` | `1` | **Yes** | `5,988.7 KB` | `238.8 ms` | `10,107 ms` | `1.00x` | `1.00x` (`0.0%`) |
-| | `dev_china_portal` | `equal_bin_102` | `56` | **Yes** | `5,002.1 KB` | `124.4 ms` | `8,628 ms` | `1.92x` | `1.17x` (`16.5%`) |
-| | `dev_china_portal` | **`range_compact_most1000_500_topics100`** | **`11`** | **Yes** | **`1,151.0 KB`** | **`51.9 ms`** | **`2,022 ms`** | **`4.60x`** | **`5.00x` (`80.8%`)** |
-| **`notosanstc`** | `tc_taipei_tech_portal` | `single_slice` | `1` | **Yes** | `4,067.0 KB` | `172.4 ms` | `6,892 ms` | `1.00x` | `1.00x` (`0.0%`) |
-| | `tc_taipei_tech_portal` | `equal_bin_82` | `51` | **Yes** | `3,807.7 KB` | `104.3 ms` | `6,623 ms` | `1.65x` | `1.04x` (`6.4%`) |
-| | `tc_taipei_tech_portal` | **`range_compact_most600_600_topics80`** | **`12`** | **Yes** | **`1,103.5 KB`** | **`54.2 ms`** | **`1,946 ms`** | **`3.18x`** | **`3.54x` (`72.9%`)** |
-| **`notosansjp`** | `jp_web_dev_docs` | `single_slice` | `1` | **Yes** | `3,279.1 KB` | `170.2 ms` | `5,599 ms` | `1.00x` | `1.00x` (`0.0%`) |
-| | `jp_web_dev_docs` | `equal_bin_62` | `34` | **Yes** | `2,642.4 KB` | `91.0 ms` | `4,616 ms` | `1.87x` | `1.21x` (`19.4%`) |
-| | `jp_web_dev_docs` | **`range_compact_most500_500_topics60`** | **`7`** | **Yes** | **`773.6 KB`** | **`54.3 ms`** | **`1,406 ms`** | **`3.13x`** | **`3.98x` (`76.4%`)** |
-| **`notosanskr`** | `kr_cloud_engineering` | `single_slice` | `1` | **Yes** | `3,048.7 KB` | `147.0 ms` | `5,198 ms` | `1.00x` | `1.00x` (`0.0%`) |
-| | `kr_cloud_engineering` | `equal_bin_52` | `24` | **Yes** | `2,516.7 KB` | `77.6 ms` | `4,341 ms` | `1.89x` | `1.20x` (`17.4%`) |
-| | `kr_cloud_engineering` | **`range_compact_most300_300_topics50`** | **`6`** | **Yes** | **`481.9 KB`** | **`41.4 ms`** | **`887 ms`** | **`3.55x`** | **`5.86x` (`84.2%`)** |
-| **`notosans_lgc`** | `lgc_scientific_typography` | `single_slice` | `1` | **Yes** | `158.4 KB` | `24.2 ms` | `340 ms` | `1.00x` | `1.00x` (`0.0%`) |
-| | `lgc_scientific_typography` | `equal_bin_20` | `1` | **Yes** | `22.7 KB` | `19.6 ms` | `113 ms` | `1.23x` | `3.01x` (`85.7%`) |
-| | `lgc_scientific_typography` | **`range_compact_topics20`** | **`2`** | **Yes** | **`41.7 KB`** | **`20.7 ms`** | **`145 ms`** | **`1.17x`** | **`2.34x` (`73.7%`)** |
+| **`notosanssc`** | `dev_china_portal` | `single_slice` | `1` | **Yes** | `5,988.7 KB` | `230.6 ms` | `10,099 ms` | `1.00x` | `1.00x` (`0.0%`) |
+| | `dev_china_portal` | `equal_bin_102` | `56` | **Yes** | `5,002.1 KB` | `118.6 ms` | `8,622 ms` | `1.94x` | `1.17x` (`16.5%`) |
+| | `dev_china_portal` | **`range_compact_most1000_500_topics100`** | **`11`** | **Yes** | **`1,151.0 KB`** | **`55.6 ms`** | **`2,025 ms`** | **`4.15x`** | **`4.99x` (`80.8%`)** |
+| **`notosanstc`** | `tc_taipei_tech_portal` | `single_slice` | `1` | **Yes** | `4,067.0 KB` | `170.5 ms` | `6,890 ms` | `1.00x` | `1.00x` (`0.0%`) |
+| | `tc_taipei_tech_portal` | `equal_bin_82` | `51` | **Yes** | `3,807.7 KB` | `182.8 ms` | `6,701 ms` | `0.93x` | `1.03x` (`6.4%`) |
+| | `tc_taipei_tech_portal` | **`range_compact_most600_600_topics80`** | **`12`** | **Yes** | **`1,103.5 KB`** | **`63.8 ms`** | **`1,956 ms`** | **`2.67x`** | **`3.52x` (`72.9%`)** |
+| **`notosansjp`** | `jp_web_dev_docs` | `single_slice` | `1` | **Yes** | `3,279.1 KB` | `151.6 ms` | `5,580 ms` | `1.00x` | `1.00x` (`0.0%`) |
+| | `jp_web_dev_docs` | `equal_bin_62` | `34` | **Yes** | `2,642.4 KB` | `92.8 ms` | `4,618 ms` | `1.63x` | `1.21x` (`19.4%`) |
+| | `jp_web_dev_docs` | **`range_compact_most500_500_topics60`** | **`7`** | **Yes** | **`773.6 KB`** | **`60.0 ms`** | **`1,412 ms`** | **`2.53x`** | **`3.95x` (`76.4%`)** |
+| **`notosanskr`** | `kr_cloud_engineering` | `single_slice` | `1` | **Yes** | `3,048.7 KB` | `147.4 ms` | `5,198 ms` | `1.00x` | `1.00x` (`0.0%`) |
+| | `kr_cloud_engineering` | `equal_bin_52` | `24` | **Yes** | `2,516.7 KB` | `74.4 ms` | `4,338 ms` | `1.98x` | `1.20x` (`17.4%`) |
+| | `kr_cloud_engineering` | **`range_compact_most300_300_topics50`** | **`6`** | **Yes** | **`481.9 KB`** | **`43.5 ms`** | **`889 ms`** | **`3.39x`** | **`5.85x` (`84.2%`)** |
+| **`notosans_lgc`** | `lgc_scientific_typography` | `single_slice` | `1` | **Yes** | `158.4 KB` | `22.5 ms` | `338 ms` | `1.00x` | `1.00x` (`0.0%`) |
+| | `lgc_scientific_typography` | `equal_bin_20` | `1` | **Yes** | `22.7 KB` | `17.9 ms` | `111 ms` | `1.26x` | `3.04x` (`85.7%`) |
+| | `lgc_scientific_typography` | **`range_compact_topics20`** | **`2`** | **Yes** | **`41.7 KB`** | **`18.7 ms`** | **`143 ms`** | **`1.20x`** | **`2.36x` (`73.7%`)** |
+
+### 5. Systems Trade-Offs and Limitations
+
+1. **Physical WOFF2 OpenType Table-Replication Overhead vs. Per-Page Bandwidth Savings**: Because each `.woff2` slice must be a valid standalone font file, shared OpenType tables (`cmap`, `hmtx`, `loca`, `GSUB`, `GPOS`, and composite glyph components) are replicated across slices, increasing the aggregate static CDN disk footprint by `+46.6%` (`Noto Sans JP`) to `+175.3%` (`Noto Sans LGC`; `+52.1%` on `Noto Sans SC`: `9,107.9 KB` across 102 slices vs. `5,987.0 KB` monolithic WOFF2). Consequently, naive `equal_bin` slicing—which triggers 55+ slices on a typical Chinese page—can exceed the monolithic WOFF2 transfer size over a multi-page session (`-1.6%` to `-7.6%` net byte savings across an 8-page `Noto Sans SC` session). By concentrating >90% of page tokens into Tier-1 `most` slices and co-occurring Tier-2 topic slices, **MLFont** triggers only 5.7–16.9 slices per page, achieving **`65.4%–84.9%` cold-cache bandwidth reduction on CJK (`44.7%` on LGC)** and **`+38.2%` to `+52.9%` positive multi-page session byte savings** on `Noto Sans SC`.
+2. **Cross-Slice OpenType Shaping Boundaries**: Browser engines apply OpenType `GSUB` ligature and `GPOS` kerning rules within a single resolved `@font-face` font instance. While CJK ideographs and Hangul syllables are predominantly monospaced and independent, complex scripts or Latin kerning pairs split across distinct slices do not shape across slice boundaries unless co-located in the same slice (which Tier-1 frequency isolation naturally preserves for common Latin/punctuation pairs).
+3. **Serial 1-RTT Training Surrogate vs. Multiplexed HTTP/2 Waves**: `FontLoadingEvaluator` optimizes a conservative 1-RTT-per-slice serial surrogate (a worst-case upper bound that strongly penalizes slice proliferation), whereas `WebsiteFontSimulator` and `run_headless_chrome_benchmark` evaluate realistic parallel HTTP/2 wave fetching (`max_parallel_requests = 6`) alongside explicit CSS download and `Parse Stylesheet` costs.
 
 ---
 
@@ -450,6 +456,8 @@ from mlfont import (
 )
 
 # 1. Extract valid Unicode codepoints from a TrueType/OpenType font
+# (Run `mlfont-prepare-data --preset lgc --output_dir data/lgc` to download NotoSans-Regular.ttf,
+#  or point `font_path` to any local .ttf / .otf font file.)
 font_path = Path("fonts/NotoSans-Regular.ttf")
 font_codepoints = extract_font_codepoints(font_path)
 

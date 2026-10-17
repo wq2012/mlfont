@@ -104,19 +104,19 @@ Across **3 real-world sample websites** for **Noto Sans KR (Korean)** (full unsl
 
 #### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100.0%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`).
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `kr_cloud_engineering` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 147.0 ms | **5,198 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_cloud_engineering` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 77.6 ms | **4,341 ms** | 1.89x | **1.20x** (17.4%) |
-| `kr_cloud_engineering` | **range_compact_most300_300_topics50 (This Model)** | 6 | **Yes** | 481.9 KB | 41.4 ms | **887 ms** | 3.55x | **5.86x** (84.2%) |
-| `kr_kpop_entertainment` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 146.2 ms | **5,197 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_kpop_entertainment` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 74.8 ms | **4,338 ms** | 1.95x | **1.20x** (17.4%) |
-| `kr_kpop_entertainment` | **range_compact_most300_300_topics50 (This Model)** | 7 | **Yes** | 582.9 KB | 42.6 ms | **1,082 ms** | 3.43x | **4.81x** (80.9%) |
-| `kr_economy_finance` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 141.5 ms | **5,192 ms** | 1.00x | **1.00x** (0.0%) |
-| `kr_economy_finance` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 75.0 ms | **4,338 ms** | 1.89x | **1.20x** (17.4%) |
-| `kr_economy_finance` | **range_compact_most300_300_topics50 (This Model)** | 4 | **Yes** | 318.9 KB | 38.2 ms | **617 ms** | 3.70x | **8.42x** (89.5%) |
+| `kr_cloud_engineering` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 147.4 ms | **5,198 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_cloud_engineering` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 74.4 ms | **4,338 ms** | 1.98x | **1.20x** (17.4%) |
+| `kr_cloud_engineering` | **range_compact_most300_300_topics50 (This Model)** | 6 | **Yes** | 481.9 KB | 43.5 ms | **889 ms** | 3.39x | **5.85x** (84.2%) |
+| `kr_kpop_entertainment` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 140.5 ms | **5,191 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_kpop_entertainment` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 95.6 ms | **4,359 ms** | 1.47x | **1.19x** (17.4%) |
+| `kr_kpop_entertainment` | **range_compact_most300_300_topics50 (This Model)** | 7 | **Yes** | 582.9 KB | 43.3 ms | **1,082 ms** | 3.24x | **4.80x** (80.9%) |
+| `kr_economy_finance` | `single_slice` | 1 | **Yes** | 3,048.7 KB | 138.3 ms | **5,189 ms** | 1.00x | **1.00x** (0.0%) |
+| `kr_economy_finance` | `equal_bin_52` | 24 | **Yes** | 2,516.7 KB | 75.7 ms | **4,339 ms** | 1.83x | **1.20x** (17.4%) |
+| `kr_economy_finance` | **range_compact_most300_300_topics50 (This Model)** | 4 | **Yes** | 318.9 KB | 37.9 ms | **616 ms** | 3.65x | **8.42x** (89.5%) |
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosanskr` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -134,16 +134,16 @@ mlfont-simulate --font_key notosanskr --url https://example.com --network_profil
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `ko`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `korean`)
 * **Total Slices**: 52 slices (6,769 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 5.29 MB / 5419.9 KB (5,549,952 bytes) across 52 `.woff2` files (companion CSS: 78.0 KB)
-* **Training Wall-Time**: 84.5 seconds on CPU/GPU
+* **Physical WOFF2 Bundle Size**: 5.29 MB / 5419.9 KB (5,549,952 bytes) across 52 `.woff2` files (companion CSS: 78.3 KB). Note: physical `.woff2` slicing replicates shared OpenType tables (`cmap`, `hmtx`, `loca`, `GSUB`, `GPOS`) into each standalone subset file (increasing static CDN disk footprint by +46.6% to +175.3% vs. a monolithic WOFF2), whereas individual webpages only fetch the small subset of triggered slices (saving 65.4%–84.9% per-page bandwidth on CJK and 44.7% on LGC).
+* **Training Wall-Time**: 30.0 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans KR Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
-* `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansKR-Regular Sliced'`) with compact `unicode-range` descriptors
+* `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansKR-Regular Sliced'`, `url(woff2/NotoSansKR-Regular_slice_XXX.woff2)`) with compact `unicode-range` descriptors
 * `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
-* `woff2/*.woff2`: 52 physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: 52 `.nam` codepoint subset files
+* `woff2/NotoSansKR-Regular_slice_XXX.woff2`: 52 physical WOFF2 font slices generated via `fontTools.subset` (plus `woff2/font_sliced.css`)
+* `nam/slice_XXX.nam`: 52 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
 * `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition

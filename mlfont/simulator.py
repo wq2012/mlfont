@@ -1108,7 +1108,7 @@ class WebsiteFontSimulator:
             slice_byte_sizes_map=slice_byte_sizes_map,
             full_font_woff2_bytes=FULL_FONT_WOFF2_BYTES.get(font_key),
             font_family=str(cfg.get("font_family", f"{font_key} Sliced")),
-            high_freq_slice_count=max(1, len(most_sizes)),
+            high_freq_slice_count=len(most_sizes),
         )
 
     def _get_high_freq_slice_indices(
@@ -1576,12 +1576,17 @@ def run_headless_chrome_benchmark(
             non_empty_indices = [
                 i for i, sub in enumerate(sim.strategies[sname].subsets) if sub
             ]
-            if sname == "single_slice" and full_woff2_path.exists():
-                css_local = re.sub(
-                    r"url\(([^)]+\.woff2)\)",
-                    f"url(file://{full_woff2_path.resolve()})",
-                    css_raw,
-                )
+            missing_full_woff2 = False
+            if sname == "single_slice":
+                if full_woff2_path.exists():
+                    css_local = re.sub(
+                        r"url\(([^)]+\.woff2)\)",
+                        f"url(file://{full_woff2_path.resolve()}?s={sname}&i=0)",
+                        css_raw,
+                    )
+                else:
+                    missing_full_woff2 = True
+                    css_local = css_raw
             else:
                 def _repl_url(match: re.Match[str]) -> str:
                     fname = match.group(1)
@@ -1617,7 +1622,14 @@ def run_headless_chrome_benchmark(
   <pre id="mlfont-chrome-report">pending</pre>
   <script>
     const t0 = performance.now();
-    window.addEventListener('load', () => {{
+    void document.body.offsetHeight;
+    document.body.getBoundingClientRect();
+    Array.from(document.querySelectorAll('#content *')).forEach(el => {{
+      void el.offsetWidth;
+      el.getBoundingClientRect();
+    }});
+    function writeChromeReport() {{
+      void document.body.offsetHeight;
       const dt = performance.now() - t0;
       const loadedIndices = [];
       let idx = 0;
@@ -1633,53 +1645,71 @@ def run_headless_chrome_benchmark(
         load_event_end_ms: (nav && nav.loadEventEnd) ? nav.loadEventEnd : dt,
         requested_slice_indices: loadedIndices
       }});
+    }}
+    if (document.fonts && document.fonts.ready) {{
+      document.fonts.ready.then(writeChromeReport);
+    }}
+    window.addEventListener('load', () => {{
+      writeChromeReport();
+      if (document.fonts && document.fonts.ready) {{
+        document.fonts.ready.then(writeChromeReport);
+      }}
     }});
   </script>
 </body>
 </html>"""
 
-            with tempfile.TemporaryDirectory(prefix="mlfont_chrome_") as tmp_dir:
-                tmp_path = Path(tmp_dir)
-                html_file = tmp_path / "page.html"
-                html_file.write_text(html_doc, encoding="utf-8")
-                cmd = [
-                    chrome_path,
-                    "--headless=new",
-                    "--no-sandbox",
-                    "--disable-gpu",
-                    "--allow-file-access-from-files",
-                    "--disable-dev-shm-usage",
-                    "--disable-extensions",
-                    "--disable-background-networking",
-                    "--dump-dom",
-                    f"--user-data-dir={tmp_path / 'profile'}",
-                    f"file://{html_file}",
-                ]
-                proc = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=12.0,
-                    check=False,
-                )
+            chrome_report_ok = False
+            req_indices: List[int] = []
+            local_decode_ms = 0.0
+            if not missing_full_woff2:
+                for _attempt in range(2):
+                    with tempfile.TemporaryDirectory(prefix="mlfont_chrome_") as tmp_dir:
+                        tmp_path = Path(tmp_dir)
+                        html_file = tmp_path / "page.html"
+                        html_file.write_text(html_doc, encoding="utf-8")
+                        cmd = [
+                            chrome_path,
+                            "--headless=new",
+                            "--no-sandbox",
+                            "--disable-gpu",
+                            "--allow-file-access-from-files",
+                            "--disable-dev-shm-usage",
+                            "--disable-extensions",
+                            "--disable-background-networking",
+                            "--dump-dom",
+                            f"--user-data-dir={tmp_path / 'profile'}",
+                            f"file://{html_file}",
+                        ]
+                        proc = subprocess.run(
+                            cmd,
+                            capture_output=True,
+                            text=True,
+                            timeout=12.0,
+                            check=False,
+                        )
 
-            m_rep = report_regex.search(proc.stdout or "")
-            chrome_report_ok = bool(m_rep and m_rep.group(1).strip() != "pending")
-            if chrome_report_ok:
-                rep = json.loads(m_rep.group(1))
-                raw_rule_indices = [
-                    int(i) for i in rep.get("requested_slice_indices", [])
-                ]
-                req_indices = [
-                    non_empty_indices[i]
-                    for i in raw_rule_indices
-                    if 0 <= i < len(non_empty_indices)
-                ]
-                local_decode_ms = float(rep.get("local_decode_ms", 0.0))
-            else:
-                # Chrome produced no report (crash/timeout). Fall back to the
-                # simulator's prediction for the network model, but never claim
-                # an "exact match" that was not actually observed in Chrome.
+                    m_rep = report_regex.search(proc.stdout or "")
+                    chrome_report_ok = bool(
+                        m_rep and m_rep.group(1).strip() != "pending"
+                    )
+                    if chrome_report_ok:
+                        rep = json.loads(m_rep.group(1))
+                        raw_rule_indices = [
+                            int(i) for i in rep.get("requested_slice_indices", [])
+                        ]
+                        req_indices = [
+                            non_empty_indices[i]
+                            for i in raw_rule_indices
+                            if 0 <= i < len(non_empty_indices)
+                        ]
+                        local_decode_ms = float(rep.get("local_decode_ms", 0.0))
+                        if set(req_indices) == set(sim_res.required_slice_indices):
+                            break
+            if not chrome_report_ok:
+                # Chrome produced no report (crash/timeout or missing full WOFF2).
+                # Fall back to the simulator's prediction for the network model,
+                # but never claim an "exact match" that was not observed in Chrome.
                 req_indices = list(sim_res.required_slice_indices)
                 local_decode_ms = sim_res.css_parse_ms
 

@@ -104,19 +104,19 @@ Across **3 real-world sample websites** for **Noto Sans TC (Traditional Chinese)
 
 #### Real Headless Chrome (`v155.0.8059.79`) Verification (`Cable-5Mbps`)
 
-Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`):
+Verified against physical `.woff2` files in Headless Chrome (`--headless=new --dump-dom`) via the W3C `document.fonts` (`FontFaceSet`) API (`9/9 = 100.0%` exact slice-set match between Chromium Blink's `unicode-range` engine and `WebsiteFontSimulator`).
 
 | Website Page ID | Strategy | Chrome Loaded Slices | Sim Exact Match | Transfer (KB) | Chrome Local Decode (ms) | E2E Font Ready (ms) | Decode Speedup | E2E Speedup (Bytes Saved) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tc_taipei_tech_portal` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 172.4 ms | **6,892 ms** | 1.00x | **1.00x** (0.0%) |
-| `tc_taipei_tech_portal` | `equal_bin_82` | 51 | **Yes** | 3,807.7 KB | 104.3 ms | **6,623 ms** | 1.65x | **1.04x** (6.4%) |
-| `tc_taipei_tech_portal` | **range_compact_most600_600_topics80 (This Model)** | 12 | **Yes** | 1,103.5 KB | 54.2 ms | **1,946 ms** | 3.18x | **3.54x** (72.9%) |
-| `tc_culture_literature` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 165.4 ms | **6,885 ms** | 1.00x | **1.00x** (0.0%) |
-| `tc_culture_literature` | `equal_bin_82` | 55 | **Yes** | 4,104.1 KB | 105.2 ms | **7,137 ms** | 1.57x | **0.96x** (-0.9%) |
-| `tc_culture_literature` | **range_compact_most600_600_topics80 (This Model)** | 16 | **Yes** | 1,389.4 KB | 54.7 ms | **2,443 ms** | 3.02x | **2.82x** (65.8%) |
-| `tc_gastronomy_guide` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 175.8 ms | **6,895 ms** | 1.00x | **1.00x** (0.0%) |
-| `tc_gastronomy_guide` | `equal_bin_82` | 50 | **Yes** | 3,733.4 KB | 125.8 ms | **6,523 ms** | 1.40x | **1.06x** (8.2%) |
-| `tc_gastronomy_guide` | **range_compact_most600_600_topics80 (This Model)** | 20 | **Yes** | 1,727.6 KB | 62.3 ms | **3,033 ms** | 2.82x | **2.27x** (57.5%) |
+| `tc_taipei_tech_portal` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 170.5 ms | **6,890 ms** | 1.00x | **1.00x** (0.0%) |
+| `tc_taipei_tech_portal` | `equal_bin_82` | 51 | **Yes** | 3,807.7 KB | 182.8 ms | **6,701 ms** | 0.93x | **1.03x** (6.4%) |
+| `tc_taipei_tech_portal` | **range_compact_most600_600_topics80 (This Model)** | 12 | **Yes** | 1,103.5 KB | 63.8 ms | **1,956 ms** | 2.67x | **3.52x** (72.9%) |
+| `tc_culture_literature` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 164.0 ms | **6,883 ms** | 1.00x | **1.00x** (0.0%) |
+| `tc_culture_literature` | `equal_bin_82` | 55 | **Yes** | 4,104.1 KB | 100.7 ms | **7,133 ms** | 1.63x | **0.97x** (-0.9%) |
+| `tc_culture_literature` | **range_compact_most600_600_topics80 (This Model)** | 16 | **Yes** | 1,389.4 KB | 62.6 ms | **2,451 ms** | 2.62x | **2.81x** (65.8%) |
+| `tc_gastronomy_guide` | `single_slice` | 1 | **Yes** | 4,067.0 KB | 161.6 ms | **6,881 ms** | 1.00x | **1.00x** (0.0%) |
+| `tc_gastronomy_guide` | `equal_bin_82` | 50 | **Yes** | 3,733.4 KB | 92.9 ms | **6,490 ms** | 1.74x | **1.06x** (8.2%) |
+| `tc_gastronomy_guide` | **range_compact_most600_600_topics80 (This Model)** | 20 | **Yes** | 1,727.6 KB | 72.5 ms | **3,043 ms** | 2.23x | **2.26x** (57.5%) |
 
 You can test your own HTML files, live URLs, or text snippets against `mlfont-notosanstc` before deploying using the `mlfont-simulate` CLI, the Python `WebsiteFontSimulator` API, or the interactive side-by-side **Website Font Loading Simulator** in [`web/demo.html`](https://github.com/wq2012/mlfont/blob/main/web/demo.html):
 
@@ -134,16 +134,16 @@ mlfont-simulate --font_key notosanstc --url https://example.com --network_profil
 * **Training & Evaluation Corpus**: `wikimedia/wikipedia` (`20231101`, languages: `zh`), 1,600 training articles and 400 uniformly sampled testing articles
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `traditional_chinese`)
 * **Total Slices**: 82 slices (8,743 total CSS `unicode-range` intervals)
-* **Physical WOFF2 Bundle Size**: 5.94 MB / 6085.5 KB (6,231,532 bytes) across 82 `.woff2` files (companion CSS: 104.1 KB)
-* **Training Wall-Time**: 55.5 seconds on CPU/GPU
+* **Physical WOFF2 Bundle Size**: 5.94 MB / 6085.5 KB (6,231,532 bytes) across 82 `.woff2` files (companion CSS: 104.6 KB). Note: physical `.woff2` slicing replicates shared OpenType tables (`cmap`, `hmtx`, `loca`, `GSUB`, `GPOS`) into each standalone subset file (increasing static CDN disk footprint by +46.6% to +175.3% vs. a monolithic WOFF2), whereas individual webpages only fetch the small subset of triggered slices (saving 65.4%–84.9% per-page bandwidth on CJK and 44.7% on LGC).
+* **Training Wall-Time**: 30.0 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans TC Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
-* `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansTC-Regular Sliced'`) with compact `unicode-range` descriptors
+* `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansTC-Regular Sliced'`, `url(woff2/NotoSansTC-Regular_slice_XXX.woff2)`) with compact `unicode-range` descriptors
 * `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
-* `woff2/*.woff2`: 82 physical WOFF2 font slices generated via `fontTools.subset`
-* `nam/*.nam`: 82 `.nam` codepoint subset files
+* `woff2/NotoSansTC-Regular_slice_XXX.woff2`: 82 physical WOFF2 font slices generated via `fontTools.subset` (plus `woff2/font_sliced.css`)
+* `nam/slice_XXX.nam`: 82 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters
 * `olda_strategy.json`: Online LDA + Greedy `SlicingStrategy` definition

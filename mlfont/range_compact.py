@@ -1721,11 +1721,20 @@ class RangeCompactGASolver(RangeCompactGeneticLearner):
     ) -> SlicingStrategy:
         """Runs GA optimization and optionally prepends/appends deterministic slices."""
         strat = self.run()
-        subsets = list(strat.subsets)
+        subsets = [sorted(set(int(c) for c in sub)) for sub in strat.subsets if sub]
         if prefix_slices:
-            subsets = [sorted(int(c) for c in s) for s in prefix_slices] + subsets
+            norm_prefix = [sorted(set(int(c) for c in s)) for s in prefix_slices if s]
+            if norm_prefix and subsets[: len(norm_prefix)] != norm_prefix:
+                prefix_cps = {c for s in norm_prefix for c in s}
+                filtered = [[c for c in sub if c not in prefix_cps] for sub in subsets]
+                subsets = norm_prefix + [sub for sub in filtered if sub]
         if suffix_slices:
-            subsets = subsets + [sorted(int(c) for c in s) for s in suffix_slices]
+            norm_suffix = [sorted(set(int(c) for c in s)) for s in suffix_slices if s]
+            n_suf = len(norm_suffix)
+            if norm_suffix and subsets[-n_suf:] != norm_suffix:
+                suffix_cps = {c for s in norm_suffix for c in s}
+                filtered = [[c for c in sub if c not in suffix_cps] for sub in subsets]
+                subsets = [sub for sub in filtered if sub] + norm_suffix
         meta = dict(strat.metadata)
         if font_name is not None:
             meta["font_name"] = font_name

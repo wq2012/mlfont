@@ -27,6 +27,7 @@ class PretrainedMLFontBundle:
     codepoints: Optional[np.ndarray] = None
     remaining_codepoints: Optional[np.ndarray] = None
     frequency_array: Optional[np.ndarray] = None
+    dna_assignment: Optional[np.ndarray] = None
     olda_strategy: Optional[SlicingStrategy] = None
     dnntm_strategy: Optional[SlicingStrategy] = None
     css_path: Optional[Path] = None
@@ -181,7 +182,7 @@ def export_pretrained_bundle(
     woff2_slice_byte_sizes: List[int] = []
     if font_path is not None and slice_font:
         woff2_dir = out / "woff2"
-        artifacts, gen_css_path = slice_font_file(
+        artifacts, _ = slice_font_file(
             font_path=font_path,
             strategy=strategy,
             output_dir=woff2_dir,
@@ -190,18 +191,17 @@ def export_pretrained_bundle(
             max_slices=max_physical_slices,
             num_workers=num_workers,
         )
-        css_path.write_text(gen_css_path.read_text(encoding="utf-8"), encoding="utf-8")
         woff2_slice_byte_sizes = [a.byte_size for a in artifacts]
         total_woff2_bytes = sum(woff2_slice_byte_sizes)
         num_written_woff2 = len(artifacts)
-    else:
-        css_text = generate_css(
-            strategy=strategy,
-            font_family=family,
-            font_basename=basename,
-            extension="woff2",
-        )
-        css_path.write_text(css_text, encoding="utf-8")
+    css_text = generate_css(
+        strategy=strategy,
+        font_family=family,
+        font_url_prefix="woff2",
+        font_basename=basename,
+        extension="woff2",
+    )
+    css_path.write_text(css_text, encoding="utf-8")
 
     # Generate CDN-ready stylesheet pointing directly to Hugging Face WOFF2 slices
     hf_url_prefix = f"https://huggingface.co/wq2012/{out.name}/resolve/main/woff2"
@@ -224,9 +224,11 @@ def export_pretrained_bundle(
     cdn_css_path.write_text(cdn_css_text, encoding="utf-8")
 
     # Copy browser loader & latency telemetry script (mlfont.js) if present
+    pkg_js = Path(__file__).resolve().parent / "mlfont.js"
     repo_js = Path(__file__).resolve().parent.parent / "web" / "mlfont.js"
-    if repo_js.exists():
-        (out / "mlfont.js").write_text(repo_js.read_text(encoding="utf-8"), encoding="utf-8")
+    src_js = pkg_js if pkg_js.exists() else repo_js
+    if src_js.exists():
+        (out / "mlfont.js").write_text(src_js.read_text(encoding="utf-8"), encoding="utf-8")
 
     # 4. Save config.json
     config_payload: Dict[str, object] = {
@@ -282,7 +284,21 @@ def export_pretrained_bundle(
             f"### Latency Metrics (`mlfont.js` — Recommended)\n"
             f"```html\n"
             f'<script src="/fonts/{out.name}/mlfont.js" async></script>\n'
-            f"```\n"
+            f"```\n\n"
+            f"## Bundle Files\n"
+            f"- `strategy.json`: Range-Compact GA `SlicingStrategy` JSON\n"
+            f"- `olda_strategy.json`, `dnntm_strategy.json`: Topic-model `SlicingStrategy` JSONs\n"
+            f"- `model.safetensors`: SafeTensors weights (`lambda_matrix`, "
+            f"`dnntm_lambda_matrix`, `codepoints`, `remaining_codepoints`, "
+            f"`frequency_array`, `dna_assignment`)\n"
+            f"- `config.json`: Hyperparameters and per-slice `.woff2` byte sizes\n"
+            f"- `font_sliced.css`: Self-hosted `@font-face` stylesheet "
+            f"(`url(woff2/{basename}_slice_XXX.woff2)`)\n"
+            f"- `font_sliced_cdn.css`: Hugging Face CDN `@font-face` stylesheet\n"
+            f"- `woff2/{basename}_slice_XXX.woff2`: Physical WOFF2 font slices "
+            f"(plus `woff2/font_sliced.css`)\n"
+            f"- `nam/slice_XXX.nam`: Per-slice Unicode codepoint `.nam` files\n"
+            f"- `mlfont.js`: Browser loader and HTML5 Resource Timing telemetry script\n"
         )
         readme_path.write_text(default_card, encoding="utf-8")
 
@@ -313,6 +329,7 @@ def load_pretrained(model_dir: str | Path) -> PretrainedMLFontBundle:
     cps: Optional[np.ndarray] = None
     rem_cps: Optional[np.ndarray] = None
     freq_arr: Optional[np.ndarray] = None
+    dna_assign: Optional[np.ndarray] = None
     st_path = root / "model.safetensors"
     if st_path.exists():
         tensors = load_safetensors(str(st_path))
@@ -321,6 +338,7 @@ def load_pretrained(model_dir: str | Path) -> PretrainedMLFontBundle:
         cps = tensors.get("codepoints")
         rem_cps = tensors.get("remaining_codepoints")
         freq_arr = tensors.get("frequency_array")
+        dna_assign = tensors.get("dna_assignment")
 
     css_path = root / "font_sliced.css"
     return PretrainedMLFontBundle(
@@ -332,6 +350,7 @@ def load_pretrained(model_dir: str | Path) -> PretrainedMLFontBundle:
         codepoints=cps,
         remaining_codepoints=rem_cps,
         frequency_array=freq_arr,
+        dna_assignment=dna_assign,
         olda_strategy=olda_strategy,
         dnntm_strategy=dnntm_strategy,
         css_path=css_path if css_path.exists() else None,

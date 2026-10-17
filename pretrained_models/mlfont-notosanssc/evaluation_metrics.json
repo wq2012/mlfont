@@ -1613,7 +1613,7 @@
       "stddev": 317.3259759161057
     },
     "upfront_utilization_pct": 1.3425508757781366,
-    "session_utilization_pct": 2.9708769143183713,
+    "session_utilization_pct": 2.9645976690234574,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1646,7 +1646,7 @@
       "stddev": 127.20676474499919
     },
     "upfront_utilization_pct": 2.1037116221908727,
-    "session_utilization_pct": 4.230649756768894,
+    "session_utilization_pct": 4.2216002506922345,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1679,7 +1679,7 @@
       "stddev": 203.37552889724083
     },
     "upfront_utilization_pct": 1.3960152122443839,
-    "session_utilization_pct": 2.972563180063457,
+    "session_utilization_pct": 2.9662713506958185,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1712,7 +1712,7 @@
       "stddev": 103.25565019969542
     },
     "upfront_utilization_pct": 4.05480378427074,
-    "session_utilization_pct": 8.843882545219206,
+    "session_utilization_pct": 8.826627535244553,
     "num_unassigned_font_codepoints": 19659
   },
   {
@@ -1745,7 +1745,7 @@
       "stddev": 40.509427739208704
     },
     "upfront_utilization_pct": 4.306182906258908,
-    "session_utilization_pct": 5.225714478817269,
+    "session_utilization_pct": 5.214982727085187,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1778,7 +1778,7 @@
       "stddev": 32.45133606281646
     },
     "upfront_utilization_pct": 6.924385750604218,
-    "session_utilization_pct": 11.753576143065715,
+    "session_utilization_pct": 11.727378867394485,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1811,7 +1811,7 @@
       "stddev": 30.823751986958815
     },
     "upfront_utilization_pct": 7.321078100821785,
-    "session_utilization_pct": 11.848179057571773,
+    "session_utilization_pct": 11.823899158747674,
     "num_unassigned_font_codepoints": 0
   },
   {
@@ -1844,7 +1844,7 @@
       "stddev": 34.83355743641313
     },
     "upfront_utilization_pct": 6.324748882201822,
-    "session_utilization_pct": 10.536439461910144,
+    "session_utilization_pct": 10.509926383539398,
     "num_unassigned_font_codepoints": 0
   }
 ]

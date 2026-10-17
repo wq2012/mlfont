@@ -3377,7 +3377,7 @@
             "stddev": 329.10110740479683
           },
           "upfront_utilization_pct": 1.023021243495906,
-          "session_utilization_pct": 1.9482149560660502,
+          "session_utilization_pct": 1.944158348849983,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3410,7 +3410,7 @@
             "stddev": 182.3362069561198
           },
           "upfront_utilization_pct": 1.9068031370821057,
-          "session_utilization_pct": 2.6993509189076406,
+          "session_utilization_pct": 2.70102961545167,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3443,7 +3443,7 @@
             "stddev": 264.8513714398836
           },
           "upfront_utilization_pct": 1.0506909649059277,
-          "session_utilization_pct": 1.950776982758772,
+          "session_utilization_pct": 1.9467012559405201,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3476,7 +3476,7 @@
             "stddev": 243.62879970453892
           },
           "upfront_utilization_pct": 1.5566968491320827,
-          "session_utilization_pct": 2.5670264595326304,
+          "session_utilization_pct": 2.56863336976976,
           "num_unassigned_font_codepoints": 4322
         },
         {
@@ -3509,7 +3509,7 @@
             "stddev": 61.16047751945624
           },
           "upfront_utilization_pct": 3.296912860560451,
-          "session_utilization_pct": 3.193926455927671,
+          "session_utilization_pct": 3.1994300986028597,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3542,7 +3542,7 @@
             "stddev": 35.91320103425584
           },
           "upfront_utilization_pct": 7.876657742964331,
-          "session_utilization_pct": 10.856946640557062,
+          "session_utilization_pct": 10.876407972348957,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3575,7 +3575,7 @@
             "stddev": 29.334155724624203
           },
           "upfront_utilization_pct": 9.837171997717178,
-          "session_utilization_pct": 11.226331486787107,
+          "session_utilization_pct": 11.266160859962278,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -3608,7 +3608,7 @@
             "stddev": 36.12655171609749
           },
           "upfront_utilization_pct": 7.164144807983945,
-          "session_utilization_pct": 9.109190132725486,
+          "session_utilization_pct": 9.140817022385693,
           "num_unassigned_font_codepoints": 0
         }
       ]
@@ -5325,7 +5325,7 @@
             "stddev": 110.95908453301165
           },
           "upfront_utilization_pct": 2.301148043614371,
-          "session_utilization_pct": 4.449279593390244,
+          "session_utilization_pct": 4.437976354798055,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5358,7 +5358,7 @@
             "stddev": 73.7310306055912
           },
           "upfront_utilization_pct": 2.902206860781637,
-          "session_utilization_pct": 5.211766135741488,
+          "session_utilization_pct": 5.199491759961071,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5391,7 +5391,7 @@
             "stddev": 104.09212227868356
           },
           "upfront_utilization_pct": 2.318711679876053,
-          "session_utilization_pct": 4.449279593390244,
+          "session_utilization_pct": 4.438335705266796,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5424,7 +5424,7 @@
             "stddev": 46.408373070046906
           },
           "upfront_utilization_pct": 5.423045110034248,
-          "session_utilization_pct": 10.079671948483902,
+          "session_utilization_pct": 10.057368142373361,
           "num_unassigned_font_codepoints": 7632
         },
         {
@@ -5457,7 +5457,7 @@
             "stddev": 31.329768932023
           },
           "upfront_utilization_pct": 5.503346784649736,
-          "session_utilization_pct": 6.179843191345227,
+          "session_utilization_pct": 6.168820685938326,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5490,7 +5490,7 @@
             "stddev": 20.026083690897533
           },
           "upfront_utilization_pct": 9.95821489536299,
-          "session_utilization_pct": 15.742253742882095,
+          "session_utilization_pct": 15.712835379503819,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5523,7 +5523,7 @@
             "stddev": 18.04034364054434
           },
           "upfront_utilization_pct": 10.88116677705989,
-          "session_utilization_pct": 15.863454168969742,
+          "session_utilization_pct": 15.83313132479977,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -5556,7 +5556,7 @@
             "stddev": 20.718947451681547
           },
           "upfront_utilization_pct": 9.355732825847795,
-          "session_utilization_pct": 13.770052147748334,
+          "session_utilization_pct": 13.741749934712136,
           "num_unassigned_font_codepoints": 0
         }
       ]
@@ -7293,7 +7293,7 @@
             "stddev": 244.12244574287297
           },
           "upfront_utilization_pct": 2.060565033532729,
-          "session_utilization_pct": 4.285535761193943,
+          "session_utilization_pct": 4.271164890766403,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7326,7 +7326,7 @@
             "stddev": 116.14693808399484
           },
           "upfront_utilization_pct": 2.744195049367172,
-          "session_utilization_pct": 5.377500419900195,
+          "session_utilization_pct": 5.359927875478885,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7359,7 +7359,7 @@
             "stddev": 155.8430220273831
           },
           "upfront_utilization_pct": 2.115111268336305,
-          "session_utilization_pct": 4.2874003106882395,
+          "session_utilization_pct": 4.273015525712235,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7392,7 +7392,7 @@
             "stddev": 93.09049447946612
           },
           "upfront_utilization_pct": 5.177138302677828,
-          "session_utilization_pct": 10.437351639455725,
+          "session_utilization_pct": 10.40203479842039,
           "num_unassigned_font_codepoints": 11699
         },
         {
@@ -7425,7 +7425,7 @@
             "stddev": 44.92881077548439
           },
           "upfront_utilization_pct": 4.384145232001089,
-          "session_utilization_pct": 6.189393048600507,
+          "session_utilization_pct": 6.170931696236663,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7458,7 +7458,7 @@
             "stddev": 35.12161718503886
           },
           "upfront_utilization_pct": 7.563072391885838,
-          "session_utilization_pct": 13.095618266360553,
+          "session_utilization_pct": 13.049572484551756,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7491,7 +7491,7 @@
             "stddev": 34.71023909402823
           },
           "upfront_utilization_pct": 7.678347912877967,
-          "session_utilization_pct": 13.087531605289092,
+          "session_utilization_pct": 13.039819862530228,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -7524,7 +7524,7 @@
             "stddev": 38.17293851322276
           },
           "upfront_utilization_pct": 7.015706539180983,
-          "session_utilization_pct": 12.136178144880388,
+          "session_utilization_pct": 12.09549063339486,
           "num_unassigned_font_codepoints": 0
         }
       ]
@@ -9281,7 +9281,7 @@
             "stddev": 317.3259759161057
           },
           "upfront_utilization_pct": 1.3425508757781366,
-          "session_utilization_pct": 2.9708769143183713,
+          "session_utilization_pct": 2.9645976690234574,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9314,7 +9314,7 @@
             "stddev": 127.20676474499919
           },
           "upfront_utilization_pct": 2.1037116221908727,
-          "session_utilization_pct": 4.230649756768894,
+          "session_utilization_pct": 4.2216002506922345,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9347,7 +9347,7 @@
             "stddev": 203.37552889724083
           },
           "upfront_utilization_pct": 1.3960152122443839,
-          "session_utilization_pct": 2.972563180063457,
+          "session_utilization_pct": 2.9662713506958185,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9380,7 +9380,7 @@
             "stddev": 103.25565019969542
           },
           "upfront_utilization_pct": 4.05480378427074,
-          "session_utilization_pct": 8.843882545219206,
+          "session_utilization_pct": 8.826627535244553,
           "num_unassigned_font_codepoints": 19659
         },
         {
@@ -9413,7 +9413,7 @@
             "stddev": 40.509427739208704
           },
           "upfront_utilization_pct": 4.306182906258908,
-          "session_utilization_pct": 5.225714478817269,
+          "session_utilization_pct": 5.214982727085187,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9446,7 +9446,7 @@
             "stddev": 32.45133606281646
           },
           "upfront_utilization_pct": 6.924385750604218,
-          "session_utilization_pct": 11.753576143065715,
+          "session_utilization_pct": 11.727378867394485,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9479,7 +9479,7 @@
             "stddev": 30.823751986958815
           },
           "upfront_utilization_pct": 7.321078100821785,
-          "session_utilization_pct": 11.848179057571773,
+          "session_utilization_pct": 11.823899158747674,
           "num_unassigned_font_codepoints": 0
         },
         {
@@ -9512,7 +9512,7 @@
             "stddev": 34.83355743641313
           },
           "upfront_utilization_pct": 6.324748882201822,
-          "session_utilization_pct": 10.536439461910144,
+          "session_utilization_pct": 10.509926383539398,
           "num_unassigned_font_codepoints": 0
         }
       ]

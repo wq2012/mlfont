@@ -143,15 +143,26 @@ class FrequencySolver:
         least_sizes: Sequence[int] = (),
         codepoints: Optional[Sequence[int]] = None,
     ) -> None:
-        if codepoints is None and (
-            len(most_sizes) > 12
-            or (len(most_sizes) > 0 and max(int(x) for x in most_sizes) > 2000)
-        ):
-            self.codepoints_: List[int] = sorted(set(int(c) for c in most_sizes))
+        raw_vals = [int(x) for x in most_sizes]
+        is_codepoint_seq = (
+            codepoints is None
+            and len(raw_vals) > 0
+            and (
+                len(raw_vals) > 12
+                or max(raw_vals) > 2000
+                or (
+                    len(raw_vals) >= 3
+                    and all(b > a for a, b in zip(raw_vals, raw_vals[1:]))
+                    and (max(raw_vals) - min(raw_vals)) <= len(raw_vals) * 8
+                )
+            )
+        )
+        if is_codepoint_seq:
+            self.codepoints_: List[int] = sorted(set(raw_vals))
             self.most_sizes: List[int] = []
         else:
             self.codepoints_ = sorted(set(int(c) for c in (codepoints or ())))
-            self.most_sizes = [int(m) for m in most_sizes if int(m) > 0]
+            self.most_sizes = [m for m in raw_vals if m > 0]
         self.least_sizes = [int(ls) for ls in least_sizes if int(ls) > 0]
         self.frequency_array_: Optional[np.ndarray] = None
 
@@ -170,7 +181,11 @@ class FrequencySolver:
                     all_cps.update(ord(ch) for ch in doc)
                 elif isinstance(doc, (set, list, tuple)):
                     all_cps.update(int(c) for c in doc)
-            self.codepoints_ = sorted(all_cps)
+            if self.most_sizes and sum(self.most_sizes) > max(len(all_cps), 1):
+                self.codepoints_ = sorted(set(self.most_sizes))
+                self.most_sizes = []
+            else:
+                self.codepoints_ = sorted(all_cps)
         proc = (
             docs
             if isinstance(docs, DocumentCorpusProcessor)
@@ -248,7 +263,7 @@ class FontSubsetter:
 extract_font_codepoints = extract_codepoints_from_font
 normalize_topic_matrix = normalize_lambda_matrix
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "BrowserNetworkProfile",

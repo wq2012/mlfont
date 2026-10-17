@@ -101039,11 +101039,11 @@
             "stddev": 2220.149827016186
           },
           "cold_first_text_paint_ms": {
-            "mean": 4369.47,
-            "p95": 4369.47,
-            "minimal": 4369.47,
-            "maximal": 4369.47,
-            "stddev": 0.0
+            "mean": 9116.35,
+            "p95": 11311.782000000001,
+            "minimal": 6149.55,
+            "maximal": 11489.79,
+            "stddev": 2220.149827016186
           },
           "cold_per_glyph_ms": {
             "mean": 90.31833333333333,
@@ -101071,7 +101071,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.69,
           "speedup_vs_single_slice_session": 1.69,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -101095,11 +101095,11 @@
             "stddev": 1678.2755187393993
           },
           "cold_first_text_paint_ms": {
-            "mean": 4370.93,
-            "p95": 4370.93,
-            "minimal": 4370.93,
-            "maximal": 4370.93,
-            "stddev": 0.0
+            "mean": 8524.449999999999,
+            "p95": 9711.17,
+            "minimal": 6151.01,
+            "maximal": 9711.17,
+            "stddev": 1678.2755187393993
           },
           "cold_per_glyph_ms": {
             "mean": 85.71866666666666,
@@ -101127,7 +101127,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.8,
           "speedup_vs_single_slice_session": 1.34,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -101151,11 +101151,11 @@
             "stddev": 2658.1180994748065
           },
           "cold_first_text_paint_ms": {
-            "mean": 4247.19,
-            "p95": 4247.19,
-            "minimal": 4247.19,
-            "maximal": 4247.19,
-            "stddev": 0.0
+            "mean": 9577.856666666667,
+            "p95": 11457.43,
+            "minimal": 5818.71,
+            "maximal": 11457.43,
+            "stddev": 2658.1180994748065
           },
           "cold_per_glyph_ms": {
             "mean": 94.824,
@@ -101183,7 +101183,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.61,
           "speedup_vs_single_slice_session": 1.61,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -101375,11 +101375,11 @@
             "stddev": 555.0374567540464
           },
           "cold_first_text_paint_ms": {
-            "mean": 1293.77,
-            "p95": 1293.77,
-            "minimal": 1293.77,
-            "maximal": 1293.77,
-            "stddev": 0.0
+            "mean": 2480.4900000000002,
+            "p95": 3029.348,
+            "minimal": 1738.79,
+            "maximal": 3073.85,
+            "stddev": 555.0374567540464
           },
           "cold_per_glyph_ms": {
             "mean": 23.907,
@@ -101407,7 +101407,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.63,
           "speedup_vs_single_slice_session": 1.63,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -101431,11 +101431,11 @@
             "stddev": 419.5688796848498
           },
           "cold_first_text_paint_ms": {
-            "mean": 1294.15,
-            "p95": 1294.15,
-            "minimal": 1294.15,
-            "maximal": 1294.15,
-            "stddev": 0.0
+            "mean": 2332.53,
+            "p95": 2629.21,
+            "minimal": 1739.17,
+            "maximal": 2629.21,
+            "stddev": 419.5688796848498
           },
           "cold_per_glyph_ms": {
             "mean": 22.757,
@@ -101463,7 +101463,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.73,
           "speedup_vs_single_slice_session": 1.27,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -101487,11 +101487,11 @@
             "stddev": 664.5295248687017
           },
           "cold_first_text_paint_ms": {
-            "mean": 1262.99,
-            "p95": 1262.99,
-            "minimal": 1262.99,
-            "maximal": 1262.99,
-            "stddev": 0.0
+            "mean": 2595.6566666666668,
+            "p95": 3065.55,
+            "minimal": 1655.87,
+            "maximal": 3065.55,
+            "stddev": 664.5295248687017
           },
           "cold_per_glyph_ms": {
             "mean": 25.033666666666665,
@@ -101519,7 +101519,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.56,
           "speedup_vs_single_slice_session": 1.56,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -101711,11 +101711,11 @@
             "stddev": 138.7575824554784
           },
           "cold_first_text_paint_ms": {
-            "mean": 424.84,
-            "p95": 424.84,
-            "minimal": 424.84,
-            "maximal": 424.84,
-            "stddev": 0.0
+            "mean": 721.5233333333334,
+            "p95": 858.735,
+            "minimal": 536.1,
+            "maximal": 869.86,
+            "stddev": 138.7575824554784
           },
           "cold_per_glyph_ms": {
             "mean": 6.640666666666667,
@@ -101743,7 +101743,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.54,
           "speedup_vs_single_slice_session": 1.54,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -101767,11 +101767,11 @@
             "stddev": 104.89221992121244
           },
           "cold_first_text_paint_ms": {
-            "mean": 424.95,
-            "p95": 424.95,
-            "minimal": 424.95,
-            "maximal": 424.95,
-            "stddev": 0.0
+            "mean": 684.5500000000001,
+            "p95": 758.72,
+            "minimal": 536.21,
+            "maximal": 758.72,
+            "stddev": 104.89221992121244
           },
           "cold_per_glyph_ms": {
             "mean": 6.353333333333333,
@@ -101799,7 +101799,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.62,
           "speedup_vs_single_slice_session": 1.17,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -101823,11 +101823,11 @@
             "stddev": 166.13238121717544
           },
           "cold_first_text_paint_ms": {
-            "mean": 416.94,
-            "p95": 416.94,
-            "minimal": 416.94,
-            "maximal": 416.94,
-            "stddev": 0.0
+            "mean": 750.1066666666667,
+            "p95": 867.58,
+            "minimal": 515.16,
+            "maximal": 867.58,
+            "stddev": 166.13238121717544
           },
           "cold_per_glyph_ms": {
             "mean": 6.922000000000001,
@@ -101855,7 +101855,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.48,
           "speedup_vs_single_slice_session": 1.48,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -102047,11 +102047,11 @@
             "stddev": 111.0069568390498
           },
           "cold_first_text_paint_ms": {
-            "mean": 200.25,
-            "p95": 200.25,
-            "minimal": 200.25,
-            "maximal": 200.25,
-            "stddev": 0.0
+            "mean": 437.59,
+            "p95": 547.36,
+            "minimal": 289.25,
+            "maximal": 556.26,
+            "stddev": 111.0069568390498
           },
           "cold_per_glyph_ms": {
             "mean": 4.383,
@@ -102079,7 +102079,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.71,
           "speedup_vs_single_slice_session": 1.71,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -102103,11 +102103,11 @@
             "stddev": 83.91471874601157
           },
           "cold_first_text_paint_ms": {
-            "mean": 200.34,
-            "p95": 200.34,
-            "minimal": 200.34,
-            "maximal": 200.34,
-            "stddev": 0.0
+            "mean": 408.0133333333333,
+            "p95": 467.35,
+            "minimal": 289.34,
+            "maximal": 467.35,
+            "stddev": 83.91471874601157
           },
           "cold_per_glyph_ms": {
             "mean": 4.153,
@@ -102135,7 +102135,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.84,
           "speedup_vs_single_slice_session": 1.37,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -102159,11 +102159,11 @@
             "stddev": 132.90307654661555
           },
           "cold_first_text_paint_ms": {
-            "mean": 193.87,
-            "p95": 193.87,
-            "minimal": 193.87,
-            "maximal": 193.87,
-            "stddev": 0.0
+            "mean": 460.40333333333336,
+            "p95": 554.38,
+            "minimal": 272.45,
+            "maximal": 554.38,
+            "stddev": 132.90307654661555
           },
           "cold_per_glyph_ms": {
             "mean": 4.608333333333333,
@@ -102191,7 +102191,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.63,
           "speedup_vs_single_slice_session": 1.63,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -102383,11 +102383,11 @@
             "stddev": 44.401000989717446
           },
           "cold_first_text_paint_ms": {
-            "mean": 97.21999999999998,
-            "p95": 97.22,
-            "minimal": 97.22,
-            "maximal": 97.22,
-            "stddev": 1.4210854715202004e-14
+            "mean": 192.15333333333334,
+            "p95": 236.06,
+            "minimal": 132.82,
+            "maximal": 239.62,
+            "stddev": 44.401000989717446
           },
           "cold_per_glyph_ms": {
             "mean": 1.8596666666666668,
@@ -102415,7 +102415,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.64,
           "speedup_vs_single_slice_session": 1.64,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -102439,11 +102439,11 @@
             "stddev": 33.56400188032145
           },
           "cold_first_text_paint_ms": {
-            "mean": 97.27,
-            "p95": 97.27,
-            "minimal": 97.27,
-            "maximal": 97.27,
-            "stddev": 0.0
+            "mean": 180.33666666666667,
+            "p95": 204.07,
+            "minimal": 132.87,
+            "maximal": 204.07,
+            "stddev": 33.56400188032145
           },
           "cold_per_glyph_ms": {
             "mean": 1.7676666666666667,
@@ -102471,7 +102471,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.75,
           "speedup_vs_single_slice_session": 1.29,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -102495,11 +102495,11 @@
             "stddev": 53.16500185481255
           },
           "cold_first_text_paint_ms": {
-            "mean": 94.5,
-            "p95": 94.5,
-            "minimal": 94.5,
-            "maximal": 94.5,
-            "stddev": 0.0
+            "mean": 201.11666666666667,
+            "p95": 238.71,
+            "minimal": 125.93,
+            "maximal": 238.71,
+            "stddev": 53.16500185481255
           },
           "cold_per_glyph_ms": {
             "mean": 1.9496666666666667,
@@ -102527,7 +102527,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.57,
           "speedup_vs_single_slice_session": 1.57,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -102719,11 +102719,11 @@
             "stddev": 18.500714100331972
           },
           "cold_first_text_paint_ms": {
-            "mean": 158.26,
-            "p95": 158.26,
-            "minimal": 158.26,
-            "maximal": 158.26,
-            "stddev": 0.0
+            "mean": 197.82333333333335,
+            "p95": 216.117,
+            "minimal": 173.1,
+            "maximal": 217.6,
+            "stddev": 18.500714100331972
           },
           "cold_per_glyph_ms": {
             "mean": 1.5490000000000002,
@@ -102751,7 +102751,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.26,
           "speedup_vs_single_slice_session": 1.26,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -102775,11 +102775,11 @@
             "stddev": 13.986572131869917
           },
           "cold_first_text_paint_ms": {
-            "mean": 158.3,
-            "p95": 158.3,
-            "minimal": 158.3,
-            "maximal": 158.3,
-            "stddev": 0.0
+            "mean": 192.91,
+            "p95": 202.8,
+            "minimal": 173.13,
+            "maximal": 202.8,
+            "stddev": 13.986572131869917
           },
           "cold_per_glyph_ms": {
             "mean": 1.5106666666666666,
@@ -102807,7 +102807,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.29,
           "speedup_vs_single_slice_session": 0.89,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -102831,11 +102831,11 @@
             "stddev": 22.15129843197058
           },
           "cold_first_text_paint_ms": {
-            "mean": 156.97,
-            "p95": 156.97,
-            "minimal": 156.97,
-            "maximal": 156.97,
-            "stddev": 0.0
+            "mean": 201.39666666666668,
+            "p95": 217.06,
+            "minimal": 170.07,
+            "maximal": 217.06,
+            "stddev": 22.15129843197058
           },
           "cold_per_glyph_ms": {
             "mean": 1.5863333333333334,
@@ -102863,7 +102863,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.23,
           "speedup_vs_single_slice_session": 1.23,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -103055,11 +103055,11 @@
             "stddev": 11.10025024742936
           },
           "cold_first_text_paint_ms": {
-            "mean": 51.70000000000001,
-            "p95": 51.7,
-            "minimal": 51.7,
-            "maximal": 51.7,
-            "stddev": 7.105427357601002e-15
+            "mean": 75.44333333333333,
+            "p95": 86.42,
+            "minimal": 60.61,
+            "maximal": 87.31,
+            "stddev": 11.10025024742936
           },
           "cold_per_glyph_ms": {
             "mean": 0.6376666666666667,
@@ -103087,7 +103087,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 84.08333333333333,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.39,
           "speedup_vs_single_slice_session": 1.39,
           "bytes_saved_vs_single_slice_cold_pct": 48.24,
@@ -103111,11 +103111,11 @@
             "stddev": 8.391000470080366
           },
           "cold_first_text_paint_ms": {
-            "mean": 51.73,
-            "p95": 51.73,
-            "minimal": 51.73,
-            "maximal": 51.73,
-            "stddev": 0.0
+            "mean": 72.49666666666667,
+            "p95": 78.43,
+            "minimal": 60.63,
+            "maximal": 78.43,
+            "stddev": 8.391000470080366
           },
           "cold_per_glyph_ms": {
             "mean": 0.6146666666666667,
@@ -103143,7 +103143,7 @@
           },
           "warm_slices_downloaded_mean": 0.5,
           "warm_font_bytes_downloaded_mean": 11125.5,
-          "high_freq_token_coverage_pct_mean": 85.68333333333334,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.45,
           "speedup_vs_single_slice_session": 1.04,
           "bytes_saved_vs_single_slice_cold_pct": 52.8,
@@ -103167,11 +103167,11 @@
             "stddev": 13.288893441099185
           },
           "cold_first_text_paint_ms": {
-            "mean": 50.82,
-            "p95": 50.82,
-            "minimal": 50.82,
-            "maximal": 50.82,
-            "stddev": 0.0
+            "mean": 77.47333333333334,
+            "p95": 86.87,
+            "minimal": 58.68,
+            "maximal": 86.87,
+            "stddev": 13.288893441099185
           },
           "cold_per_glyph_ms": {
             "mean": 0.66,
@@ -103199,7 +103199,7 @@
           },
           "warm_slices_downloaded_mean": 0.0,
           "warm_font_bytes_downloaded_mean": 0.0,
-          "high_freq_token_coverage_pct_mean": 83.69999999999999,
+          "high_freq_token_coverage_pct_mean": 0.0,
           "speedup_vs_single_slice_cold": 1.36,
           "speedup_vs_single_slice_session": 1.36,
           "bytes_saved_vs_single_slice_cold_pct": 44.68,
@@ -103837,7 +103837,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -103848,7 +103848,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 8900.4,
-          "first_text_paint_ms": 4369.47,
+          "first_text_paint_ms": 11489.79,
           "total_font_load_ms": 11489.79,
           "per_glyph_latency_ms": 78.298
         },
@@ -103881,7 +103881,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -103892,7 +103892,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 7120.32,
-          "first_text_paint_ms": 4369.47,
+          "first_text_paint_ms": 9709.71,
           "total_font_load_ms": 9709.71,
           "per_glyph_latency_ms": 93.487
         },
@@ -103921,7 +103921,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -103932,7 +103932,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 3560.16,
-          "first_text_paint_ms": 4369.47,
+          "first_text_paint_ms": 6149.55,
           "total_font_load_ms": 6149.55,
           "per_glyph_latency_ms": 99.17
         },
@@ -103960,7 +103960,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -103997,7 +103997,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -104041,7 +104041,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -104052,7 +104052,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 7120.32,
-          "first_text_paint_ms": 4370.93,
+          "first_text_paint_ms": 9711.17,
           "total_font_load_ms": 9711.17,
           "per_glyph_latency_ms": 64.499
         },
@@ -104085,7 +104085,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -104096,7 +104096,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 7120.32,
-          "first_text_paint_ms": 4370.93,
+          "first_text_paint_ms": 9711.17,
           "total_font_load_ms": 9711.17,
           "per_glyph_latency_ms": 93.487
         },
@@ -104125,7 +104125,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -104136,7 +104136,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 3560.16,
-          "first_text_paint_ms": 4370.93,
+          "first_text_paint_ms": 6151.01,
           "total_font_load_ms": 6151.01,
           "per_glyph_latency_ms": 99.17
         },
@@ -104166,7 +104166,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -104177,7 +104177,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 1780.08,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 2980.08,
           "total_font_load_ms": 2980.08,
           "per_glyph_latency_ms": 33.484
         },
@@ -104203,7 +104203,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -104249,7 +104249,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -104260,7 +104260,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 8893.76,
-          "first_text_paint_ms": 4247.19,
+          "first_text_paint_ms": 11457.43,
           "total_font_load_ms": 11457.43,
           "per_glyph_latency_ms": 78.246
         },
@@ -104295,7 +104295,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -104306,7 +104306,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 8893.76,
-          "first_text_paint_ms": 4247.19,
+          "first_text_paint_ms": 11457.43,
           "total_font_load_ms": 11457.43,
           "per_glyph_latency_ms": 113.413
         },
@@ -104335,7 +104335,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -104346,7 +104346,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 1200.0,
           "font_download_ms": 3255.04,
-          "first_text_paint_ms": 4247.19,
+          "first_text_paint_ms": 5818.71,
           "total_font_load_ms": 5818.71,
           "per_glyph_latency_ms": 92.813
         },
@@ -104375,7 +104375,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -104412,7 +104412,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -105057,7 +105057,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -105068,7 +105068,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 400.0,
           "font_download_ms": 2225.1,
-          "first_text_paint_ms": 1293.77,
+          "first_text_paint_ms": 3073.85,
           "total_font_load_ms": 3073.85,
           "per_glyph_latency_ms": 20.35
         },
@@ -105101,7 +105101,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -105112,7 +105112,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 400.0,
           "font_download_ms": 1780.08,
-          "first_text_paint_ms": 1293.77,
+          "first_text_paint_ms": 2628.83,
           "total_font_load_ms": 2628.83,
           "per_glyph_latency_ms": 24.495
         },
@@ -105141,7 +105141,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -105152,7 +105152,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 400.0,
           "font_download_ms": 890.04,
-          "first_text_paint_ms": 1293.77,
+          "first_text_paint_ms": 1738.79,
           "total_font_load_ms": 1738.79,
           "per_glyph_latency_ms": 26.876
         },
@@ -105180,7 +105180,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -105217,7 +105217,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -105261,7 +105261,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -105272,7 +105272,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 400.0,
           "font_download_ms": 1780.08,
-          "first_text_paint_ms": 1294.15,
+          "first_text_paint_ms": 2629.21,
           "total_font_load_ms": 2629.21,
           "per_glyph_latency_ms": 16.9
         },
@@ -105305,7 +105305,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -105316,7 +105316,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 400.0,
           "font_download_ms": 1780.08,
-          "first_text_paint_ms": 1294.15,
+          "first_text_paint_ms": 2629.21,
           "total_font_load_ms": 2629.21,
           "per_glyph_latency_ms": 24.495
         },
@@ -105345,7 +105345,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -105356,7 +105356,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 400.0,
           "font_download_ms": 890.04,
-          "first_text_paint_ms": 1294.15,
+          "first_text_paint_ms": 1739.17,
           "total_font_load_ms": 1739.17,
           "per_glyph_latency_ms": 26.876
         },
@@ -105386,7 +105386,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -105397,7 +105397,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 400.0,
           "font_download_ms": 445.02,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 845.02,
           "total_font_load_ms": 845.02,
           "per_glyph_latency_ms": 9.495
         },
@@ -105423,7 +105423,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -105469,7 +105469,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -105480,7 +105480,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 400.0,
           "font_download_ms": 2223.44,
-          "first_text_paint_ms": 1262.99,
+          "first_text_paint_ms": 3065.55,
           "total_font_load_ms": 3065.55,
           "per_glyph_latency_ms": 20.337
         },
@@ -105515,7 +105515,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -105526,7 +105526,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 400.0,
           "font_download_ms": 2223.44,
-          "first_text_paint_ms": 1262.99,
+          "first_text_paint_ms": 3065.55,
           "total_font_load_ms": 3065.55,
           "per_glyph_latency_ms": 29.477
         },
@@ -105555,7 +105555,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -105566,7 +105566,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 400.0,
           "font_download_ms": 813.76,
-          "first_text_paint_ms": 1262.99,
+          "first_text_paint_ms": 1655.87,
           "total_font_load_ms": 1655.87,
           "per_glyph_latency_ms": 25.287
         },
@@ -105595,7 +105595,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -105632,7 +105632,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -106277,7 +106277,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -106288,7 +106288,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 150.0,
           "font_download_ms": 556.27,
-          "first_text_paint_ms": 424.84,
+          "first_text_paint_ms": 869.86,
           "total_font_load_ms": 869.86,
           "per_glyph_latency_ms": 5.475
         },
@@ -106321,7 +106321,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -106332,7 +106332,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 150.0,
           "font_download_ms": 445.02,
-          "first_text_paint_ms": 424.84,
+          "first_text_paint_ms": 758.61,
           "total_font_load_ms": 758.61,
           "per_glyph_latency_ms": 6.686
         },
@@ -106361,7 +106361,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -106372,7 +106372,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 150.0,
           "font_download_ms": 222.51,
-          "first_text_paint_ms": 424.84,
+          "first_text_paint_ms": 536.1,
           "total_font_load_ms": 536.1,
           "per_glyph_latency_ms": 7.761
         },
@@ -106400,7 +106400,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -106437,7 +106437,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -106481,7 +106481,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -106492,7 +106492,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 150.0,
           "font_download_ms": 445.02,
-          "first_text_paint_ms": 424.95,
+          "first_text_paint_ms": 758.72,
           "total_font_load_ms": 758.72,
           "per_glyph_latency_ms": 4.613
         },
@@ -106525,7 +106525,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -106536,7 +106536,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 150.0,
           "font_download_ms": 445.02,
-          "first_text_paint_ms": 424.95,
+          "first_text_paint_ms": 758.72,
           "total_font_load_ms": 758.72,
           "per_glyph_latency_ms": 6.686
         },
@@ -106565,7 +106565,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -106576,7 +106576,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 150.0,
           "font_download_ms": 222.51,
-          "first_text_paint_ms": 424.95,
+          "first_text_paint_ms": 536.21,
           "total_font_load_ms": 536.21,
           "per_glyph_latency_ms": 7.761
         },
@@ -106606,7 +106606,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -106617,7 +106617,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 150.0,
           "font_download_ms": 111.25,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 261.25,
           "total_font_load_ms": 261.25,
           "per_glyph_latency_ms": 2.935
         },
@@ -106643,7 +106643,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -106689,7 +106689,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -106700,7 +106700,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 150.0,
           "font_download_ms": 555.86,
-          "first_text_paint_ms": 416.94,
+          "first_text_paint_ms": 867.58,
           "total_font_load_ms": 867.58,
           "per_glyph_latency_ms": 5.472
         },
@@ -106735,7 +106735,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -106746,7 +106746,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 150.0,
           "font_download_ms": 555.86,
-          "first_text_paint_ms": 416.94,
+          "first_text_paint_ms": 867.58,
           "total_font_load_ms": 867.58,
           "per_glyph_latency_ms": 7.931
         },
@@ -106775,7 +106775,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -106786,7 +106786,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 150.0,
           "font_download_ms": 203.44,
-          "first_text_paint_ms": 416.94,
+          "first_text_paint_ms": 515.16,
           "total_font_load_ms": 515.16,
           "per_glyph_latency_ms": 7.363
         },
@@ -106815,7 +106815,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -106852,7 +106852,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -107497,7 +107497,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -107508,7 +107508,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 50.0,
           "font_download_ms": 445.02,
-          "first_text_paint_ms": 200.25,
+          "first_text_paint_ms": 556.26,
           "total_font_load_ms": 556.26,
           "per_glyph_latency_ms": 3.837
         },
@@ -107541,7 +107541,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -107552,7 +107552,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 50.0,
           "font_download_ms": 356.02,
-          "first_text_paint_ms": 200.25,
+          "first_text_paint_ms": 467.26,
           "total_font_load_ms": 467.26,
           "per_glyph_latency_ms": 4.562
         },
@@ -107581,7 +107581,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -107592,7 +107592,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 50.0,
           "font_download_ms": 178.01,
-          "first_text_paint_ms": 200.25,
+          "first_text_paint_ms": 289.25,
           "total_font_load_ms": 289.25,
           "per_glyph_latency_ms": 4.75
         },
@@ -107620,7 +107620,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -107657,7 +107657,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -107701,7 +107701,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -107712,7 +107712,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 50.0,
           "font_download_ms": 356.02,
-          "first_text_paint_ms": 200.34,
+          "first_text_paint_ms": 467.35,
           "total_font_load_ms": 467.35,
           "per_glyph_latency_ms": 3.147
         },
@@ -107745,7 +107745,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -107756,7 +107756,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 50.0,
           "font_download_ms": 356.02,
-          "first_text_paint_ms": 200.34,
+          "first_text_paint_ms": 467.35,
           "total_font_load_ms": 467.35,
           "per_glyph_latency_ms": 4.562
         },
@@ -107785,7 +107785,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -107796,7 +107796,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 50.0,
           "font_download_ms": 178.01,
-          "first_text_paint_ms": 200.34,
+          "first_text_paint_ms": 289.34,
           "total_font_load_ms": 289.34,
           "per_glyph_latency_ms": 4.75
         },
@@ -107826,7 +107826,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -107837,7 +107837,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 50.0,
           "font_download_ms": 89.0,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 139.0,
           "total_font_load_ms": 139.0,
           "per_glyph_latency_ms": 1.562
         },
@@ -107863,7 +107863,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -107909,7 +107909,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -107920,7 +107920,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 50.0,
           "font_download_ms": 444.69,
-          "first_text_paint_ms": 193.87,
+          "first_text_paint_ms": 554.38,
           "total_font_load_ms": 554.38,
           "per_glyph_latency_ms": 3.835
         },
@@ -107955,7 +107955,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -107966,7 +107966,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 50.0,
           "font_download_ms": 444.69,
-          "first_text_paint_ms": 193.87,
+          "first_text_paint_ms": 554.38,
           "total_font_load_ms": 554.38,
           "per_glyph_latency_ms": 5.558
         },
@@ -107995,7 +107995,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -108006,7 +108006,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 50.0,
           "font_download_ms": 162.75,
-          "first_text_paint_ms": 193.87,
+          "first_text_paint_ms": 272.45,
           "total_font_load_ms": 272.45,
           "per_glyph_latency_ms": 4.432
         },
@@ -108035,7 +108035,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -108072,7 +108072,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -108717,7 +108717,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -108728,7 +108728,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 28.0,
           "font_download_ms": 178.01,
-          "first_text_paint_ms": 97.22,
+          "first_text_paint_ms": 239.62,
           "total_font_load_ms": 239.62,
           "per_glyph_latency_ms": 1.597
         },
@@ -108761,7 +108761,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -108772,7 +108772,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 28.0,
           "font_download_ms": 142.41,
-          "first_text_paint_ms": 97.22,
+          "first_text_paint_ms": 204.02,
           "total_font_load_ms": 204.02,
           "per_glyph_latency_ms": 1.915
         },
@@ -108801,7 +108801,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -108812,7 +108812,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 28.0,
           "font_download_ms": 71.2,
-          "first_text_paint_ms": 97.22,
+          "first_text_paint_ms": 132.82,
           "total_font_load_ms": 132.82,
           "per_glyph_latency_ms": 2.067
         },
@@ -108840,7 +108840,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -108877,7 +108877,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -108921,7 +108921,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -108932,7 +108932,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 28.0,
           "font_download_ms": 142.41,
-          "first_text_paint_ms": 97.27,
+          "first_text_paint_ms": 204.07,
           "total_font_load_ms": 204.07,
           "per_glyph_latency_ms": 1.321
         },
@@ -108965,7 +108965,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -108976,7 +108976,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 28.0,
           "font_download_ms": 142.41,
-          "first_text_paint_ms": 97.27,
+          "first_text_paint_ms": 204.07,
           "total_font_load_ms": 204.07,
           "per_glyph_latency_ms": 1.915
         },
@@ -109005,7 +109005,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -109016,7 +109016,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 28.0,
           "font_download_ms": 71.2,
-          "first_text_paint_ms": 97.27,
+          "first_text_paint_ms": 132.87,
           "total_font_load_ms": 132.87,
           "per_glyph_latency_ms": 2.067
         },
@@ -109046,7 +109046,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -109057,7 +109057,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 28.0,
           "font_download_ms": 35.6,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 63.6,
           "total_font_load_ms": 63.6,
           "per_glyph_latency_ms": 0.715
         },
@@ -109083,7 +109083,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -109129,7 +109129,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -109140,7 +109140,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 28.0,
           "font_download_ms": 177.88,
-          "first_text_paint_ms": 94.5,
+          "first_text_paint_ms": 238.71,
           "total_font_load_ms": 238.71,
           "per_glyph_latency_ms": 1.596
         },
@@ -109175,7 +109175,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -109186,7 +109186,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 28.0,
           "font_download_ms": 177.88,
-          "first_text_paint_ms": 94.5,
+          "first_text_paint_ms": 238.71,
           "total_font_load_ms": 238.71,
           "per_glyph_latency_ms": 2.313
         },
@@ -109215,7 +109215,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -109226,7 +109226,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 28.0,
           "font_download_ms": 65.1,
-          "first_text_paint_ms": 94.5,
+          "first_text_paint_ms": 125.93,
           "total_font_load_ms": 125.93,
           "per_glyph_latency_ms": 1.94
         },
@@ -109255,7 +109255,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -109292,7 +109292,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -109937,7 +109937,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -109948,7 +109948,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 70.0,
           "font_download_ms": 74.17,
-          "first_text_paint_ms": 158.26,
+          "first_text_paint_ms": 217.6,
           "total_font_load_ms": 217.6,
           "per_glyph_latency_ms": 1.118
         },
@@ -109981,7 +109981,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -109992,7 +109992,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 70.0,
           "font_download_ms": 59.34,
-          "first_text_paint_ms": 158.26,
+          "first_text_paint_ms": 202.77,
           "total_font_load_ms": 202.77,
           "per_glyph_latency_ms": 1.453
         },
@@ -110021,7 +110021,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -110032,7 +110032,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 70.0,
           "font_download_ms": 29.67,
-          "first_text_paint_ms": 158.26,
+          "first_text_paint_ms": 173.1,
           "total_font_load_ms": 173.1,
           "per_glyph_latency_ms": 2.076
         },
@@ -110060,7 +110060,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -110097,7 +110097,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -110141,7 +110141,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -110152,7 +110152,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 70.0,
           "font_download_ms": 59.34,
-          "first_text_paint_ms": 158.3,
+          "first_text_paint_ms": 202.8,
           "total_font_load_ms": 202.8,
           "per_glyph_latency_ms": 1.003
         },
@@ -110185,7 +110185,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -110196,7 +110196,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 70.0,
           "font_download_ms": 59.34,
-          "first_text_paint_ms": 158.3,
+          "first_text_paint_ms": 202.8,
           "total_font_load_ms": 202.8,
           "per_glyph_latency_ms": 1.453
         },
@@ -110225,7 +110225,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -110236,7 +110236,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 70.0,
           "font_download_ms": 29.67,
-          "first_text_paint_ms": 158.3,
+          "first_text_paint_ms": 173.13,
           "total_font_load_ms": 173.13,
           "per_glyph_latency_ms": 2.076
         },
@@ -110266,7 +110266,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -110277,7 +110277,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 70.0,
           "font_download_ms": 14.83,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 84.83,
           "total_font_load_ms": 84.83,
           "per_glyph_latency_ms": 0.953
         },
@@ -110303,7 +110303,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -110349,7 +110349,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -110360,7 +110360,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 70.0,
           "font_download_ms": 74.11,
-          "first_text_paint_ms": 156.97,
+          "first_text_paint_ms": 217.06,
           "total_font_load_ms": 217.06,
           "per_glyph_latency_ms": 1.117
         },
@@ -110395,7 +110395,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -110406,7 +110406,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 70.0,
           "font_download_ms": 74.11,
-          "first_text_paint_ms": 156.97,
+          "first_text_paint_ms": 217.06,
           "total_font_load_ms": 217.06,
           "per_glyph_latency_ms": 1.619
         },
@@ -110435,7 +110435,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -110446,7 +110446,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 70.0,
           "font_download_ms": 27.13,
-          "first_text_paint_ms": 156.97,
+          "first_text_paint_ms": 170.07,
           "total_font_load_ms": 170.07,
           "per_glyph_latency_ms": 2.023
         },
@@ -110475,7 +110475,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -110512,7 +110512,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111157,7 +111157,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 68.07,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -111168,7 +111168,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 20.0,
           "font_download_ms": 44.5,
-          "first_text_paint_ms": 51.7,
+          "first_text_paint_ms": 87.31,
           "total_font_load_ms": 87.31,
           "per_glyph_latency_ms": 0.5
         },
@@ -111201,7 +111201,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -111212,7 +111212,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 20.0,
           "font_download_ms": 35.6,
-          "first_text_paint_ms": 51.7,
+          "first_text_paint_ms": 78.41,
           "total_font_load_ms": 78.41,
           "per_glyph_latency_ms": 0.625
         },
@@ -111241,7 +111241,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -111252,7 +111252,7 @@
           "css_parse_ms": 1.87,
           "font_rtt_ms": 20.0,
           "font_download_ms": 17.8,
-          "first_text_paint_ms": 51.7,
+          "first_text_paint_ms": 60.61,
           "total_font_load_ms": 60.61,
           "per_glyph_latency_ms": 0.788
         },
@@ -111280,7 +111280,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.44,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -111317,7 +111317,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9418,
           "css_gzip_bytes": 2344,
           "num_unicode_ranges": 537,
@@ -111361,7 +111361,7 @@
             7,
             8
           ],
-          "high_freq_token_coverage_pct": 71.82,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -111372,7 +111372,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 20.0,
           "font_download_ms": 35.6,
-          "first_text_paint_ms": 51.73,
+          "first_text_paint_ms": 78.43,
           "total_font_load_ms": 78.43,
           "per_glyph_latency_ms": 0.431
         },
@@ -111405,7 +111405,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -111416,7 +111416,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 20.0,
           "font_download_ms": 35.6,
-          "first_text_paint_ms": 51.73,
+          "first_text_paint_ms": 78.43,
           "total_font_load_ms": 78.43,
           "per_glyph_latency_ms": 0.625
         },
@@ -111445,7 +111445,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -111456,7 +111456,7 @@
           "css_parse_ms": 1.89,
           "font_rtt_ms": 20.0,
           "font_download_ms": 17.8,
-          "first_text_paint_ms": 51.73,
+          "first_text_paint_ms": 60.63,
           "total_font_load_ms": 60.63,
           "per_glyph_latency_ms": 0.788
         },
@@ -111486,7 +111486,7 @@
           "downloaded_slice_indices": [
             17
           ],
-          "high_freq_token_coverage_pct": 85.49,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -111497,7 +111497,7 @@
           "css_parse_ms": 0.0,
           "font_rtt_ms": 20.0,
           "font_download_ms": 8.9,
-          "first_text_paint_ms": 0.0,
+          "first_text_paint_ms": 28.9,
           "total_font_load_ms": 28.9,
           "per_glyph_latency_ms": 0.325
         },
@@ -111523,7 +111523,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.74,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 9487,
           "css_gzip_bytes": 2362,
           "num_unicode_ranges": 549,
@@ -111569,7 +111569,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 67.62,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111580,7 +111580,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 20.0,
           "font_download_ms": 44.47,
-          "first_text_paint_ms": 50.82,
+          "first_text_paint_ms": 86.87,
           "total_font_load_ms": 86.87,
           "per_glyph_latency_ms": 0.5
         },
@@ -111615,7 +111615,7 @@
             8,
             17
           ],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111626,7 +111626,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 20.0,
           "font_download_ms": 44.47,
-          "first_text_paint_ms": 50.82,
+          "first_text_paint_ms": 86.87,
           "total_font_load_ms": 86.87,
           "per_glyph_latency_ms": 0.724
         },
@@ -111655,7 +111655,7 @@
             0,
             1
           ],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111666,7 +111666,7 @@
           "css_parse_ms": 1.59,
           "font_rtt_ms": 20.0,
           "font_download_ms": 16.28,
-          "first_text_paint_ms": 50.82,
+          "first_text_paint_ms": 58.68,
           "total_font_load_ms": 58.68,
           "per_glyph_latency_ms": 0.756
         },
@@ -111695,7 +111695,7 @@
             17
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 84.27,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111732,7 +111732,7 @@
             1
           ],
           "downloaded_slice_indices": [],
-          "high_freq_token_coverage_pct": 99.21,
+          "high_freq_token_coverage_pct": 0.0,
           "css_raw_bytes": 8334,
           "css_gzip_bytes": 2026,
           "num_unicode_ranges": 384,
@@ -111757,10 +111757,10 @@
       "font_key": "notosanssc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 238.8,
+      "chrome_local_decode_ms": 230.6,
       "network_transfer_ms": 9867.92,
-      "fonts_ready_ms": 10106.72,
-      "load_event_end_ms": 10106.72,
+      "fonts_ready_ms": 10098.52,
+      "load_event_end_ms": 10098.52,
       "css_transfer_bytes": 1737,
       "css_duration_ms": 30.78,
       "num_slices_requested_by_chrome": 1,
@@ -111770,10 +111770,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 6130712,
       "max_slice_duration_ms": 9837.14,
-      "wall_clock_font_window_ms": 10075.94,
+      "wall_clock_font_window_ms": 10067.74,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "dev_china_portal",
@@ -111781,10 +111782,10 @@
       "font_key": "notosanssc",
       "strategy_name": "equal_bin_102",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 124.4,
+      "chrome_local_decode_ms": 118.6,
       "network_transfer_ms": 8503.45,
-      "fonts_ready_ms": 8627.85,
-      "load_event_end_ms": 8627.85,
+      "fonts_ready_ms": 8622.05,
+      "load_event_end_ms": 8622.05,
       "css_transfer_bytes": 3290,
       "css_duration_ms": 33.26,
       "num_slices_requested_by_chrome": 56,
@@ -111849,10 +111850,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 5118868,
       "max_slice_duration_ms": 174.51,
-      "wall_clock_font_window_ms": 8594.59,
-      "local_decode_speedup_vs_single_slice": 1.92,
+      "wall_clock_font_window_ms": 8588.79,
+      "local_decode_speedup_vs_single_slice": 1.94,
       "speedup_vs_single_slice": 1.17,
-      "bytes_saved_vs_single_slice_pct": 16.47
+      "bytes_saved_vs_single_slice_pct": 16.47,
+      "chrome_report_available": true
     },
     {
       "page_id": "dev_china_portal",
@@ -111860,10 +111862,10 @@
       "font_key": "notosanssc",
       "strategy_name": "range_compact_most1000_500_topics100",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 51.9,
+      "chrome_local_decode_ms": 55.6,
       "network_transfer_ms": 1969.83,
-      "fonts_ready_ms": 2021.73,
-      "load_event_end_ms": 2021.73,
+      "fonts_ready_ms": 2025.43,
+      "load_event_end_ms": 2025.43,
       "css_transfer_bytes": 26874,
       "css_duration_ms": 71.0,
       "num_slices_requested_by_chrome": 11,
@@ -111883,10 +111885,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1151768,
       "max_slice_duration_ms": 440.74,
-      "wall_clock_font_window_ms": 1950.73,
-      "local_decode_speedup_vs_single_slice": 4.6,
-      "speedup_vs_single_slice": 5.0,
-      "bytes_saved_vs_single_slice_pct": 80.78
+      "wall_clock_font_window_ms": 1954.43,
+      "local_decode_speedup_vs_single_slice": 4.15,
+      "speedup_vs_single_slice": 4.99,
+      "bytes_saved_vs_single_slice_pct": 80.78,
+      "chrome_report_available": true
     },
     {
       "page_id": "sina_sports_nba",
@@ -111894,10 +111897,10 @@
       "font_key": "notosanssc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 242.7,
+      "chrome_local_decode_ms": 221.1,
       "network_transfer_ms": 9867.92,
-      "fonts_ready_ms": 10110.62,
-      "load_event_end_ms": 10110.62,
+      "fonts_ready_ms": 10089.02,
+      "load_event_end_ms": 10089.02,
       "css_transfer_bytes": 1737,
       "css_duration_ms": 30.78,
       "num_slices_requested_by_chrome": 1,
@@ -111907,10 +111910,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 6130712,
       "max_slice_duration_ms": 9837.14,
-      "wall_clock_font_window_ms": 10079.84,
+      "wall_clock_font_window_ms": 10058.24,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "sina_sports_nba",
@@ -111918,10 +111922,10 @@
       "font_key": "notosanssc",
       "strategy_name": "equal_bin_102",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 116.4,
+      "chrome_local_decode_ms": 109.2,
       "network_transfer_ms": 7889.89,
-      "fonts_ready_ms": 8006.29,
-      "load_event_end_ms": 8006.29,
+      "fonts_ready_ms": 7999.09,
+      "load_event_end_ms": 7999.09,
       "css_transfer_bytes": 3290,
       "css_duration_ms": 33.26,
       "num_slices_requested_by_chrome": 52,
@@ -111982,10 +111986,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 4752894,
       "max_slice_duration_ms": 174.51,
-      "wall_clock_font_window_ms": 7973.03,
-      "local_decode_speedup_vs_single_slice": 2.09,
+      "wall_clock_font_window_ms": 7965.83,
+      "local_decode_speedup_vs_single_slice": 2.02,
       "speedup_vs_single_slice": 1.26,
-      "bytes_saved_vs_single_slice_pct": 22.44
+      "bytes_saved_vs_single_slice_pct": 22.44,
+      "chrome_report_available": true
     },
     {
       "page_id": "sina_sports_nba",
@@ -111993,23 +111998,39 @@
       "font_key": "notosanssc",
       "strategy_name": "range_compact_most1000_500_topics100",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 9.7,
-      "network_transfer_ms": 511.73,
-      "fonts_ready_ms": 521.43,
-      "load_event_end_ms": 521.43,
+      "chrome_local_decode_ms": 65.1,
+      "network_transfer_ms": 2701.12,
+      "fonts_ready_ms": 2766.22,
+      "load_event_end_ms": 2766.22,
       "css_transfer_bytes": 26874,
       "css_duration_ms": 71.0,
-      "num_slices_requested_by_chrome": 1,
+      "num_slices_requested_by_chrome": 16,
       "requested_slice_indices": [
-        0
+        0,
+        1,
+        2,
+        36,
+        43,
+        46,
+        48,
+        56,
+        58,
+        71,
+        73,
+        82,
+        83,
+        86,
+        90,
+        91
       ],
-      "simulator_exact_slice_match": false,
-      "woff2_transfer_bytes": 257960,
+      "simulator_exact_slice_match": true,
+      "woff2_transfer_bytes": 1591324,
       "max_slice_duration_ms": 440.74,
-      "wall_clock_font_window_ms": 450.44,
-      "local_decode_speedup_vs_single_slice": 25.02,
-      "speedup_vs_single_slice": 19.39,
-      "bytes_saved_vs_single_slice_pct": 95.36
+      "wall_clock_font_window_ms": 2695.22,
+      "local_decode_speedup_vs_single_slice": 3.4,
+      "speedup_vs_single_slice": 3.65,
+      "bytes_saved_vs_single_slice_pct": 73.61,
+      "chrome_report_available": true
     },
     {
       "page_id": "tech_ai_maluuba",
@@ -112017,10 +112038,10 @@
       "font_key": "notosanssc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 235.0,
+      "chrome_local_decode_ms": 221.7,
       "network_transfer_ms": 9867.92,
-      "fonts_ready_ms": 10102.92,
-      "load_event_end_ms": 10102.92,
+      "fonts_ready_ms": 10089.62,
+      "load_event_end_ms": 10089.62,
       "css_transfer_bytes": 1737,
       "css_duration_ms": 30.78,
       "num_slices_requested_by_chrome": 1,
@@ -112030,10 +112051,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 6130712,
       "max_slice_duration_ms": 9837.14,
-      "wall_clock_font_window_ms": 10072.14,
+      "wall_clock_font_window_ms": 10058.84,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "tech_ai_maluuba",
@@ -112041,10 +112063,10 @@
       "font_key": "notosanssc",
       "strategy_name": "equal_bin_102",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 119.7,
+      "chrome_local_decode_ms": 122.3,
       "network_transfer_ms": 8503.45,
-      "fonts_ready_ms": 8623.15,
-      "load_event_end_ms": 8623.15,
+      "fonts_ready_ms": 8625.75,
+      "load_event_end_ms": 8625.75,
       "css_transfer_bytes": 3290,
       "css_duration_ms": 33.26,
       "num_slices_requested_by_chrome": 56,
@@ -112109,10 +112131,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 5118868,
       "max_slice_duration_ms": 174.51,
-      "wall_clock_font_window_ms": 8589.89,
-      "local_decode_speedup_vs_single_slice": 1.96,
+      "wall_clock_font_window_ms": 8592.49,
+      "local_decode_speedup_vs_single_slice": 1.81,
       "speedup_vs_single_slice": 1.17,
-      "bytes_saved_vs_single_slice_pct": 16.47
+      "bytes_saved_vs_single_slice_pct": 16.47,
+      "chrome_report_available": true
     },
     {
       "page_id": "tech_ai_maluuba",
@@ -112120,10 +112143,10 @@
       "font_key": "notosanssc",
       "strategy_name": "range_compact_most1000_500_topics100",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 57.5,
+      "chrome_local_decode_ms": 59.5,
       "network_transfer_ms": 2610.43,
-      "fonts_ready_ms": 2667.93,
-      "load_event_end_ms": 2667.93,
+      "fonts_ready_ms": 2669.93,
+      "load_event_end_ms": 2669.93,
       "css_transfer_bytes": 26874,
       "css_duration_ms": 71.0,
       "num_slices_requested_by_chrome": 15,
@@ -112147,10 +112170,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1534644,
       "max_slice_duration_ms": 440.74,
-      "wall_clock_font_window_ms": 2596.93,
-      "local_decode_speedup_vs_single_slice": 4.09,
-      "speedup_vs_single_slice": 3.79,
-      "bytes_saved_vs_single_slice_pct": 74.54
+      "wall_clock_font_window_ms": 2598.93,
+      "local_decode_speedup_vs_single_slice": 3.73,
+      "speedup_vs_single_slice": 3.78,
+      "bytes_saved_vs_single_slice_pct": 74.54,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_taipei_tech_portal",
@@ -112158,10 +112182,10 @@
       "font_key": "notosanstc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 172.4,
+      "chrome_local_decode_ms": 170.5,
       "network_transfer_ms": 6719.31,
-      "fonts_ready_ms": 6891.71,
-      "load_event_end_ms": 6891.71,
+      "fonts_ready_ms": 6889.81,
+      "load_event_end_ms": 6889.81,
       "css_transfer_bytes": 20023,
       "css_duration_ms": 60.04,
       "num_slices_requested_by_chrome": 1,
@@ -112171,10 +112195,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 4144544,
       "max_slice_duration_ms": 6659.27,
-      "wall_clock_font_window_ms": 6831.67,
+      "wall_clock_font_window_ms": 6829.77,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_taipei_tech_portal",
@@ -112182,10 +112207,10 @@
       "font_key": "notosanstc",
       "strategy_name": "equal_bin_82",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 104.3,
+      "chrome_local_decode_ms": 182.8,
       "network_transfer_ms": 6518.51,
-      "fonts_ready_ms": 6622.81,
-      "load_event_end_ms": 6622.81,
+      "fonts_ready_ms": 6701.31,
+      "load_event_end_ms": 6701.31,
       "css_transfer_bytes": 21664,
       "css_duration_ms": 62.66,
       "num_slices_requested_by_chrome": 51,
@@ -112245,10 +112270,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3877407,
       "max_slice_duration_ms": 149.75,
-      "wall_clock_font_window_ms": 6560.15,
-      "local_decode_speedup_vs_single_slice": 1.65,
-      "speedup_vs_single_slice": 1.04,
-      "bytes_saved_vs_single_slice_pct": 6.38
+      "wall_clock_font_window_ms": 6638.65,
+      "local_decode_speedup_vs_single_slice": 0.93,
+      "speedup_vs_single_slice": 1.03,
+      "bytes_saved_vs_single_slice_pct": 6.38,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_taipei_tech_portal",
@@ -112256,10 +112282,10 @@
       "font_key": "notosanstc",
       "strategy_name": "range_compact_most600_600_topics80",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 54.2,
+      "chrome_local_decode_ms": 63.8,
       "network_transfer_ms": 1892.04,
-      "fonts_ready_ms": 1946.24,
-      "load_event_end_ms": 1946.24,
+      "fonts_ready_ms": 1955.84,
+      "load_event_end_ms": 1955.84,
       "css_transfer_bytes": 34897,
       "css_duration_ms": 83.84,
       "num_slices_requested_by_chrome": 12,
@@ -112280,10 +112306,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1095128,
       "max_slice_duration_ms": 295.99,
-      "wall_clock_font_window_ms": 1862.4,
-      "local_decode_speedup_vs_single_slice": 3.18,
-      "speedup_vs_single_slice": 3.54,
-      "bytes_saved_vs_single_slice_pct": 72.87
+      "wall_clock_font_window_ms": 1872.0,
+      "local_decode_speedup_vs_single_slice": 2.67,
+      "speedup_vs_single_slice": 3.52,
+      "bytes_saved_vs_single_slice_pct": 72.87,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_culture_literature",
@@ -112291,10 +112318,10 @@
       "font_key": "notosanstc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 165.4,
+      "chrome_local_decode_ms": 164.0,
       "network_transfer_ms": 6719.31,
-      "fonts_ready_ms": 6884.71,
-      "load_event_end_ms": 6884.71,
+      "fonts_ready_ms": 6883.31,
+      "load_event_end_ms": 6883.31,
       "css_transfer_bytes": 20023,
       "css_duration_ms": 60.04,
       "num_slices_requested_by_chrome": 1,
@@ -112304,10 +112331,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 4144544,
       "max_slice_duration_ms": 6659.27,
-      "wall_clock_font_window_ms": 6824.67,
+      "wall_clock_font_window_ms": 6823.27,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_culture_literature",
@@ -112315,10 +112343,10 @@
       "font_key": "notosanstc",
       "strategy_name": "equal_bin_82",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 105.2,
+      "chrome_local_decode_ms": 100.7,
       "network_transfer_ms": 7032.08,
-      "fonts_ready_ms": 7137.28,
-      "load_event_end_ms": 7137.28,
+      "fonts_ready_ms": 7132.78,
+      "load_event_end_ms": 7132.78,
       "css_transfer_bytes": 21664,
       "css_duration_ms": 62.66,
       "num_slices_requested_by_chrome": 55,
@@ -112382,10 +112410,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 4180889,
       "max_slice_duration_ms": 149.75,
-      "wall_clock_font_window_ms": 7074.62,
-      "local_decode_speedup_vs_single_slice": 1.57,
-      "speedup_vs_single_slice": 0.96,
-      "bytes_saved_vs_single_slice_pct": -0.91
+      "wall_clock_font_window_ms": 7070.12,
+      "local_decode_speedup_vs_single_slice": 1.63,
+      "speedup_vs_single_slice": 0.97,
+      "bytes_saved_vs_single_slice_pct": -0.91,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_culture_literature",
@@ -112393,10 +112422,10 @@
       "font_key": "notosanstc",
       "strategy_name": "range_compact_most600_600_topics80",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 54.7,
+      "chrome_local_decode_ms": 62.6,
       "network_transfer_ms": 2388.37,
-      "fonts_ready_ms": 2443.07,
-      "load_event_end_ms": 2443.07,
+      "fonts_ready_ms": 2450.97,
+      "load_event_end_ms": 2450.97,
       "css_transfer_bytes": 34897,
       "css_duration_ms": 83.84,
       "num_slices_requested_by_chrome": 16,
@@ -112421,10 +112450,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1387836,
       "max_slice_duration_ms": 295.99,
-      "wall_clock_font_window_ms": 2359.24,
-      "local_decode_speedup_vs_single_slice": 3.02,
-      "speedup_vs_single_slice": 2.82,
-      "bytes_saved_vs_single_slice_pct": 65.84
+      "wall_clock_font_window_ms": 2367.14,
+      "local_decode_speedup_vs_single_slice": 2.62,
+      "speedup_vs_single_slice": 2.81,
+      "bytes_saved_vs_single_slice_pct": 65.84,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_gastronomy_guide",
@@ -112432,10 +112462,10 @@
       "font_key": "notosanstc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 175.8,
+      "chrome_local_decode_ms": 161.6,
       "network_transfer_ms": 6719.31,
-      "fonts_ready_ms": 6895.11,
-      "load_event_end_ms": 6895.11,
+      "fonts_ready_ms": 6880.91,
+      "load_event_end_ms": 6880.91,
       "css_transfer_bytes": 20023,
       "css_duration_ms": 60.04,
       "num_slices_requested_by_chrome": 1,
@@ -112445,10 +112475,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 4144544,
       "max_slice_duration_ms": 6659.27,
-      "wall_clock_font_window_ms": 6835.07,
+      "wall_clock_font_window_ms": 6820.87,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_gastronomy_guide",
@@ -112456,10 +112487,10 @@
       "font_key": "notosanstc",
       "strategy_name": "equal_bin_82",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 125.8,
+      "chrome_local_decode_ms": 92.9,
       "network_transfer_ms": 6396.77,
-      "fonts_ready_ms": 6522.57,
-      "load_event_end_ms": 6522.57,
+      "fonts_ready_ms": 6489.67,
+      "load_event_end_ms": 6489.67,
       "css_transfer_bytes": 21664,
       "css_duration_ms": 62.66,
       "num_slices_requested_by_chrome": 50,
@@ -112518,10 +112549,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3801316,
       "max_slice_duration_ms": 149.75,
-      "wall_clock_font_window_ms": 6459.91,
-      "local_decode_speedup_vs_single_slice": 1.4,
+      "wall_clock_font_window_ms": 6427.01,
+      "local_decode_speedup_vs_single_slice": 1.74,
       "speedup_vs_single_slice": 1.06,
-      "bytes_saved_vs_single_slice_pct": 8.2
+      "bytes_saved_vs_single_slice_pct": 8.2,
+      "chrome_report_available": true
     },
     {
       "page_id": "tc_gastronomy_guide",
@@ -112529,10 +112561,10 @@
       "font_key": "notosanstc",
       "strategy_name": "range_compact_most600_600_topics80",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 62.3,
+      "chrome_local_decode_ms": 72.5,
       "network_transfer_ms": 2970.48,
-      "fonts_ready_ms": 3032.78,
-      "load_event_end_ms": 3032.78,
+      "fonts_ready_ms": 3042.98,
+      "load_event_end_ms": 3042.98,
       "css_transfer_bytes": 34897,
       "css_duration_ms": 83.84,
       "num_slices_requested_by_chrome": 20,
@@ -112561,10 +112593,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1734152,
       "max_slice_duration_ms": 295.99,
-      "wall_clock_font_window_ms": 2948.94,
-      "local_decode_speedup_vs_single_slice": 2.82,
-      "speedup_vs_single_slice": 2.27,
-      "bytes_saved_vs_single_slice_pct": 57.52
+      "wall_clock_font_window_ms": 2959.14,
+      "local_decode_speedup_vs_single_slice": 2.23,
+      "speedup_vs_single_slice": 2.26,
+      "bytes_saved_vs_single_slice_pct": 57.52,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_web_dev_docs",
@@ -112572,10 +112605,10 @@
       "font_key": "notosansjp",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 170.2,
+      "chrome_local_decode_ms": 151.6,
       "network_transfer_ms": 5428.47,
-      "fonts_ready_ms": 5598.67,
-      "load_event_end_ms": 5598.67,
+      "fonts_ready_ms": 5580.07,
+      "load_event_end_ms": 5580.07,
       "css_transfer_bytes": 19391,
       "css_duration_ms": 59.03,
       "num_slices_requested_by_chrome": 1,
@@ -112585,10 +112618,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3338400,
       "max_slice_duration_ms": 5369.44,
-      "wall_clock_font_window_ms": 5539.64,
+      "wall_clock_font_window_ms": 5521.04,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_web_dev_docs",
@@ -112596,10 +112630,10 @@
       "font_key": "notosansjp",
       "strategy_name": "equal_bin_62",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 91.0,
+      "chrome_local_decode_ms": 92.8,
       "network_transfer_ms": 4525.38,
-      "fonts_ready_ms": 4616.38,
-      "load_event_end_ms": 4616.38,
+      "fonts_ready_ms": 4618.18,
+      "load_event_end_ms": 4618.18,
       "css_transfer_bytes": 20602,
       "css_duration_ms": 60.96,
       "num_slices_requested_by_chrome": 34,
@@ -112642,10 +112676,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 2685260,
       "max_slice_duration_ms": 154.42,
-      "wall_clock_font_window_ms": 4555.42,
-      "local_decode_speedup_vs_single_slice": 1.87,
+      "wall_clock_font_window_ms": 4557.22,
+      "local_decode_speedup_vs_single_slice": 1.63,
       "speedup_vs_single_slice": 1.21,
-      "bytes_saved_vs_single_slice_pct": 19.42
+      "bytes_saved_vs_single_slice_pct": 19.42,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_web_dev_docs",
@@ -112653,10 +112688,10 @@
       "font_key": "notosansjp",
       "strategy_name": "range_compact_most500_500_topics60",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 54.3,
+      "chrome_local_decode_ms": 60.0,
       "network_transfer_ms": 1351.55,
-      "fonts_ready_ms": 1405.85,
-      "load_event_end_ms": 1405.85,
+      "fonts_ready_ms": 1411.55,
+      "load_event_end_ms": 1411.55,
       "css_transfer_bytes": 29089,
       "css_duration_ms": 74.54,
       "num_slices_requested_by_chrome": 7,
@@ -112672,10 +112707,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 763128,
       "max_slice_duration_ms": 382.25,
-      "wall_clock_font_window_ms": 1331.3,
-      "local_decode_speedup_vs_single_slice": 3.13,
-      "speedup_vs_single_slice": 3.98,
-      "bytes_saved_vs_single_slice_pct": 76.41
+      "wall_clock_font_window_ms": 1337.0,
+      "local_decode_speedup_vs_single_slice": 2.53,
+      "speedup_vs_single_slice": 3.95,
+      "bytes_saved_vs_single_slice_pct": 76.41,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_sports_baseball",
@@ -112683,10 +112719,10 @@
       "font_key": "notosansjp",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 148.9,
+      "chrome_local_decode_ms": 154.7,
       "network_transfer_ms": 5428.47,
-      "fonts_ready_ms": 5577.37,
-      "load_event_end_ms": 5577.37,
+      "fonts_ready_ms": 5583.17,
+      "load_event_end_ms": 5583.17,
       "css_transfer_bytes": 19391,
       "css_duration_ms": 59.03,
       "num_slices_requested_by_chrome": 1,
@@ -112696,10 +112732,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3338400,
       "max_slice_duration_ms": 5369.44,
-      "wall_clock_font_window_ms": 5518.34,
+      "wall_clock_font_window_ms": 5524.14,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_sports_baseball",
@@ -112707,10 +112744,10 @@
       "font_key": "notosansjp",
       "strategy_name": "equal_bin_62",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 104.3,
+      "chrome_local_decode_ms": 101.2,
       "network_transfer_ms": 4650.42,
-      "fonts_ready_ms": 4754.72,
-      "load_event_end_ms": 4754.72,
+      "fonts_ready_ms": 4751.62,
+      "load_event_end_ms": 4751.62,
       "css_transfer_bytes": 20602,
       "css_duration_ms": 60.96,
       "num_slices_requested_by_chrome": 35,
@@ -112754,10 +112791,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 2763411,
       "max_slice_duration_ms": 154.42,
-      "wall_clock_font_window_ms": 4693.76,
-      "local_decode_speedup_vs_single_slice": 1.43,
-      "speedup_vs_single_slice": 1.17,
-      "bytes_saved_vs_single_slice_pct": 17.09
+      "wall_clock_font_window_ms": 4690.66,
+      "local_decode_speedup_vs_single_slice": 1.53,
+      "speedup_vs_single_slice": 1.18,
+      "bytes_saved_vs_single_slice_pct": 17.09,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_sports_baseball",
@@ -112765,10 +112803,10 @@
       "font_key": "notosansjp",
       "strategy_name": "range_compact_most500_500_topics60",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 60.0,
+      "chrome_local_decode_ms": 60.8,
       "network_transfer_ms": 1811.8,
-      "fonts_ready_ms": 1871.8,
-      "load_event_end_ms": 1871.8,
+      "fonts_ready_ms": 1872.6,
+      "load_event_end_ms": 1872.6,
       "css_transfer_bytes": 29089,
       "css_duration_ms": 74.54,
       "num_slices_requested_by_chrome": 10,
@@ -112787,10 +112825,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1050788,
       "max_slice_duration_ms": 382.25,
-      "wall_clock_font_window_ms": 1797.26,
-      "local_decode_speedup_vs_single_slice": 2.48,
+      "wall_clock_font_window_ms": 1798.06,
+      "local_decode_speedup_vs_single_slice": 2.54,
       "speedup_vs_single_slice": 2.98,
-      "bytes_saved_vs_single_slice_pct": 67.84
+      "bytes_saved_vs_single_slice_pct": 67.84,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_literature_essay",
@@ -112798,10 +112837,10 @@
       "font_key": "notosansjp",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 147.5,
+      "chrome_local_decode_ms": 149.0,
       "network_transfer_ms": 5428.47,
-      "fonts_ready_ms": 5575.97,
-      "load_event_end_ms": 5575.97,
+      "fonts_ready_ms": 5577.47,
+      "load_event_end_ms": 5577.47,
       "css_transfer_bytes": 19391,
       "css_duration_ms": 59.03,
       "num_slices_requested_by_chrome": 1,
@@ -112811,10 +112850,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3338400,
       "max_slice_duration_ms": 5369.44,
-      "wall_clock_font_window_ms": 5516.94,
+      "wall_clock_font_window_ms": 5518.44,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_literature_essay",
@@ -112822,10 +112862,10 @@
       "font_key": "notosansjp",
       "strategy_name": "equal_bin_62",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 141.2,
+      "chrome_local_decode_ms": 102.9,
       "network_transfer_ms": 5562.9,
-      "fonts_ready_ms": 5704.1,
-      "load_event_end_ms": 5704.1,
+      "fonts_ready_ms": 5665.8,
+      "load_event_end_ms": 5665.8,
       "css_transfer_bytes": 20602,
       "css_duration_ms": 60.96,
       "num_slices_requested_by_chrome": 42,
@@ -112876,10 +112916,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3316208,
       "max_slice_duration_ms": 154.42,
-      "wall_clock_font_window_ms": 5643.13,
-      "local_decode_speedup_vs_single_slice": 1.04,
+      "wall_clock_font_window_ms": 5604.83,
+      "local_decode_speedup_vs_single_slice": 1.45,
       "speedup_vs_single_slice": 0.98,
-      "bytes_saved_vs_single_slice_pct": 0.62
+      "bytes_saved_vs_single_slice_pct": 0.62,
+      "chrome_report_available": true
     },
     {
       "page_id": "jp_literature_essay",
@@ -112887,10 +112928,10 @@
       "font_key": "notosansjp",
       "strategy_name": "range_compact_most500_500_topics60",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 61.5,
+      "chrome_local_decode_ms": 74.7,
       "network_transfer_ms": 2340.8,
-      "fonts_ready_ms": 2402.3,
-      "load_event_end_ms": 2402.3,
+      "fonts_ready_ms": 2415.5,
+      "load_event_end_ms": 2415.5,
       "css_transfer_bytes": 29089,
       "css_duration_ms": 74.54,
       "num_slices_requested_by_chrome": 14,
@@ -112913,10 +112954,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 1363912,
       "max_slice_duration_ms": 382.25,
-      "wall_clock_font_window_ms": 2327.76,
-      "local_decode_speedup_vs_single_slice": 2.4,
-      "speedup_vs_single_slice": 2.32,
-      "bytes_saved_vs_single_slice_pct": 58.51
+      "wall_clock_font_window_ms": 2340.96,
+      "local_decode_speedup_vs_single_slice": 1.99,
+      "speedup_vs_single_slice": 2.31,
+      "bytes_saved_vs_single_slice_pct": 58.51,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_cloud_engineering",
@@ -112924,10 +112966,10 @@
       "font_key": "notosanskr",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 147.0,
+      "chrome_local_decode_ms": 147.4,
       "network_transfer_ms": 5050.99,
-      "fonts_ready_ms": 5197.99,
-      "load_event_end_ms": 5197.99,
+      "fonts_ready_ms": 5198.39,
+      "load_event_end_ms": 5198.39,
       "css_transfer_bytes": 16668,
       "css_duration_ms": 54.67,
       "num_slices_requested_by_chrome": 1,
@@ -112937,10 +112979,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3105200,
       "max_slice_duration_ms": 4996.32,
-      "wall_clock_font_window_ms": 5143.32,
+      "wall_clock_font_window_ms": 5143.72,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_cloud_engineering",
@@ -112948,10 +112991,10 @@
       "font_key": "notosanskr",
       "strategy_name": "equal_bin_52",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 77.6,
+      "chrome_local_decode_ms": 74.4,
       "network_transfer_ms": 4263.29,
-      "fonts_ready_ms": 4340.89,
-      "load_event_end_ms": 4340.89,
+      "fonts_ready_ms": 4337.69,
+      "load_event_end_ms": 4337.69,
       "css_transfer_bytes": 17582,
       "css_duration_ms": 56.13,
       "num_slices_requested_by_chrome": 24,
@@ -112984,10 +113027,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 2559477,
       "max_slice_duration_ms": 198.97,
-      "wall_clock_font_window_ms": 4284.76,
-      "local_decode_speedup_vs_single_slice": 1.89,
+      "wall_clock_font_window_ms": 4281.56,
+      "local_decode_speedup_vs_single_slice": 1.98,
       "speedup_vs_single_slice": 1.2,
-      "bytes_saved_vs_single_slice_pct": 17.45
+      "bytes_saved_vs_single_slice_pct": 17.45,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_cloud_engineering",
@@ -112995,10 +113039,10 @@
       "font_key": "notosanskr",
       "strategy_name": "range_compact_most300_300_topics50",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 41.4,
+      "chrome_local_decode_ms": 43.5,
       "network_transfer_ms": 845.48,
-      "fonts_ready_ms": 886.88,
-      "load_event_end_ms": 886.88,
+      "fonts_ready_ms": 888.98,
+      "load_event_end_ms": 888.98,
       "css_transfer_bytes": 26571,
       "css_duration_ms": 70.51,
       "num_slices_requested_by_chrome": 6,
@@ -113013,10 +113057,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 466856,
       "max_slice_duration_ms": 199.32,
-      "wall_clock_font_window_ms": 816.37,
-      "local_decode_speedup_vs_single_slice": 3.55,
-      "speedup_vs_single_slice": 5.86,
-      "bytes_saved_vs_single_slice_pct": 84.19
+      "wall_clock_font_window_ms": 818.47,
+      "local_decode_speedup_vs_single_slice": 3.39,
+      "speedup_vs_single_slice": 5.85,
+      "bytes_saved_vs_single_slice_pct": 84.19,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_kpop_entertainment",
@@ -113024,10 +113069,10 @@
       "font_key": "notosanskr",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 146.2,
+      "chrome_local_decode_ms": 140.5,
       "network_transfer_ms": 5050.99,
-      "fonts_ready_ms": 5197.19,
-      "load_event_end_ms": 5197.19,
+      "fonts_ready_ms": 5191.49,
+      "load_event_end_ms": 5191.49,
       "css_transfer_bytes": 16668,
       "css_duration_ms": 54.67,
       "num_slices_requested_by_chrome": 1,
@@ -113037,10 +113082,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3105200,
       "max_slice_duration_ms": 4996.32,
-      "wall_clock_font_window_ms": 5142.52,
+      "wall_clock_font_window_ms": 5136.82,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_kpop_entertainment",
@@ -113048,10 +113094,10 @@
       "font_key": "notosanskr",
       "strategy_name": "equal_bin_52",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 74.8,
+      "chrome_local_decode_ms": 95.6,
       "network_transfer_ms": 4263.29,
-      "fonts_ready_ms": 4338.09,
-      "load_event_end_ms": 4338.09,
+      "fonts_ready_ms": 4358.89,
+      "load_event_end_ms": 4358.89,
       "css_transfer_bytes": 17582,
       "css_duration_ms": 56.13,
       "num_slices_requested_by_chrome": 24,
@@ -113084,10 +113130,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 2559477,
       "max_slice_duration_ms": 198.97,
-      "wall_clock_font_window_ms": 4281.96,
-      "local_decode_speedup_vs_single_slice": 1.95,
-      "speedup_vs_single_slice": 1.2,
-      "bytes_saved_vs_single_slice_pct": 17.45
+      "wall_clock_font_window_ms": 4302.76,
+      "local_decode_speedup_vs_single_slice": 1.47,
+      "speedup_vs_single_slice": 1.19,
+      "bytes_saved_vs_single_slice_pct": 17.45,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_kpop_entertainment",
@@ -113095,10 +113142,10 @@
       "font_key": "notosanskr",
       "strategy_name": "range_compact_most300_300_topics50",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 42.6,
+      "chrome_local_decode_ms": 43.3,
       "network_transfer_ms": 1038.99,
-      "fonts_ready_ms": 1081.59,
-      "load_event_end_ms": 1081.59,
+      "fonts_ready_ms": 1082.29,
+      "load_event_end_ms": 1082.29,
       "css_transfer_bytes": 26571,
       "css_duration_ms": 70.51,
       "num_slices_requested_by_chrome": 7,
@@ -113114,10 +113161,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 570300,
       "max_slice_duration_ms": 199.32,
-      "wall_clock_font_window_ms": 1011.08,
-      "local_decode_speedup_vs_single_slice": 3.43,
-      "speedup_vs_single_slice": 4.81,
-      "bytes_saved_vs_single_slice_pct": 80.88
+      "wall_clock_font_window_ms": 1011.78,
+      "local_decode_speedup_vs_single_slice": 3.24,
+      "speedup_vs_single_slice": 4.8,
+      "bytes_saved_vs_single_slice_pct": 80.88,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_economy_finance",
@@ -113125,10 +113173,10 @@
       "font_key": "notosanskr",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 141.5,
+      "chrome_local_decode_ms": 138.3,
       "network_transfer_ms": 5050.99,
-      "fonts_ready_ms": 5192.49,
-      "load_event_end_ms": 5192.49,
+      "fonts_ready_ms": 5189.29,
+      "load_event_end_ms": 5189.29,
       "css_transfer_bytes": 16668,
       "css_duration_ms": 54.67,
       "num_slices_requested_by_chrome": 1,
@@ -113138,10 +113186,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 3105200,
       "max_slice_duration_ms": 4996.32,
-      "wall_clock_font_window_ms": 5137.82,
+      "wall_clock_font_window_ms": 5134.62,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_economy_finance",
@@ -113149,10 +113198,10 @@
       "font_key": "notosanskr",
       "strategy_name": "equal_bin_52",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 75.0,
+      "chrome_local_decode_ms": 75.7,
       "network_transfer_ms": 4263.29,
-      "fonts_ready_ms": 4338.29,
-      "load_event_end_ms": 4338.29,
+      "fonts_ready_ms": 4338.99,
+      "load_event_end_ms": 4338.99,
       "css_transfer_bytes": 17582,
       "css_duration_ms": 56.13,
       "num_slices_requested_by_chrome": 24,
@@ -113185,10 +113234,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 2559477,
       "max_slice_duration_ms": 198.97,
-      "wall_clock_font_window_ms": 4282.16,
-      "local_decode_speedup_vs_single_slice": 1.89,
+      "wall_clock_font_window_ms": 4282.86,
+      "local_decode_speedup_vs_single_slice": 1.83,
       "speedup_vs_single_slice": 1.2,
-      "bytes_saved_vs_single_slice_pct": 17.45
+      "bytes_saved_vs_single_slice_pct": 17.45,
+      "chrome_report_available": true
     },
     {
       "page_id": "kr_economy_finance",
@@ -113196,10 +113246,10 @@
       "font_key": "notosanskr",
       "strategy_name": "range_compact_most300_300_topics50",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 38.2,
+      "chrome_local_decode_ms": 37.9,
       "network_transfer_ms": 578.51,
-      "fonts_ready_ms": 616.71,
-      "load_event_end_ms": 616.71,
+      "fonts_ready_ms": 616.41,
+      "load_event_end_ms": 616.41,
       "css_transfer_bytes": 26571,
       "css_duration_ms": 70.51,
       "num_slices_requested_by_chrome": 4,
@@ -113212,10 +113262,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 299996,
       "max_slice_duration_ms": 199.32,
-      "wall_clock_font_window_ms": 546.19,
-      "local_decode_speedup_vs_single_slice": 3.7,
+      "wall_clock_font_window_ms": 545.89,
+      "local_decode_speedup_vs_single_slice": 3.65,
       "speedup_vs_single_slice": 8.42,
-      "bytes_saved_vs_single_slice_pct": 89.54
+      "bytes_saved_vs_single_slice_pct": 89.54,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_multilingual_eu_news",
@@ -113223,10 +113274,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 33.2,
+      "chrome_local_decode_ms": 28.6,
       "network_transfer_ms": 315.46,
-      "fonts_ready_ms": 348.66,
-      "load_event_end_ms": 348.66,
+      "fonts_ready_ms": 344.06,
+      "load_event_end_ms": 344.06,
       "css_transfer_bytes": 688,
       "css_duration_ms": 29.1,
       "num_slices_requested_by_chrome": 1,
@@ -113236,10 +113287,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 161472,
       "max_slice_duration_ms": 286.36,
-      "wall_clock_font_window_ms": 319.56,
+      "wall_clock_font_window_ms": 314.96,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_multilingual_eu_news",
@@ -113247,10 +113299,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "equal_bin_20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 29.8,
+      "chrome_local_decode_ms": 27.2,
       "network_transfer_ms": 270.91,
-      "fonts_ready_ms": 300.71,
-      "load_event_end_ms": 300.71,
+      "fonts_ready_ms": 298.11,
+      "load_event_end_ms": 298.11,
       "css_transfer_bytes": 988,
       "css_duration_ms": 29.58,
       "num_slices_requested_by_chrome": 6,
@@ -113265,10 +113317,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 133328,
       "max_slice_duration_ms": 63.6,
-      "wall_clock_font_window_ms": 271.12,
-      "local_decode_speedup_vs_single_slice": 1.11,
-      "speedup_vs_single_slice": 1.16,
-      "bytes_saved_vs_single_slice_pct": 17.17
+      "wall_clock_font_window_ms": 268.52,
+      "local_decode_speedup_vs_single_slice": 1.05,
+      "speedup_vs_single_slice": 1.15,
+      "bytes_saved_vs_single_slice_pct": 17.17,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_multilingual_eu_news",
@@ -113276,10 +113329,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "range_compact_topics20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 27.9,
+      "chrome_local_decode_ms": 24.5,
       "network_transfer_ms": 237.12,
-      "fonts_ready_ms": 265.02,
-      "load_event_end_ms": 265.02,
+      "fonts_ready_ms": 261.62,
+      "load_event_end_ms": 261.62,
       "css_transfer_bytes": 2026,
       "css_duration_ms": 31.24,
       "num_slices_requested_by_chrome": 5,
@@ -113293,10 +113346,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 111172,
       "max_slice_duration_ms": 66.39,
-      "wall_clock_font_window_ms": 233.78,
-      "local_decode_speedup_vs_single_slice": 1.19,
+      "wall_clock_font_window_ms": 230.38,
+      "local_decode_speedup_vs_single_slice": 1.17,
       "speedup_vs_single_slice": 1.32,
-      "bytes_saved_vs_single_slice_pct": 30.19
+      "bytes_saved_vs_single_slice_pct": 30.19,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_slavic_hellenic_encyclopedia",
@@ -113304,10 +113358,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 32.7,
+      "chrome_local_decode_ms": 30.9,
       "network_transfer_ms": 315.46,
-      "fonts_ready_ms": 348.16,
-      "load_event_end_ms": 348.16,
+      "fonts_ready_ms": 346.36,
+      "load_event_end_ms": 346.36,
       "css_transfer_bytes": 688,
       "css_duration_ms": 29.1,
       "num_slices_requested_by_chrome": 1,
@@ -113317,10 +113371,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 161472,
       "max_slice_duration_ms": 286.36,
-      "wall_clock_font_window_ms": 319.06,
+      "wall_clock_font_window_ms": 317.26,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_slavic_hellenic_encyclopedia",
@@ -113328,10 +113383,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "equal_bin_20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 30.1,
+      "chrome_local_decode_ms": 29.3,
       "network_transfer_ms": 235.3,
-      "fonts_ready_ms": 265.4,
-      "load_event_end_ms": 265.4,
+      "fonts_ready_ms": 264.6,
+      "load_event_end_ms": 264.6,
       "css_transfer_bytes": 988,
       "css_duration_ms": 29.58,
       "num_slices_requested_by_chrome": 5,
@@ -113345,10 +113400,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 111077,
       "max_slice_duration_ms": 63.6,
-      "wall_clock_font_window_ms": 235.82,
-      "local_decode_speedup_vs_single_slice": 1.09,
+      "wall_clock_font_window_ms": 235.02,
+      "local_decode_speedup_vs_single_slice": 1.05,
       "speedup_vs_single_slice": 1.31,
-      "bytes_saved_vs_single_slice_pct": 30.89
+      "bytes_saved_vs_single_slice_pct": 30.89,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_slavic_hellenic_encyclopedia",
@@ -113356,10 +113412,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "range_compact_topics20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 32.6,
+      "chrome_local_decode_ms": 27.1,
       "network_transfer_ms": 237.12,
-      "fonts_ready_ms": 269.72,
-      "load_event_end_ms": 269.72,
+      "fonts_ready_ms": 264.22,
+      "load_event_end_ms": 264.22,
       "css_transfer_bytes": 2026,
       "css_duration_ms": 31.24,
       "num_slices_requested_by_chrome": 5,
@@ -113373,10 +113429,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 111172,
       "max_slice_duration_ms": 66.39,
-      "wall_clock_font_window_ms": 238.48,
-      "local_decode_speedup_vs_single_slice": 1.0,
-      "speedup_vs_single_slice": 1.29,
-      "bytes_saved_vs_single_slice_pct": 30.19
+      "wall_clock_font_window_ms": 232.98,
+      "local_decode_speedup_vs_single_slice": 1.14,
+      "speedup_vs_single_slice": 1.31,
+      "bytes_saved_vs_single_slice_pct": 30.19,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_scientific_typography",
@@ -113384,10 +113441,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "single_slice",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 24.2,
+      "chrome_local_decode_ms": 22.5,
       "network_transfer_ms": 315.46,
-      "fonts_ready_ms": 339.66,
-      "load_event_end_ms": 339.66,
+      "fonts_ready_ms": 337.96,
+      "load_event_end_ms": 337.96,
       "css_transfer_bytes": 688,
       "css_duration_ms": 29.1,
       "num_slices_requested_by_chrome": 1,
@@ -113397,10 +113454,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 161472,
       "max_slice_duration_ms": 286.36,
-      "wall_clock_font_window_ms": 310.56,
+      "wall_clock_font_window_ms": 308.86,
       "local_decode_speedup_vs_single_slice": 1.0,
       "speedup_vs_single_slice": 1.0,
-      "bytes_saved_vs_single_slice_pct": 0.0
+      "bytes_saved_vs_single_slice_pct": 0.0,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_scientific_typography",
@@ -113408,10 +113466,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "equal_bin_20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 19.6,
+      "chrome_local_decode_ms": 17.9,
       "network_transfer_ms": 93.18,
-      "fonts_ready_ms": 112.78,
-      "load_event_end_ms": 112.78,
+      "fonts_ready_ms": 111.08,
+      "load_event_end_ms": 111.08,
       "css_transfer_bytes": 988,
       "css_duration_ms": 29.58,
       "num_slices_requested_by_chrome": 1,
@@ -113421,10 +113479,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 22251,
       "max_slice_duration_ms": 63.6,
-      "wall_clock_font_window_ms": 83.2,
-      "local_decode_speedup_vs_single_slice": 1.23,
-      "speedup_vs_single_slice": 3.01,
-      "bytes_saved_vs_single_slice_pct": 85.67
+      "wall_clock_font_window_ms": 81.5,
+      "local_decode_speedup_vs_single_slice": 1.26,
+      "speedup_vs_single_slice": 3.04,
+      "bytes_saved_vs_single_slice_pct": 85.67,
+      "chrome_report_available": true
     },
     {
       "page_id": "lgc_scientific_typography",
@@ -113432,10 +113491,10 @@
       "font_key": "notosans_lgc",
       "strategy_name": "range_compact_topics20",
       "profile_name": "Cable-5Mbps",
-      "chrome_local_decode_ms": 20.7,
+      "chrome_local_decode_ms": 18.7,
       "network_transfer_ms": 124.34,
-      "fonts_ready_ms": 145.04,
-      "load_event_end_ms": 145.04,
+      "fonts_ready_ms": 143.04,
+      "load_event_end_ms": 143.04,
       "css_transfer_bytes": 2026,
       "css_duration_ms": 31.24,
       "num_slices_requested_by_chrome": 2,
@@ -113446,10 +113505,11 @@
       "simulator_exact_slice_match": true,
       "woff2_transfer_bytes": 40688,
       "max_slice_duration_ms": 61.67,
-      "wall_clock_font_window_ms": 113.8,
-      "local_decode_speedup_vs_single_slice": 1.17,
-      "speedup_vs_single_slice": 2.34,
-      "bytes_saved_vs_single_slice_pct": 73.66
+      "wall_clock_font_window_ms": 111.8,
+      "local_decode_speedup_vs_single_slice": 1.2,
+      "speedup_vs_single_slice": 2.36,
+      "bytes_saved_vs_single_slice_pct": 73.66,
+      "chrome_report_available": true
     }
   ]
 }

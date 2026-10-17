@@ -2,7 +2,7 @@
 
 import setuptools
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 with open("README.md", "r", encoding="utf-8") as file_object:
     LONG_DESCRIPTION = file_object.read()
@@ -27,6 +27,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/wq2012/mlfont",
     packages=setuptools.find_packages(include=["mlfont", "mlfont.*", "scripts", "scripts.*"]),
+    package_data={"mlfont": ["mlfont.js"]},
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "mlfont-prepare-data=scripts.prepare_data:main",

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
 from pathlib import Path
 from typing import List
@@ -67,17 +67,22 @@ def main() -> None:
         choices=["online_lda", "dnntm"],
         help="Underlying topic model when --algorithm=range_compact.",
     )
-    parser.add_argument("--n_topics", type=int, default=20, help="Number of topic slices.")
+    parser.add_argument(
+        "--n_topics",
+        type=int,
+        default=None,
+        help="Number of topic slices (default: 20, or preset value).",
+    )
     parser.add_argument(
         "--most_sizes",
         type=str,
-        default="",
+        default=None,
         help="Comma-separated high-frequency slice sizes (e.g. '1000,500').",
     )
     parser.add_argument(
         "--normalization_method",
         type=str,
-        default="sinkhorn",
+        default=None,
         choices=[
             "sinkhorn",
             "bistochastic",
@@ -87,64 +92,107 @@ def main() -> None:
             "spectral_norm",
             "none",
         ],
+        help="Matrix normalization method (default: 'topic_sum', or preset value).",
     )
     parser.add_argument(
         "--loss_type",
         type=str,
-        default=DnnTmLossType.ALL_COMBINED.value,
+        default=None,
         choices=[e.value for e in DnnTmLossType],
         help="Loss objective variant for DNNTM training.",
     )
     parser.add_argument(
         "--range_cost_weight",
         type=float,
-        default=0.012,
+        default=None,
         help="Weight w_r on CSS unicode-range compactness cost in Range-Compact GA.",
     )
     parser.add_argument(
         "--max_iteration",
         type=int,
-        default=1200,
+        default=None,
         help="Maximum GA iterations for range_compact.",
     )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed.")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed (default: 42, or preset value).",
+    )
     args = parser.parse_args()
 
+    effective_seed = args.seed if args.seed is not None else 42
     data_dir = Path(args.data_dir)
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     codepoints = sorted(parse_codepoints_file(data_dir / "codepoints.nam"))
     train_docs = _load_documents(data_dir / "train.jsonl")
-    corpus = DocumentCorpusProcessor(train_docs, random_seed=args.seed)
+    corpus = DocumentCorpusProcessor(train_docs, random_seed=effective_seed)
     freq_arr = corpus.count_frequency_array(codepoints, deduplicate_within_doc=True)
     np.save(out_dir / "frequency_array.npy", freq_arr)
 
     if args.preset:
         preset = get_preset_config(args.preset)
-        olda_cfg = preset.olda_config
-        dnntm_cfg = preset.dnntm_config
-        ga_cfg = preset.range_compact_config
+        olda_cfg = replace(preset.olda_config)
+        dnntm_cfg = replace(preset.dnntm_config)
+        ga_cfg = replace(preset.range_compact_config)
+        if args.n_topics is not None:
+            olda_cfg.n_topics = args.n_topics
+            dnntm_cfg.n_topics = args.n_topics
+        if args.most_sizes is not None:
+            most_override = [int(x) for x in args.most_sizes.split(",") if x.strip()]
+            olda_cfg.most_sizes = list(most_override)
+            dnntm_cfg.most_sizes = list(most_override)
+        if args.normalization_method is not None:
+            olda_cfg.normalization_method = args.normalization_method
+            dnntm_cfg.normalization_method = args.normalization_method
+        if args.loss_type is not None:
+            dnntm_cfg.loss_type = args.loss_type
+        if args.range_cost_weight is not None:
+            ga_cfg.range_cost_weight = args.range_cost_weight
+        if args.max_iteration is not None:
+            ga_cfg.max_iteration = args.max_iteration
+        if args.seed is not None:
+            olda_cfg.random_state = args.seed
+            dnntm_cfg.random_seed = args.seed
+            ga_cfg.random_seed = args.seed
     else:
-        most_list = [int(x) for x in args.most_sizes.split(",") if x.strip()]
+        most_str = args.most_sizes if args.most_sizes is not None else ""
+        most_list = [int(x) for x in most_str.split(",") if x.strip()]
+        n_topics_val = args.n_topics if args.n_topics is not None else 20
+        norm_val = (
+            args.normalization_method
+            if args.normalization_method is not None
+            else "topic_sum"
+        )
+        loss_val = (
+            args.loss_type
+            if args.loss_type is not None
+            else DnnTmLossType.ALL_COMBINED.value
+        )
+        rc_weight = (
+            args.range_cost_weight if args.range_cost_weight is not None else 0.012
+        )
+        max_iter_val = args.max_iteration if args.max_iteration is not None else 1200
         olda_cfg = OnlineLdaConfig(
-            n_topics=args.n_topics,
+            n_topics=n_topics_val,
             most_sizes=most_list,
-            normalization_method=args.normalization_method,
-            random_state=args.seed,
+            normalization_method=norm_val,
+            random_state=effective_seed,
         )
         dnntm_cfg = DnnTmConfig(
-            n_topics=args.n_topics,
+            n_topics=n_topics_val,
             most_sizes=most_list,
-            normalization_method=args.normalization_method,
-            loss_type=args.loss_type,
-            random_seed=args.seed,
+            normalization_method=norm_val,
+            loss_type=loss_val,
+            random_seed=effective_seed,
         )
         ga_cfg = RangeCompactConfig(
-            range_cost_weight=args.range_cost_weight,
-            max_iteration=args.max_iteration,
+            range_cost_weight=rc_weight,
+            max_iteration=max_iter_val,
             decay_max_diff=DecayConfig(min_val=20.0, max_val=40.0),
-            random_seed=args.seed,
+            random_seed=effective_seed,
         )
 
     if args.algorithm == "most_equal_bin":

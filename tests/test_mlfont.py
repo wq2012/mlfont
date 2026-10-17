@@ -1403,6 +1403,14 @@ def test_headless_chrome_fallback_never_fabricates_exact_match(tmp_path: Path, m
         )
 
     monkeypatch.setattr(subprocess, "run", _good_run)
+    # When full_woff2 is missing, single_slice must not substitute slice_000.woff2
+    results_no_full = run_headless_chrome_benchmark(bdir, pages=[page], full_woff2_dir=tmp_path)
+    single_no_full = [r for r in results_no_full if r.strategy_name == "single_slice"][0]
+    assert single_no_full.chrome_report_available is False
+    assert single_no_full.simulator_exact_slice_match is False
+
+    # When full_woff2 is present, all strategies succeed and match
+    (tmp_path / "NotoSansSC-Regular.woff2").write_bytes(b"\0" * 40)
     results_ok = run_headless_chrome_benchmark(bdir, pages=[page], full_woff2_dir=tmp_path)
     assert all(r.chrome_report_available for r in results_ok)
     assert all(r.simulator_exact_slice_match for r in results_ok)
@@ -1467,3 +1475,153 @@ def test_mlfont_js_syntax_and_documented_api() -> None:
         pyjsparser = None
     if pyjsparser is not None:
         pyjsparser.parse(js)
+
+
+def test_round1_review_fixes(tmp_path: Path, monkeypatch) -> None:
+    """Verify Round 1 review fixes across evaluator, train CLI, DNNTM, GA, and demo.html."""
+    import json
+    import sys
+    from mlfont import (
+        DnnTmConfig,
+        DnnTmLearner,
+        DocumentCorpusProcessor,
+        EvaluationParams,
+        FontLoadingEvaluator,
+        FrequencySolver,
+        RangeCompactConfig,
+        RangeCompactGASolver,
+        SlicingStrategy,
+        WebsiteFontSimulator,
+        export_pretrained_bundle,
+        load_pretrained,
+    )
+    from scripts import train
+    from scripts.run_noto_experiments import REPO_ROOT
+
+    # 1. Evaluator partial trailing session utilization (4 samples, L=3 -> 2 sessions: 3 and 1)
+    cps = list(range(0x41, 0x41 + 10))
+    strat = SlicingStrategy(subsets=[cps[:5], cps[5:]], name="s2")
+    samples = [
+        {cps[0], cps[1]},
+        {cps[0], cps[2]},
+        {cps[0], cps[3]},
+        {cps[5]},  # 4th sample is in trailing partial session (1 / 5 = 20%)
+    ]
+    ev = FontLoadingEvaluator(cps, samples)
+    params_l3 = EvaluationParams(
+        name="l3", rtt_ms=100.0, bandwidth_bytes_per_ms=10.0, session_length=3
+    )
+    res_l3 = ev.evaluate_strategy(strat, params_l3)
+    # Session 1: 4 unique cps / 5 downloaded = 80%; Session 2 (trailing): 1 / 5 = 20% -> mean 50%
+    assert np.isclose(res_l3.session_utilization_pct, 50.0)
+
+    # 2. DnnTmLearner fitted attributes & empty active_cols short-circuit
+    empty_corpus = DocumentCorpusProcessor(["xyz"])
+    dnn_empty = DnnTmLearner(
+        empty_corpus, list(range(0x4E00, 0x4E00 + 20)), DnnTmConfig(n_topics=3, training_steps=10)
+    )
+    strat_empty = dnn_empty.fit()
+    assert dnn_empty.num_active_codepoints_ == 0
+    assert dnn_empty.num_core_codepoints_ == 0
+    assert dnn_empty.k_eff_ == 0
+    assert dnn_empty.loss_history_ == []
+    assert strat_empty.num_codepoints == 20
+
+    active_corpus = DocumentCorpusProcessor(["一二三", "二三四", "五六七"])
+    dnn_act = DnnTmLearner(
+        active_corpus,
+        [ord(c) for c in "一二三四五六七八九十"],
+        DnnTmConfig(n_topics=2, training_steps=5),
+    )
+    dnn_act.fit()
+    assert dnn_act.num_active_codepoints_ == 7
+    assert dnn_act.num_core_codepoints_ == 7
+    assert dnn_act.k_eff_ == 2
+
+    # 3. RangeCompactGASolver.optimize guard against duplicate prefix_slices
+    lam = np.ones((2, 6), dtype=np.float64)
+    freq = np.array([100, 90, 10, 10, 10, 10, 10, 10], dtype=np.int64)
+    all_8 = list(range(0x41, 0x41 + 8))
+    ga_sol = RangeCompactGASolver(
+        codepoints=all_8,
+        topic_matrix=lam,
+        config=RangeCompactConfig(max_iteration=5),
+        frequency_array=freq,
+        most_sizes=[2],
+    )
+    opt_strat = ga_sol.optimize(prefix_slices=[[0x41, 0x42]])
+    assert opt_strat.num_codepoints == 8
+    assert sum(len(s) for s in opt_strat.subsets) == 8
+
+    # 4. FrequencySolver positional small codepoint list
+    fs = FrequencySolver([0x41, 0x42, 0x43, 0x44])
+    fs.fit(["AB", "ABC", "ABCD"])
+    most_s, rem_s = fs.partition_most_frequent([2])
+    assert len(most_s) == 1 and len(most_s[0]) == 2 and len(rem_s) == 2
+
+    # 5. scripts/train.py CLI overrides when --preset is passed
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    (data_dir / "codepoints.nam").write_text(
+        "\n".join(f"0x{c:04X}" for c in range(0x41, 0x41 + 24)), encoding="utf-8"
+    )
+    (data_dir / "train.jsonl").write_text(
+        "\n".join(json.dumps({"text": "ABCDEFGH"}) for _ in range(5)), encoding="utf-8"
+    )
+    out_train = tmp_path / "out_preset_override"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mlfont-train",
+            "--data_dir",
+            str(data_dir),
+            "--output_dir",
+            str(out_train),
+            "--preset",
+            "lgc",
+            "--algorithm",
+            "online_lda",
+            "--n_topics",
+            "3",
+            "--most_sizes",
+            "4",
+            "--normalization_method",
+            "sinkhorn",
+            "--seed",
+            "77",
+        ],
+    )
+    train.main()
+    st_override = SlicingStrategy.load_json(out_train / "strategy.json")
+    assert st_override.num_slices == 4  # 1 most slice (size 4) + 3 topic slices
+
+    # 6. export_pretrained_bundle font_sliced.css url(woff2/...) & load_pretrained dna_assignment
+    b_out = tmp_path / "bundle_test"
+    export_pretrained_bundle(
+        output_dir=b_out,
+        strategy=st_override,
+        lambda_matrix=np.ones((3, 20), dtype=np.float32),
+        dnntm_lambda_matrix=np.ones((3, 20), dtype=np.float32),
+        olda_strategy=st_override,
+        dnntm_strategy=st_override,
+        slice_font=False,
+    )
+    css_root = (b_out / "font_sliced.css").read_text(encoding="utf-8")
+    assert "url(woff2/font_slice_000.woff2)" in css_root
+    assert (b_out / "mlfont.js").exists()
+    loaded_b = load_pretrained(b_out)
+    assert loaded_b.dna_assignment is not None
+    assert loaded_b.dnntm_lambda_matrix is not None
+    assert loaded_b.olda_strategy is not None
+    assert loaded_b.dnntm_strategy is not None
+
+    # 7. WebsiteFontSimulator.from_pretrained LGC high_freq_slice_count == 0 & demo.html checks
+    sim_lgc = WebsiteFontSimulator.from_pretrained(
+        REPO_ROOT / "pretrained_models" / "mlfont-notosans-lgc"
+    )
+    assert sim_lgc.high_freq_slice_count == 0
+    demo_text = (REPO_ROOT / "web" / "demo.html").read_text(encoding="utf-8")
+    assert "repertoireDeltas" in demo_text and "gaSliceB64" in demo_text
+    assert "uniqueChars / baseChars" not in demo_text
+    assert "* 0.18" not in demo_text

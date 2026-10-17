@@ -18,7 +18,7 @@ from mlfont.maths import (
     balance_topics_greedy,
     balance_topics_unbalanced,
 )
-from mlfont.olda import align_and_smooth_topic_matrix
+from mlfont.olda import align_and_smooth_topic_matrix, compute_core_mask_and_k_eff
 from mlfont.schemas import SlicingStrategy
 
 
@@ -162,6 +162,9 @@ class DnnTmLearner:
         self.remaining_codepoints_: Optional[List[int]] = None
         self.most_slices_: List[List[int]] = []
         self.least_slices_: List[List[int]] = []
+        self.num_active_codepoints_: int = 0
+        self.num_core_codepoints_: int = 0
+        self.k_eff_: int = 0
 
     def _ensure_corpus(self, docs: Optional[Sequence[object]] = None) -> DocumentCorpusProcessor:
         if docs is not None:
@@ -225,161 +228,179 @@ class DnnTmLearner:
         )
         col_sums = np.asarray(full_sparse.sum(axis=0)).ravel()
         active_cols = np.flatnonzero(col_sums > 0)
+        _, n_core, k_eff = compute_core_mask_and_k_eff(
+            col_sums[active_cols], n_rem, n_topics
+        )
+        self.num_active_codepoints_ = int(len(active_cols))
+        self.num_core_codepoints_ = int(n_core)
+        self.k_eff_ = int(k_eff)
+
         if len(active_cols) == 0:
-            active_cols = np.arange(n_rem, dtype=np.int64)
-            from scipy import sparse as sp
-
-            active_sparse = sp.csr_matrix(np.ones((1, n_rem), dtype=np.uint8))
-        elif len(active_cols) == n_rem:
-            active_sparse = full_sparse
-        else:
-            active_sparse = full_sparse[:, active_cols]
-            row_mask = np.asarray(active_sparse.sum(axis=1)).ravel() > 0
-            if np.any(row_mask):
-                active_sparse = active_sparse[row_mask]
-
-        n_words = len(active_cols)
-        model = DnnTopicNetwork(
-            n_words=n_words,
-            n_topics=n_topics,
-            n_layers=self.config.n_layers,
-            layer_size=self.config.layer_size,
-            activation=self.config.activation,
-            use_decoder=use_decoder,
-        ).to(device)
-
-        optimizer = torch.optim.Adam(
-            model.parameters(), lr=self.config.init_learning_rate
-        )
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer,
-            step_size=max(1, self.config.learning_rate_decay_steps),
-            gamma=self.config.learning_rate_decay,
-        )
-
-        full_docs_tensor = torch.from_numpy(
-            active_sparse.toarray().astype(np.float32)
-        ).to(device)
-        n_total_docs = full_docs_tensor.shape[0]
-        b_size = max(1, self.config.batch_size)
-        density = float(self.config.fake_doc_word_density)
-        log_k = float(math.log(max(2, n_topics)))
-
-        self.loss_history_ = []
-        for _ in range(self.config.training_steps):
-            batch_idx = torch.randint(0, n_total_docs, (b_size,), device=device)
-            real_docs = full_docs_tensor[batch_idx]
-
-            optimizer.zero_grad()
-            real_topics = model(real_docs)
-            loss_real = torch.mean(_shannon_entropy(real_topics))
-            avg_real_topic = torch.mean(real_topics, dim=0, keepdim=True)
-            loss_real_avg = torch.mean(_shannon_entropy(avg_real_topic))
-
-            loss_ent = torch.tensor(0.0, device=device)
-            if loss_type != "AUTOENCODER":
-                fake_docs = (
-                    torch.rand((b_size, n_words), device=device) < density
-                ).float()
-                fake_topics = model(fake_docs)
-                loss_fake = torch.mean(_shannon_entropy(fake_topics))
-
-                if loss_type == "REAL_FAKE_DIFF":
-                    loss_ent = (loss_real - loss_fake) + log_k
-                elif loss_type == "REAL_FAKE_AND_REAL_AVERAGE_DIFF":
-                    loss_ent = (loss_real - loss_fake + log_k) + (
-                        loss_real - loss_real_avg + log_k
-                    )
-                else:
-                    if n_words <= 256:
-                        eye_batch = torch.eye(n_words, device=device)
-                    else:
-                        idx = torch.randperm(n_words, device=device)[:256]
-                        eye_batch = torch.zeros((len(idx), n_words), device=device)
-                        eye_batch[torch.arange(len(idx), device=device), idx] = 1.0
-                    word_topics = model(eye_batch)
-                    loss_word = torch.mean(_shannon_entropy(word_topics))
-                    avg_word_topic = torch.mean(word_topics, dim=0, keepdim=True)
-                    loss_word_avg = torch.mean(_shannon_entropy(avg_word_topic))
-                    loss_ent = (
-                        (loss_real - loss_fake + log_k)
-                        + (loss_real - loss_real_avg + log_k)
-                        + (loss_word - loss_word_avg + log_k)
-                    )
-
-            loss_ae = torch.tensor(0.0, device=device)
-            if use_decoder:
-                recon_probs = torch.clamp(model.decode(real_topics), min=1e-12, max=1.0)
-                doc_sums = torch.clamp(torch.sum(real_docs, dim=-1, keepdim=True), min=1.0)
-                target_probs = real_docs / doc_sums
-                kl_div = torch.sum(
-                    target_probs
-                    * (
-                        torch.log(torch.clamp(target_probs, min=1e-12))
-                        - torch.log(recon_probs)
-                    ),
-                    dim=-1,
-                )
-                loss_recon = torch.clamp(torch.mean(kl_div), min=0.0)
-                loss_sparse = self.config.l1_sparsity_weight * torch.clamp(
-                    loss_real + (log_k - loss_real_avg), min=0.0
-                )
-                assert model.decoder_weight is not None
-                loss_l2 = self.config.l2_reg_weight * torch.mean(
-                    model.decoder_weight ** 2
-                )
-                loss_ae = loss_recon + loss_sparse + loss_l2
-
-            if loss_type == "AUTOENCODER":
-                loss = loss_ae
-            elif loss_type == "HYBRID_AUTOENCODER":
-                loss = loss_ent + self.config.recon_weight * loss_ae
-            else:
-                loss = loss_ent
-
-            loss.backward()
-            optimizer.step()
-            if use_decoder:
-                model.project_nonnegative()
-            scheduler.step()
-            self.loss_history_.append(float(max(0.0, loss.detach().cpu().item())))
-
-        # Compute word-topic probability matrix for active columns in chunks
-        model.eval()
-        word_probs_chunks: List[np.ndarray] = []
-        chunk_size = 1024
-        with torch.no_grad():
-            for start in range(0, n_words, chunk_size):
-                end = min(start + chunk_size, n_words)
-                eye_chunk = torch.zeros((end - start, n_words), device=device)
-                eye_chunk[
-                    torch.arange(end - start, device=device),
-                    torch.arange(start, end, device=device),
-                ] = 1.0
-                probs_chunk = model(eye_chunk).cpu().numpy().astype(np.float64)
-                word_probs_chunks.append(probs_chunk)
-
-        enc_topic_word = np.vstack(word_probs_chunks).T  # (n_topics, n_words)
-        if use_decoder and model.decoder_weight is not None:
-            with torch.no_grad():
-                dec_w = (
-                    torch.clamp(model.decoder_weight, min=1e-12)
-                    .cpu()
-                    .numpy()
-                    .astype(np.float64)
-                )
-            dec_col = dec_w / np.maximum(1e-12, np.sum(dec_w, axis=0, keepdims=True))
-            enc_col = enc_topic_word / np.maximum(
-                1e-12, np.sum(enc_topic_word, axis=0, keepdims=True)
+            self.loss_history_ = []
+            self.lambda_matrix_ = align_and_smooth_topic_matrix(
+                np.empty((n_topics, 0), dtype=np.float64),
+                active_cols,
+                col_sums,
+                n_rem,
+                n_topics,
             )
-            alpha_enc = 0.35 if loss_type == "AUTOENCODER" else 0.75
-            raw_topic_word = alpha_enc * enc_col + (1.0 - alpha_enc) * dec_col
         else:
-            raw_topic_word = enc_topic_word
+            if len(active_cols) == n_rem:
+                active_sparse = full_sparse
+            else:
+                active_sparse = full_sparse[:, active_cols]
+                row_mask = np.asarray(active_sparse.sum(axis=1)).ravel() > 0
+                if np.any(row_mask):
+                    active_sparse = active_sparse[row_mask]
 
-        self.lambda_matrix_ = align_and_smooth_topic_matrix(
-            raw_topic_word, active_cols, col_sums, n_rem, n_topics
-        )
+            n_words = len(active_cols)
+            model = DnnTopicNetwork(
+                n_words=n_words,
+                n_topics=n_topics,
+                n_layers=self.config.n_layers,
+                layer_size=self.config.layer_size,
+                activation=self.config.activation,
+                use_decoder=use_decoder,
+            ).to(device)
+
+            optimizer = torch.optim.Adam(
+                model.parameters(), lr=self.config.init_learning_rate
+            )
+            scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer,
+                step_size=max(1, self.config.learning_rate_decay_steps),
+                gamma=self.config.learning_rate_decay,
+            )
+
+            full_docs_tensor = torch.from_numpy(
+                active_sparse.toarray().astype(np.float32)
+            ).to(device)
+            n_total_docs = full_docs_tensor.shape[0]
+            b_size = max(1, self.config.batch_size)
+            density = float(self.config.fake_doc_word_density)
+            log_k = float(math.log(max(2, n_topics)))
+
+            self.loss_history_ = []
+            for _ in range(self.config.training_steps):
+                batch_idx = torch.randint(0, n_total_docs, (b_size,), device=device)
+                real_docs = full_docs_tensor[batch_idx]
+
+                optimizer.zero_grad()
+                real_topics = model(real_docs)
+                loss_real = torch.mean(_shannon_entropy(real_topics))
+                avg_real_topic = torch.mean(real_topics, dim=0, keepdim=True)
+                loss_real_avg = torch.mean(_shannon_entropy(avg_real_topic))
+
+                loss_ent = torch.tensor(0.0, device=device)
+                if loss_type != "AUTOENCODER":
+                    fake_docs = (
+                        torch.rand((b_size, n_words), device=device) < density
+                    ).float()
+                    fake_topics = model(fake_docs)
+                    loss_fake = torch.mean(_shannon_entropy(fake_topics))
+
+                    if loss_type == "REAL_FAKE_DIFF":
+                        loss_ent = (loss_real - loss_fake) + log_k
+                    elif loss_type == "REAL_FAKE_AND_REAL_AVERAGE_DIFF":
+                        loss_ent = (loss_real - loss_fake + log_k) + (
+                            loss_real - loss_real_avg + log_k
+                        )
+                    else:
+                        if n_words <= 256:
+                            eye_batch = torch.eye(n_words, device=device)
+                        else:
+                            idx = torch.randperm(n_words, device=device)[:256]
+                            eye_batch = torch.zeros((len(idx), n_words), device=device)
+                            eye_batch[torch.arange(len(idx), device=device), idx] = 1.0
+                        word_topics = model(eye_batch)
+                        loss_word = torch.mean(_shannon_entropy(word_topics))
+                        avg_word_topic = torch.mean(word_topics, dim=0, keepdim=True)
+                        loss_word_avg = torch.mean(_shannon_entropy(avg_word_topic))
+                        loss_ent = (
+                            (loss_real - loss_fake + log_k)
+                            + (loss_real - loss_real_avg + log_k)
+                            + (loss_word - loss_word_avg + log_k)
+                        )
+
+                loss_ae = torch.tensor(0.0, device=device)
+                if use_decoder:
+                    recon_probs = torch.clamp(
+                        model.decode(real_topics), min=1e-12, max=1.0
+                    )
+                    doc_sums = torch.clamp(
+                        torch.sum(real_docs, dim=-1, keepdim=True), min=1.0
+                    )
+                    target_probs = real_docs / doc_sums
+                    kl_div = torch.sum(
+                        target_probs
+                        * (
+                            torch.log(torch.clamp(target_probs, min=1e-12))
+                            - torch.log(recon_probs)
+                        ),
+                        dim=-1,
+                    )
+                    loss_recon = torch.clamp(torch.mean(kl_div), min=0.0)
+                    loss_sparse = self.config.l1_sparsity_weight * torch.clamp(
+                        loss_real + (log_k - loss_real_avg), min=0.0
+                    )
+                    assert model.decoder_weight is not None
+                    loss_l2 = self.config.l2_reg_weight * torch.mean(
+                        model.decoder_weight ** 2
+                    )
+                    loss_ae = loss_recon + loss_sparse + loss_l2
+
+                if loss_type == "AUTOENCODER":
+                    loss = loss_ae
+                elif loss_type == "HYBRID_AUTOENCODER":
+                    loss = loss_ent + self.config.recon_weight * loss_ae
+                else:
+                    loss = loss_ent
+
+                loss.backward()
+                optimizer.step()
+                if use_decoder:
+                    model.project_nonnegative()
+                scheduler.step()
+                self.loss_history_.append(float(max(0.0, loss.detach().cpu().item())))
+
+            # Compute word-topic probability matrix for active columns in chunks
+            model.eval()
+            word_probs_chunks: List[np.ndarray] = []
+            chunk_size = 1024
+            with torch.no_grad():
+                for start in range(0, n_words, chunk_size):
+                    end = min(start + chunk_size, n_words)
+                    eye_chunk = torch.zeros((end - start, n_words), device=device)
+                    eye_chunk[
+                        torch.arange(end - start, device=device),
+                        torch.arange(start, end, device=device),
+                    ] = 1.0
+                    probs_chunk = model(eye_chunk).cpu().numpy().astype(np.float64)
+                    word_probs_chunks.append(probs_chunk)
+
+            enc_topic_word = np.vstack(word_probs_chunks).T  # (n_topics, n_words)
+            if use_decoder and model.decoder_weight is not None:
+                with torch.no_grad():
+                    dec_w = (
+                        torch.clamp(model.decoder_weight, min=1e-12)
+                        .cpu()
+                        .numpy()
+                        .astype(np.float64)
+                    )
+                dec_col = dec_w / np.maximum(
+                    1e-12, np.sum(dec_w, axis=0, keepdims=True)
+                )
+                enc_col = enc_topic_word / np.maximum(
+                    1e-12, np.sum(enc_topic_word, axis=0, keepdims=True)
+                )
+                alpha_enc = 0.35 if loss_type == "AUTOENCODER" else 0.75
+                raw_topic_word = alpha_enc * enc_col + (1.0 - alpha_enc) * dec_col
+            else:
+                raw_topic_word = enc_topic_word
+
+            self.lambda_matrix_ = align_and_smooth_topic_matrix(
+                raw_topic_word, active_cols, col_sums, n_rem, n_topics
+            )
         col_norm = self.lambda_matrix_ / np.maximum(
             1e-12, np.sum(self.lambda_matrix_, axis=0, keepdims=True)
         )
