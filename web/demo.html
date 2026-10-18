@@ -329,10 +329,10 @@
           <div class="progress-track">
             <div class="progress-bar green" id="mlfont-progress"></div>
           </div>
-          <div class="preview-viewport" id="mlfont-viewport" contenteditable="true" oninput="onCustomViewportEdit()">
+          <div class="preview-viewport" id="mlfont-viewport">
             <div class="preview-nav" id="mlfont-nav"></div>
-            <div class="preview-title" id="mlfont-title"></div>
-            <p class="preview-body" id="mlfont-body"></p>
+            <div class="preview-title" id="mlfont-title" contenteditable="true" oninput="onCustomViewportEdit()"></div>
+            <p class="preview-body" id="mlfont-body" contenteditable="true" oninput="onCustomViewportEdit()"></p>
           </div>
           <div class="slice-pills" id="mlfont-slice-pills"></div>
         </div>
@@ -559,11 +559,16 @@
     }
 
     function onCustomViewportEdit() {
-      var editedTitle = document.getElementById('mlfont-title').textContent;
-      var editedBody = document.getElementById('mlfont-body').textContent;
-      document.getElementById('fullfont-title').textContent = editedTitle;
-      document.getElementById('fullfont-body').textContent = editedBody;
-      document.getElementById('mlfont-viewport').dataset.customEdited = 'true';
+      var titleEl = document.getElementById('mlfont-title');
+      var bodyEl = document.getElementById('mlfont-body');
+      var viewportEl = document.getElementById('mlfont-viewport');
+      var editedTitle = titleEl ? titleEl.textContent : '';
+      var editedBody = bodyEl ? bodyEl.textContent : (viewportEl ? viewportEl.textContent : '');
+      var fullTitleEl = document.getElementById('fullfont-title');
+      var fullBodyEl = document.getElementById('fullfont-body');
+      if (fullTitleEl) fullTitleEl.textContent = editedTitle;
+      if (fullBodyEl) fullBodyEl.textContent = editedBody;
+      if (viewportEl) viewportEl.dataset.customEdited = 'true';
       runWebsiteSimulation(false);
     }
 
@@ -637,10 +642,15 @@
       var net = NETWORK_PROFILES[netKey];
       var isWarm = document.getElementById('sim-cache').value === 'warm';
 
-      var isCustom = document.getElementById('mlfont-viewport').dataset.customEdited === 'true';
+      var viewportEl = document.getElementById('mlfont-viewport');
+      var isCustom = viewportEl && viewportEl.dataset.customEdited === 'true';
+      var navEl = document.getElementById('mlfont-nav');
+      var titleEl = document.getElementById('mlfont-title');
+      var bodyEl = document.getElementById('mlfont-body');
       var liveText = isCustom ?
-        (document.getElementById('mlfont-title').textContent + ' ' +
-         document.getElementById('mlfont-body').textContent) :
+        ((navEl ? navEl.textContent : page.nav.join(' ')) + ' ' +
+         (titleEl ? titleEl.textContent : '') + ' ' +
+         (bodyEl ? bodyEl.textContent : (viewportEl ? viewportEl.textContent : ''))) :
         buildPageVisibleText(page);
 
       var evalRes = evaluateTextAgainstFont(meta, liveText);

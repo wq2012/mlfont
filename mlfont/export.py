@@ -296,7 +296,7 @@ def export_pretrained_bundle(
             f"(`url(woff2/{basename}_slice_XXX.woff2)`)\n"
             f"- `font_sliced_cdn.css`: Hugging Face CDN `@font-face` stylesheet\n"
             f"- `woff2/{basename}_slice_XXX.woff2`: Physical WOFF2 font slices "
-            f"(plus `woff2/font_sliced.css`)\n"
+            f"(plus `woff2/{basename}_sliced.css`)\n"
             f"- `nam/slice_XXX.nam`: Per-slice Unicode codepoint `.nam` files\n"
             f"- `mlfont.js`: Browser loader and HTML5 Resource Timing telemetry script\n"
         )

@@ -135,14 +135,14 @@ mlfont-simulate --font_key notosanssc --url https://example.com --network_profil
 * **Slicing Architecture**: Tiered Document-Frequency Slicing + Online Variational LDA & Deep Neural Network Topic Model (DNNTM) + Range-Compact Genetic Algorithm (`mlfont` preset: `chinese`)
 * **Total Slices**: 102 slices (5,935 total CSS `unicode-range` intervals)
 * **Physical WOFF2 Bundle Size**: 8.89 MB / 9107.9 KB (9,326,524 bytes) across 102 `.woff2` files (companion CSS: 84.5 KB). Note: physical `.woff2` slicing replicates shared OpenType tables (`cmap`, `hmtx`, `loca`, `GSUB`, `GPOS`) into each standalone subset file (increasing static CDN disk footprint by +46.6% to +175.3% vs. a monolithic WOFF2), whereas individual webpages only fetch the small subset of triggered slices (saving 65.4%–84.9% per-page bandwidth on CJK and 44.7% on LGC).
-* **Training Wall-Time**: 30.0 seconds on CPU/GPU
+* **Training Wall-Time**: 87.6 seconds on CPU/GPU
 
 ## Model Files Included
 
 * `font_sliced_cdn.css`: Zero-hosting CDN `@font-face` stylesheet (`font-family: 'Noto Sans SC Sliced'`) streaming `.woff2` slices directly from Hugging Face CDN
 * `font_sliced.css`: Self-hosted `@font-face` stylesheet (`font-family: 'NotoSansSC-Regular Sliced'`, `url(woff2/NotoSansSC-Regular_slice_XXX.woff2)`) with compact `unicode-range` descriptors
 * `mlfont.js`: Browser JS loader (`MLFont.load`) & HTML5 Performance API slice latency telemetry library (`MLFont.getMetrics` / `MLFont.printReport`)
-* `woff2/NotoSansSC-Regular_slice_XXX.woff2`: 102 physical WOFF2 font slices generated via `fontTools.subset` (plus `woff2/font_sliced.css`)
+* `woff2/NotoSansSC-Regular_slice_XXX.woff2`: 102 physical WOFF2 font slices generated via `fontTools.subset` (plus `woff2/NotoSansSC-Regular_sliced.css`)
 * `nam/slice_XXX.nam`: 102 `.nam` codepoint subset files
 * `model.safetensors`: Learned topic-codepoint weight matrices (`lambda_matrix`, `dnntm_lambda_matrix`), `codepoints`, `remaining_codepoints`, `frequency_array`, and `dna_assignment` in SafeTensors format
 * `strategy.json`: Range-Compact GA `SlicingStrategy` definition and hyperparameters

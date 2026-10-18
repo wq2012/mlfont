@@ -713,7 +713,7 @@ def write_hf_model_card(
         ),
         (
             f"* `woff2/{font_stem}_slice_XXX.woff2`: {strategy.num_slices} physical WOFF2 font "
-            "slices generated via `fontTools.subset` (plus `woff2/font_sliced.css`)"
+            f"slices generated via `fontTools.subset` (plus `woff2/{font_stem}_sliced.css`)"
         ),
         f"* `nam/slice_XXX.nam`: {strategy.num_slices} `.nam` codepoint subset files",
         (
