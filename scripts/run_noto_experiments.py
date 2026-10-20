@@ -519,6 +519,7 @@ def write_hf_model_card(
         "- genetic-algorithm",
         "- unicode-range",
         "- woff2",
+        "- arxiv:2610.24937",
         "datasets:",
         "- wikimedia/wikipedia",
         "---",
@@ -535,9 +536,11 @@ def write_hf_model_card(
         ),
         "",
         (
-            "* **Paper**: *MLFont: Machine Learning-Driven Font Subsetting and "
-            "Optimal Unicode-Range Slicing for Low-Latency Web Typography* "
-            "(Quan Wang and Yiran Mao)"
+            "* **Paper**: [*MLFont: Machine Learning-Driven Font Subsetting and "
+            "Range-Compact Unicode-Range Slicing for Low-Latency Web Typography*]"
+            "(https://arxiv.org/abs/2610.24937) "
+            "([PDF](https://arxiv.org/pdf/2610.24937)) — Quan Wang and Yiran Mao "
+            "(`arXiv:2610.24937`)"
         ),
         (
             "* **Background & References**: Open-source reproduction of "
@@ -739,6 +742,10 @@ def write_hf_model_card(
         "",
         metrics_table,
     ]
+    paper_title = (
+        "MLFont: Machine Learning-Driven Font Subsetting and "
+        "Range-Compact Unicode-Range Slicing for Low-Latency Web Typography"
+    )
     card = "\n".join(card_lines) + f"""
 
 ## Python API Usage (ML Researchers & Custom Font Slicing)
@@ -763,12 +770,23 @@ print("DNNTM:", bundle.dnntm_strategy.name, "ranges:", bundle.dnntm_strategy.cou
 ## Citation
 
 ```bibtex
+@article{{wang2026mlfont,
+  title={{{paper_title}}},
+  author={{Wang, Quan and Mao, Yiran}},
+  journal={{arXiv preprint arXiv:2610.24937}},
+  eprint={{2610.24937}},
+  archivePrefix={{arXiv}},
+  year={{2026}},
+  url={{https://arxiv.org/abs/2610.24937}}
+}}
+
 @article{{wang2017learning,
   title={{Learning Better Font Slicing Strategies from Data}},
   author={{Wang, Quan and Mao, Yiran}},
   journal={{Technical Disclosure Commons, Defensive Publications Series}},
   volume={{906}},
-  year={{2017}}
+  year={{2017}},
+  url={{https://www.tdcommons.org/dpubs_series/906/}}
 }}
 ```
 """

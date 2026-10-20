@@ -2,7 +2,7 @@
 
 import setuptools
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 with open("README.md", "r", encoding="utf-8") as file_object:
     LONG_DESCRIPTION = file_object.read()
@@ -26,6 +26,12 @@ setuptools.setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/wq2012/mlfont",
+    project_urls={
+        "Paper (arXiv)": "https://arxiv.org/abs/2610.24937",
+        "Paper (PDF)": "https://arxiv.org/pdf/2610.24937",
+        "Hugging Face Models": "https://huggingface.co/collections/wq2012/mlfont",
+        "Source Code": "https://github.com/wq2012/mlfont",
+    },
     packages=setuptools.find_packages(include=["mlfont", "mlfont.*", "scripts", "scripts.*"]),
     package_data={"mlfont": ["mlfont.js"]},
     include_package_data=True,

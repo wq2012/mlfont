@@ -1,10 +1,14 @@
-# MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography
+# MLFont: Machine Learning-Driven Font Subsetting and Range-Compact Unicode-Range Slicing for Low-Latency Web Typography
 
+[![arXiv](https://img.shields.io/badge/arXiv-2610.24937-b31b1b.svg)](https://arxiv.org/abs/2610.24937)
+[![Paper PDF](https://img.shields.io/badge/PDF-arXiv%3A2610.24937-b31b1b.svg)](https://arxiv.org/pdf/2610.24937)
 [![Build Status](https://github.com/wq2012/mlfont/workflows/Python%20application/badge.svg)](https://github.com/wq2012/mlfont/actions)
 [![PyPI Version](https://img.shields.io/pypi/v/mlfont.svg)](https://pypi.org/project/mlfont/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/mlfont.svg)](https://pypi.org/project/mlfont/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Hugging Face Models](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Pretrained%20Models%20%26%20WOFF2%20Slices-yellow)](https://huggingface.co/collections/wq2012/mlfont)
+
+**Paper:** [arXiv:2610.24937](https://arxiv.org/abs/2610.24937) ([PDF](https://arxiv.org/pdf/2610.24937)) | **PyPI:** [`pip install mlfont`](https://pypi.org/project/mlfont/) | **Models & WOFF2 Slices:** [Hugging Face Collection](https://huggingface.co/collections/wq2012/mlfont)
 
 **MLFont** (`mlfont`) is a standalone, pure-Python and PyTorch library for machine learning-driven web font subsetting (`@font-face` `unicode-range` slicing). It solves the **Heavy Web Font Loading Problem** for large Pan-Unicode and CJK (Chinese, Japanese, Korean) fonts—which contain 2,297 to over 30,759 glyphs and weigh 430 KB to over 9 MB in WOFF2—by learning codepoint co-occurrence structure across real-world web documents and jointly optimizing network download latency, session cache utilization, and CSS `unicode-range` compactness.
 
@@ -49,7 +53,7 @@ While Latin fonts contain a few hundred glyphs (~20 KB in WOFF2), Pan-European (
 
 ## Open-Source Reproduction Notice
 
-This repository is an open-source reproduction effort of Google's machine learning font slicing technology, as described in the [official Google Fonts announcement](https://x.com/googlefonts/status/900019727732531200) and the defensive publication [*"Learning Better Font Slicing Strategies from Data"* (Technical Disclosure Commons, 2017)](https://www.tdcommons.org/dpubs_series/906/).
+This repository is an open-source reproduction effort of Google's machine learning font slicing technology, as described in our paper [*"MLFont: Machine Learning-Driven Font Subsetting and Range-Compact Unicode-Range Slicing for Low-Latency Web Typography"* (`arXiv:2610.24937`)](https://arxiv.org/abs/2610.24937) ([PDF](https://arxiv.org/pdf/2610.24937)), the [official Google Fonts announcement](https://x.com/googlefonts/status/900019727732531200), and the defensive publication [*"Learning Better Font Slicing Strategies from Data"* (Technical Disclosure Commons, 2017)](https://www.tdcommons.org/dpubs_series/906/).
 
 | Component | Open-Source Implementation (`mlfont`) |
 | :--- | :--- |
@@ -692,6 +696,16 @@ bash publish.sh --build-only
 ## Citations
 
 ```bibtex
+@article{wang2026mlfont,
+  title={MLFont: Machine Learning-Driven Font Subsetting and Range-Compact Unicode-Range Slicing for Low-Latency Web Typography},
+  author={Wang, Quan and Mao, Yiran},
+  journal={arXiv preprint arXiv:2610.24937},
+  eprint={2610.24937},
+  archivePrefix={arXiv},
+  year={2026},
+  url={https://arxiv.org/abs/2610.24937}
+}
+
 @article{wang2017learning,
   title={Learning Better Font Slicing Strategies from Data},
   author={Wang, Quan and Mao, Yiran},
@@ -706,13 +720,5 @@ bash publish.sh --build-only
   author={{Google Fonts}},
   year={2017},
   url={https://x.com/googlefonts/status/900019727732531200}
-}
-
-@article{wang2026mlfont,
-  title={MLFont: Machine Learning-Driven Font Subsetting and Optimal Unicode-Range Slicing for Low-Latency Web Typography},
-  author={Wang, Quan and Mao, Yiran},
-  journal={arXiv preprint},
-  year={2026},
-  note={Open-source code at \url{https://github.com/wq2012/mlfont} and pretrained models at \url{https://huggingface.co/collections/wq2012/mlfont}}
 }
 ```

@@ -1,6 +1,10 @@
 /**
  * MLFont Web Loader & HTML5 Performance API Latency Telemetry Library (mlfont.js)
  *
+ * Paper: "MLFont: Machine Learning-Driven Font Subsetting and Range-Compact
+ * Unicode-Range Slicing for Low-Latency Web Typography"
+ * (https://arxiv.org/abs/2610.24937, PDF: https://arxiv.org/pdf/2610.24937).
+ *
  * Open-source reproduction of Google's machine learning-driven font slicing
  * technology (https://x.com/googlefonts/status/900019727732531200,
  * https://www.tdcommons.org/dpubs_series/906/).

@@ -263,7 +263,7 @@ class FontSubsetter:
 extract_font_codepoints = extract_codepoints_from_font
 normalize_topic_matrix = normalize_lambda_matrix
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 __all__ = [
     "BrowserNetworkProfile",
